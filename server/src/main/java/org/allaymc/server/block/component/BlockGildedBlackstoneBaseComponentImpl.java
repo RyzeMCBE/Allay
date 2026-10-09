@@ -1,0 +1,31 @@
+package org.allaymc.server.block.component;
+
+import org.allaymc.api.block.BlockBehavior;
+import org.allaymc.api.block.dto.Block;
+import org.allaymc.api.block.type.BlockType;
+import org.allaymc.api.entity.Entity;
+import org.allaymc.api.item.ItemStack;
+import org.allaymc.api.item.type.ItemTypes;
+import org.allaymc.server.block.FortuneDropHelper;
+
+import java.util.Collections;
+import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
+
+/**
+ * @author IWareQ
+ */
+public class BlockGildedBlackstoneBaseComponentImpl extends BlockBaseComponentImpl {
+    public BlockGildedBlackstoneBaseComponentImpl(BlockType<? extends BlockBehavior> blockType) {
+        super(blockType);
+    }
+
+    @Override
+    public Set<ItemStack> getDrops(Block block, ItemStack usedItem, Entity entity) {
+        if (FortuneDropHelper.bonusChanceDivisor(usedItem, 10, 3)) {
+            return Set.of(ItemTypes.GOLD_NUGGET.createItemStack(ThreadLocalRandom.current().nextInt(2, 6)));
+        }
+
+        return Collections.emptySet();
+    }
+}

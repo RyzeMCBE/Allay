@@ -1,0 +1,53 @@
+package org.allaymc.server.block.component;
+
+import org.allaymc.api.block.BlockBehavior;
+import org.allaymc.api.block.component.BlockConcretePowderBaseComponent;
+import org.allaymc.api.block.data.BlockFace;
+import org.allaymc.api.block.dto.Block;
+import org.allaymc.api.block.dto.PlayerInteractInfo;
+import org.allaymc.api.block.type.BlockState;
+import org.allaymc.api.block.type.BlockType;
+import org.allaymc.api.world.Dimension;
+import org.allaymc.server.block.data.BlockId;
+import org.joml.Vector3ic;
+
+import java.util.function.Supplier;
+
+/**
+ * @author IWareQ
+ */
+public class BlockConcretePowderBaseComponentImpl extends BlockBaseComponentImpl implements BlockConcretePowderBaseComponent {
+    protected final Supplier<BlockType<?>> solidBlockType;
+
+    public BlockConcretePowderBaseComponentImpl(BlockType<? extends BlockBehavior> blockType, Supplier<BlockType<?>> solidBlockTypeSupplier) {
+        super(blockType);
+        this.solidBlockType = solidBlockTypeSupplier;
+    }
+
+    public BlockConcretePowderBaseComponentImpl(BlockType<? extends BlockBehavior> blockType, BlockId solidBlockId) {
+        this(blockType, solidBlockId::getBlockType);
+    }
+
+    @Override
+    public void onNeighborUpdate(Block block, Block neighbor, BlockFace face, BlockState oldNeighborState) {
+        super.onNeighborUpdate(block, neighbor, face, oldNeighborState);
+
+        if (hasAdjacentWater(block.getDimension(), block.getPosition())) {
+            block.getDimension().setBlockState(block.getPosition(), getSolidBlock().getDefaultState());
+        }
+    }
+
+    @Override
+    public boolean place(Dimension dimension, BlockState blockState, Vector3ic placeBlockPos, PlayerInteractInfo placementInfo) {
+        if (hasAdjacentWater(dimension, placeBlockPos)) {
+            blockState = getSolidBlock().getDefaultState();
+        }
+
+        return super.place(dimension, blockState, placeBlockPos, placementInfo);
+    }
+
+    @Override
+    public BlockType<?> getSolidBlock() {
+        return solidBlockType.get();
+    }
+}

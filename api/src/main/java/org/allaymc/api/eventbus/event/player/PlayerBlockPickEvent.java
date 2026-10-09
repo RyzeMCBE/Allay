@@ -1,0 +1,41 @@
+package org.allaymc.api.eventbus.event.player;
+
+import lombok.Getter;
+import lombok.Setter;
+import org.allaymc.api.annotation.CallerThread;
+import org.allaymc.api.annotation.ThreadType;
+import org.allaymc.api.block.dto.Block;
+import org.allaymc.api.entity.interfaces.EntityPlayer;
+import org.allaymc.api.eventbus.event.CancellableEvent;
+import org.allaymc.api.item.ItemStack;
+
+/**
+ * Called when a player picks a block using the pick block key (middle mouse button).
+ *
+ * @author daoge_cmd
+ */
+@Getter
+@CallerThread(ThreadType.WORLD)
+public class PlayerBlockPickEvent extends PlayerEvent implements CancellableEvent {
+    /**
+     * The clicked block.
+     */
+    protected Block clickedBlock;
+    /**
+     * Whether block entity data should be included in the picked item.
+     */
+    @Setter
+    protected boolean includeBlockEntity;
+    /**
+     * The item stack to give to the player.
+     */
+    @Setter
+    protected ItemStack itemBlock;
+
+    public PlayerBlockPickEvent(EntityPlayer player, Block clickedBlock, boolean includeBlockEntity, ItemStack itemBlock) {
+        super(player);
+        this.clickedBlock = clickedBlock;
+        this.includeBlockEntity = includeBlockEntity;
+        this.itemBlock = itemBlock;
+    }
+}

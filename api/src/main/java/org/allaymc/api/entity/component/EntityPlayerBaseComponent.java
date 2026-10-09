@@ -1,0 +1,666 @@
+package org.allaymc.api.entity.component;
+
+import org.allaymc.api.entity.interfaces.EntityFishingHook;
+import org.allaymc.api.item.type.ItemType;
+import org.allaymc.api.math.location.Location3ic;
+import org.allaymc.api.message.TrKeys;
+import org.allaymc.api.player.GameMode;
+import org.allaymc.api.player.Player;
+import org.allaymc.api.player.Skin;
+import org.allaymc.api.world.chunk.ChunkLoader;
+import org.jetbrains.annotations.Range;
+import org.joml.Vector3d;
+import org.joml.Vector3dc;
+import org.joml.Vector3ic;
+
+import java.util.concurrent.ThreadLocalRandom;
+
+/**
+ * Shared component for player entities, covering movement states, respawn data, cooldowns, food, experience, and fishing.
+ */
+public interface EntityPlayerBaseComponent extends EntityBaseComponent, ChunkLoader {
+
+    int MAX_FOOD_LEVEL = 20;
+    float MAX_FOOD_SATURATION_LEVEL = 20;
+    float MAX_FOOD_EXHAUSTION_LEVEL = 4;
+
+    /**
+     * Gets the controller of this entity player.
+     *
+     * @return the controller of this entity player. Can be {@code null} if this entity player
+     * is not controlled by a player. In other words, this entity player is a simulated (fake)
+     * player.
+     */
+    Player getController();
+
+    /**
+     * Checks if this player entity is an actual player. This is simply done by checking if
+     * it is controlled by a player (client).
+     *
+     * @return {@code true} if this player entity is an actual player, {@code false} otherwise
+     */
+    default boolean isActualPlayer() {
+        return getController() != null;
+    }
+
+    /**
+     * Check if the player is sprinting.
+     *
+     * @return {@code true} if the player is sprinting, {@code false} otherwise.
+     */
+    boolean isSprinting();
+
+    /**
+     * Set the player's sprinting state.
+     *
+     * @param sprinting Whether the player should be sprinting
+     */
+    void setSprinting(boolean sprinting);
+
+    /**
+     * Check if the player is sneaking.
+     *
+     * @return {@code true} if the player is sneaking, {@code false} otherwise.
+     */
+    boolean isSneaking();
+
+    /**
+     * Set the player's sneaking state.
+     *
+     * @param sneaking Whether the player should be sneaking
+     */
+    void setSneaking(boolean sneaking);
+
+    /**
+     * Check if the player is blocking with a shield.
+     * <p>
+     * Blocking state is managed automatically based on sneaking state,
+     * whether the player is holding a shield, and shield cooldown.
+     *
+     * @return {@code true} if the player is blocking, {@code false} otherwise.
+     */
+    boolean isBlocking();
+
+    /**
+     * Check if the player is swimming.
+     *
+     * @return {@code true} if the player is swimming, {@code false} otherwise.
+     */
+    boolean isSwimming();
+
+    /**
+     * Set the player's swimming state.
+     *
+     * @param swimming Whether the player should be swimming
+     */
+    void setSwimming(boolean swimming);
+
+    /**
+     * Check if the player is gliding.
+     *
+     * @return {@code true} if the player is gliding, {@code false} otherwise.
+     */
+    boolean isGliding();
+
+    /**
+     * Set the player's gliding state.
+     *
+     * @param gliding Whether the player should be gliding
+     */
+    void setGliding(boolean gliding);
+
+    /**
+     * Check if the player is crawling.
+     *
+     * @return {@code true} if the player is crawling, {@code false} otherwise.
+     */
+    boolean isCrawling();
+
+    /**
+     * Set the player's crawling state.
+     *
+     * @param crawling Whether the player should be crawling
+     */
+    void setCrawling(boolean crawling);
+
+    /**
+     * Check if the player is in a spin attack (riptide).
+     *
+     * @return {@code true} if the player is in a spin attack, {@code false} otherwise.
+     */
+    boolean isSpinAttacking();
+
+    /**
+     * Set the player's spin attack state.
+     *
+     * @param spinAttacking Whether the player should be spin attacking
+     */
+    void setSpinAttacking(boolean spinAttacking);
+
+    /**
+     * Check if the player can use riptide (must be in water or rain).
+     *
+     * @return {@code true} if the player can use riptide, {@code false} otherwise.
+     */
+    boolean canUseRiptide();
+
+    /**
+     * Check if the player is using an item on a block.
+     *
+     * @return {@code true} if the player is using an item on a block, {@code false} otherwise.
+     */
+    boolean isUsingItemOnBlock();
+
+    /**
+     * Set whether the player is using an item on a block.
+     *
+     * @param usingItemOnBlock Whether the player should be using an item on a block
+     */
+    void setUsingItemOnBlock(boolean usingItemOnBlock);
+
+    /**
+     * Eating food or using a crossbow is considered using an item.
+     * <p>
+     * Note the distinction from {@code usingItemOnBlock}! Using an item is unrelated to blocks!
+     *
+     * @return {@code true} if the player is using an item, {@code false} otherwise.
+     */
+    boolean isUsingItemInAir();
+
+    /**
+     * Set whether the player is using an item in the air.
+     *
+     * @param value Whether the player should be using an item in the air
+     */
+    void setUsingItemInAir(boolean value);
+
+    /**
+     * Get the time when the player most recently started using an item.
+     *
+     * @return The time when the player most recently started using an item, in entity ticks
+     */
+    long getStartUsingItemInAirTime();
+
+    /**
+     * Get how long the player has been using the item, in entity ticks.
+     *
+     * @return How long the player has been using the item in entity ticks
+     */
+    long getItemUsingInAirTime();
+
+    /**
+     * Get the skin of the player.
+     *
+     * @return the skin of the player, or {@code null} if the player has no custom skin (the skin will be Steve in that case)
+     */
+    Skin getSkin();
+
+    /**
+     * Sets the skin of the player.
+     *
+     * @param skin the skin to set
+     */
+    void setSkin(Skin skin);
+
+    /**
+     * Get the game mode of the player.
+     *
+     * @return The game mode of the player
+     */
+    GameMode getGameMode();
+
+    /**
+     * Sets the game mode of the player.
+     *
+     * @param gameMode The game mode to set
+     */
+    void setGameMode(GameMode gameMode);
+
+    /**
+     * Determines whether the player is currently flying.
+     *
+     * @return {@code true} if the player is flying, {@code false} otherwise
+     */
+    boolean isFlying();
+
+    /**
+     * Sets whether the player is flying.
+     *
+     * @param flying Whether the player is flying
+     */
+    void setFlying(boolean flying);
+
+    /**
+     * Checks if the player is allowed to fly based on the current game mode and abilities.
+     *
+     * @return {@code true} if the player can fly, {@code false} otherwise
+     */
+    default boolean canFly() {
+        return isActualPlayer() ? getController().canFly() : false;
+    }
+
+    /**
+     * Sets whether this player should be treated as phantom.
+     * <p>
+     * Players in phantom mode are completely removed from all viewers and cannot be interacted
+     * with by the world, while still being able to interact with the world itself.
+     *
+     * @param phantom whether to enable phantom mode
+     */
+    void setPhantom(boolean phantom);
+
+    /**
+     * Checks whether this player is currently phantom.
+     * <p>
+     * Spectator players always return {@code true}.
+     *
+     * @return {@code true} if the player is phantom
+     */
+    boolean isPhantom();
+
+    /**
+     * Gets the score tag of the player.
+     *
+     * @return the score tag of the player
+     */
+    String getScoreTag();
+
+    /**
+     * Sets the score tag of the player.
+     *
+     * @param scoreTag the score tag to set, or {@code null} to remove the score tag
+     */
+    void setScoreTag(String scoreTag);
+
+    /**
+     * Checks if the score tag is present.
+     *
+     * @return {@code true} if the score tag exists and is not null, {@code false} otherwise
+     */
+    default boolean hasScoreTag() {
+        return getScoreTag() != null;
+    }
+
+    /**
+     * Validate and get the spawn point of the player.
+     * <p>
+     * This method will check if the world of the spawn point is loaded,
+     * and if it is not loaded, the spawn point of the player will be set
+     * to the global spawn point.
+     * <p>
+     * Please note that this method won't do extra checks like checking if the
+     * bed is still exists, etc.
+     *
+     * @return The spawn point of the player
+     */
+    Location3ic validateAndGetSpawnPoint();
+
+    /**
+     * Set the spawn point of the player.
+     * <p>
+     * This sets a forced spawn point (e.g., from the {@code /spawnpoint} command) that does not
+     * require a bed or respawn anchor to be present at the location on respawn.
+     *
+     * @param spawnPoint The spawn point to set
+     */
+    void setSpawnPoint(Location3ic spawnPoint);
+
+    /**
+     * Set the spawn point of the player as anchored to a block (e.g., a bed or respawn anchor).
+     * <p>
+     * The spawn point is validated on respawn: if the block no longer exists at the stored location,
+     * the spawn point is reset to the world spawn and the player is notified.
+     *
+     * @param spawnPoint The spawn point to set
+     * @param type       The type of block that anchors this spawn point
+     */
+    void setBlockSpawnPoint(Location3ic spawnPoint, SpawnPointType type);
+
+    /**
+     * Returns the type of the player's current spawn point.
+     *
+     * @return the {@link SpawnPointType} of the current spawn point
+     */
+    SpawnPointType getSpawnPointType();
+
+    /**
+     * Describes how a player's personal spawn point was established.
+     */
+    enum SpawnPointType {
+        /** Set by command (e.g., {@code /spawnpoint}). No block validation needed on respawn. */
+        FORCED(null),
+        /** Set by sleeping in a bed. Validated against bed existence on respawn. */
+        BED(TrKeys.MC_TILE_BED_NOTVALID),
+        /** Set by interacting with a respawn anchor. Validated against anchor existence on respawn. */
+        RESPAWN_ANCHOR(TrKeys.MC_TILE_RESPAWN_ANCHOR_NOTVALID);
+
+        /**
+         * The translation key sent to the player when they die and this spawn point block is missing.
+         * {@code null} for {@link #FORCED}, which never triggers the missing-block fallback.
+         */
+        public final String invalidSpawnKey;
+
+        public static final SpawnPointType[] VALUES = values();
+
+        SpawnPointType(String invalidSpawnKey) {
+            this.invalidSpawnKey = invalidSpawnKey;
+        }
+
+        public static SpawnPointType fromId(int id) {
+            return VALUES[id];
+        }
+    }
+
+    /**
+     * Check if the player can reach a block at the specified position.
+     *
+     * @param pos The position of the block
+     * @return Whether the player can reach the block
+     */
+    default boolean canReachBlock(Vector3ic pos) {
+        return canReach(pos.x() + 0.5f, pos.y() + 0.5f, pos.z() + 0.5f);
+    }
+
+    /**
+     * Check if the player can reach a point at the specified coordinates.
+     *
+     * @param pos The position of the point
+     * @return Whether the player can reach the point
+     */
+    default boolean canReach(Vector3dc pos) {
+        return canReach(pos.x(), pos.y(), pos.z());
+    }
+
+    /**
+     * Check if the player can reach a point at the specified coordinates.
+     *
+     * @param x The x coordinate of the point
+     * @param y The y coordinate of the point
+     * @param z The z coordinate of the point
+     * @return Whether the player can reach the point
+     */
+    default boolean canReach(double x, double y, double z) {
+        if (isDead()) return false;
+        var maxDistance = getMaxInteractDistance();
+        // Check whether there is a point that inside of the player's AABB
+        // And can reach the provided pos
+        var aabb = getOffsetAABB();
+        double[] aabbXs = new double[]{aabb.minX(), aabb.maxX()};
+        double[] aabbYs = new double[]{aabb.minY(), aabb.maxY()};
+        double[] aabbZs = new double[]{aabb.minZ(), aabb.maxZ()};
+        for (var aabbX : aabbXs) {
+            for (var aabbY : aabbYs) {
+                for (var aabbZ : aabbZs) {
+                    if (new Vector3d(aabbX, aabbY, aabbZ).distanceSquared(x, y, z) <= maxDistance * maxDistance) {
+                        return true;
+                    }
+                }
+            }
+        }
+        // TODO: check yaw and pitch
+        return false;
+    }
+
+    /**
+     * Get the maximum distance that the player can interact with blocks.
+     *
+     * @return The maximum distance that the player can interact with blocks
+     */
+    default double getMaxInteractDistance() {
+        return getGameMode() == GameMode.CREATIVE ? 13d : 7d;
+    }
+
+    /**
+     * Get the enchantment seed of the player. Enchantment seed is used to generate random enchant options
+     * when the player is using an enchant table to enchant an item. The seed will only be regenerated when
+     * the player enchanted an item to make sure that the enchantment options are always the same for the same
+     * item.
+     *
+     * @return The enchantment seed of the player
+     */
+    int getEnchantmentSeed();
+
+    /**
+     * Set the enchantment seed of the player.
+     *
+     * @param seed The enchantment seed to set
+     */
+    void setEnchantmentSeed(int seed);
+
+    /**
+     * Regenerate the enchantment seed of the player.
+     */
+    default void regenerateEnchantmentSeed() {
+        setEnchantmentSeed(ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE));
+    }
+
+    /**
+     * Sets cool down for a specific category.
+     *
+     * @param category the identifier for the cooldown category
+     * @param duration the length of the cooldown in ticks
+     * @param send     whether send packet to the client if the player is an actual player
+     */
+    void setCooldown(String category, @Range(from = 0, to = Integer.MAX_VALUE) int duration, boolean send);
+
+    /**
+     * @see #setCooldown(String, int, boolean)
+     */
+    default void setCooldown(String category, @Range(from = 0, to = Integer.MAX_VALUE) int duration) {
+        setCooldown(category, duration, true);
+    }
+
+    /**
+     * Sets cool down for a specific item type.
+     *
+     * @param itemType the item type to set
+     * @param duration the cool down tick
+     * @param send     whether send packet to the client
+     */
+    default void setCooldown(ItemType<?> itemType, @Range(from = 0, to = Integer.MAX_VALUE) int duration, boolean send) {
+        setCooldown(itemType.getIdentifier().toString(), duration, send);
+    }
+
+    /**
+     * @see #setCooldown(ItemType, int, boolean)
+     */
+    default void setCooldown(ItemType<?> itemType, @Range(from = 0, to = Integer.MAX_VALUE) int duration) {
+        setCooldown(itemType, duration, false);
+    }
+
+    /**
+     * Checks if the cooldown for specific category has ended.
+     *
+     * @param category the category to check
+     * @return {@code true} if the cooldown has ended, {@code false} otherwise.
+     */
+    boolean isCooldownEnd(String category);
+
+    /**
+     * Checks if the cooldown for specific item type has ended.
+     *
+     * @param itemType the item type to check
+     * @return {@code true} if the cooldown has ended, {@code false} otherwise.
+     */
+    default boolean isCooldownEnd(ItemType<?> itemType) {
+        return isCooldownEnd(itemType.getIdentifier().toString());
+    }
+
+    /**
+     * Calculates the required experience for a given level.
+     *
+     * @param level the level
+     * @return the required experience
+     */
+    static int calculateRequiredExperience(int level) {
+        if (level >= 30) {
+            return 112 + (level - 30) * 9;
+        } else if (level >= 15) {
+            return 37 + (level - 15) * 5;
+        } else {
+            return 7 + (level << 1);
+        }
+    }
+
+    /**
+     * Get the current experience level.
+     *
+     * @return the experience level
+     */
+    int getExperienceLevel();
+
+    /**
+     * Set the experience level.
+     *
+     * @param value the new experience level
+     */
+    void setExperienceLevel(int value);
+
+    /**
+     * Get the current experience progress.
+     *
+     * @return the experience progress
+     */
+    float getExperienceProgress();
+
+    /**
+     * Set the experience progress.
+     *
+     * @param value the new experience progress
+     */
+    void setExperienceProgress(float value);
+
+    /**
+     * Adds experience to the player.
+     *
+     * @param addition the amount of experience to add
+     */
+    default void addExperience(int addition) {
+        var currentLevel = getExperienceLevel();
+        var requiredExpCurrentLevel = calculateRequiredExperience(currentLevel);
+        var total = getExperienceProgress() * requiredExpCurrentLevel + addition;
+
+        while (total >= requiredExpCurrentLevel) {
+            total -= requiredExpCurrentLevel;
+            currentLevel++;
+            requiredExpCurrentLevel = calculateRequiredExperience(currentLevel);
+        }
+
+        setExperienceProgress(total / requiredExpCurrentLevel);
+        setExperienceLevel(currentLevel);
+    }
+
+    /**
+     * Get the required experience for the current level.
+     *
+     * @return the required experience
+     */
+    default int getRequiredExperienceForCurrentLevel() {
+        return calculateRequiredExperience(getExperienceLevel());
+    }
+
+    /**
+     * Get the experience in the current level.
+     *
+     * @return the experience in the current level
+     */
+    default int getExperienceInCurrentLevel() {
+        return (int) (getExperienceProgress() * getRequiredExperienceForCurrentLevel());
+    }
+
+    /**
+     * Resets the food data.
+     */
+    default void resetFoodData() {
+        setFoodLevel(MAX_FOOD_LEVEL);
+        setFoodSaturationLevel(MAX_FOOD_SATURATION_LEVEL);
+        setFoodExhaustionLevel(0);
+    }
+
+    /**
+     * Get the current food level.
+     *
+     * @return the food level
+     */
+    int getFoodLevel();
+
+    /**
+     * Set the food level.
+     *
+     * @param value the new food level
+     */
+    void setFoodLevel(int value);
+
+    /**
+     * Get the current food saturation level.
+     *
+     * @return the food saturation level
+     */
+    float getFoodSaturationLevel();
+
+    /**
+     * Set the food saturation level.
+     *
+     * @param value the new food saturation level
+     */
+    void setFoodSaturationLevel(float value);
+
+    /**
+     * Get the current food exhaustion level.
+     *
+     * @return the food exhaustion level
+     */
+    float getFoodExhaustionLevel();
+
+    /**
+     * Set the food exhaustion level.
+     *
+     * @param value the new food exhaustion level
+     */
+    void setFoodExhaustionLevel(float value);
+
+    /**
+     * Reduces the player's exhaustion level.
+     *
+     * @param level the amount of exhaustion to reduce by
+     */
+    void exhaust(float level);
+
+    /**
+     * Increases the player's saturation level.
+     *
+     * @param food       the amount of food to add
+     * @param saturation the amount of saturation to add
+     */
+    void saturate(int food, float saturation);
+
+    /**
+     * Check if the player can eat.
+     *
+     * @return {@code true} if the player can eat, {@code false} otherwise.
+     */
+    boolean canEat();
+
+    /**
+     * Gets the fishing hook entity that the player has cast.
+     *
+     * @return the fishing hook, or {@code null} if the player is not fishing or the fishing hook is not alive
+     */
+    EntityFishingHook getFishingHook();
+
+    /**
+     * Sets the fishing hook entity for this player.
+     *
+     * @param fishingHook the fishing hook, or {@code null} to clear
+     */
+    void setFishingHook(EntityFishingHook fishingHook);
+
+    /**
+     * Checks if the player is currently fishing.
+     *
+     * @return {@code true} if the player has a fishing hook out
+     */
+    default boolean isFishing() {
+        return getFishingHook() != null;
+    }
+}

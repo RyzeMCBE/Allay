@@ -1,0 +1,33 @@
+package org.allaymc.api.eventbus.event.entity;
+
+import lombok.Getter;
+import lombok.Setter;
+import org.allaymc.api.annotation.CallerThread;
+import org.allaymc.api.annotation.ThreadType;
+import org.allaymc.api.entity.Entity;
+import org.allaymc.api.eventbus.event.CancellableEvent;
+
+/**
+ * Called when an entity's health changes.
+ *
+ * @author daoge_cmd
+ */
+@Getter
+@CallerThread(ThreadType.DIMENSION)
+public class EntityHealthChangeEvent extends EntityEvent implements CancellableEvent {
+    /**
+     * The old health value.
+     */
+    protected float oldHealth;
+    /**
+     * The new health value.
+     */
+    @Setter
+    protected float newHealth;
+
+    public EntityHealthChangeEvent(Entity entity, float oldHealth, float newHealth) {
+        super(entity);
+        this.oldHealth = oldHealth;
+        this.newHealth = newHealth;
+    }
+}

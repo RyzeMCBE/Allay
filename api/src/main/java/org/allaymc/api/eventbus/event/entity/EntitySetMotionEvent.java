@@ -1,0 +1,30 @@
+package org.allaymc.api.eventbus.event.entity;
+
+import lombok.Getter;
+import lombok.Setter;
+import org.allaymc.api.annotation.CallerThread;
+import org.allaymc.api.annotation.ThreadType;
+import org.allaymc.api.entity.Entity;
+import org.allaymc.api.eventbus.event.CancellableEvent;
+import org.joml.Vector3dc;
+
+/**
+ * Called when an entity's motion (velocity) is set.
+ *
+ * @author daoge_cmd
+ */
+@Getter
+@Setter
+@CallerThread(ThreadType.DIMENSION)
+@CallerThread(ThreadType.COMPUTE)
+public class EntitySetMotionEvent extends EntityEvent implements CancellableEvent {
+    /**
+     * The motion to apply to the entity.
+     */
+    protected Vector3dc motion;
+
+    public EntitySetMotionEvent(Entity entity, Vector3dc motion) {
+        super(entity);
+        this.motion = motion;
+    }
+}

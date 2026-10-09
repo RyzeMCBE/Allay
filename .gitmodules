@@ -1,0 +1,4 @@
+[submodule "protocol-local"]
+	path = protocol-local
+	url = https://github.com/Mykoss/Protocol.git
+	branch = main

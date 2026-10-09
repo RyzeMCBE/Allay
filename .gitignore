@@ -1,0 +1,44 @@
+.gradle
+.jacoco
+
+# Cache directory for mkdocs
+.cache
+
+# Code style files and inspection profiles should be included
+.idea/**
+!/.idea/codeStyles/Project.xml
+!/.idea/inspectionProfiles/Project_Default.xml
+.classpath
+.project
+.settings/
+**/.classpath
+**/.project
+**/.settings/
+
+# Files because of building the project
+**/build
+**/bin
+**/out
+
+# Working dir
+.run/**
+!.run/Allay.run.xml
+
+# Test working dir
+.test/**
+!.test/.keep
+
+# Files due to running `gradle run`
+/server/caches
+/server/command_data
+/server/logs
+/server/players
+/server/plugins
+/server/resource_packs
+/server/worlds
+/server/ban-info.yml
+/server/biome-ids.yml
+/server/dimension-ids.yml
+/server/operators.yml
+/server/server-settings.yml
+/server/whitelist.yml

@@ -1,0 +1,50 @@
+package org.allaymc.server.item.component;
+
+import lombok.Getter;
+import org.allaymc.api.eventbus.EventHandler;
+import org.allaymc.api.item.component.ItemTrimmableComponent;
+import org.allaymc.api.item.data.TrimMaterial;
+import org.allaymc.api.item.data.TrimPattern;
+import org.allaymc.api.utils.identifier.Identifier;
+import org.allaymc.server.item.component.event.CItemLoadExtraTagEvent;
+import org.allaymc.server.item.component.event.CItemSaveExtraTagEvent;
+import org.allaymc.server.registry.InternalRegistries;
+import org.cloudburstmc.nbt.NbtMap;
+
+/**
+ * @author IWareQ
+ */
+@Getter
+public class ItemTrimmableComponentImpl implements ItemTrimmableComponent {
+    @Identifier.Component
+    public static final Identifier IDENTIFIER = new Identifier("minecraft:item_trimmable_component");
+
+    protected TrimPattern pattern;
+    protected TrimMaterial material;
+
+    @Override
+    public void trim(TrimPattern pattern, TrimMaterial material) {
+        this.pattern = pattern;
+        this.material = material;
+    }
+
+    @EventHandler
+    public void onCItemLoadExtraTag(CItemLoadExtraTagEvent event) {
+        var extraTag = event.getExtraTag();
+        extraTag.listenForCompound("Trim", trimNbt -> {
+            trimNbt.listenForString("Pattern", patternId -> pattern = InternalRegistries.TRIM_PATTERNS.get(patternId));
+            trimNbt.listenForString("Material", materialId -> material = InternalRegistries.TRIM_MATERIALS.get(materialId));
+        });
+    }
+
+    @EventHandler
+    public void onCItemSaveExtraTag(CItemSaveExtraTagEvent event) {
+        var extraTag = event.getExtraTag();
+        if (pattern != null && material != null) {
+            extraTag.putCompound("Trim", NbtMap.builder()
+                    .putString("Pattern", pattern.patternId())
+                    .putString("Material", material.materialId())
+                    .build());
+        }
+    }
+}

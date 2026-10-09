@@ -1,0 +1,308 @@
+package org.allaymc.server.blockentity.type;
+
+import lombok.experimental.UtilityClass;
+import org.allaymc.api.blockentity.type.BlockEntityTypes;
+import org.allaymc.server.blockentity.component.*;
+import org.allaymc.server.blockentity.component.campfire.BlockEntityCampfireBaseComponentImpl;
+import org.allaymc.server.blockentity.component.campfire.BlockEntitySoulCampfireBaseComponentImpl;
+import org.allaymc.server.blockentity.component.furnace.BlockEntityBlastFurnaceBaseComponentImpl;
+import org.allaymc.server.blockentity.component.furnace.BlockEntityFurnaceBaseComponentImpl;
+import org.allaymc.server.blockentity.component.furnace.BlockEntitySmokerFurnaceBaseComponentImpl;
+import org.allaymc.server.blockentity.component.piston.BlockEntityMovingBlockBaseComponentImpl;
+import org.allaymc.server.blockentity.component.piston.BlockEntityPistonArmBaseComponentImpl;
+import org.allaymc.server.blockentity.component.shulkerbox.BlockEntityShulkerBoxBaseComponentImpl;
+import org.allaymc.server.blockentity.component.shulkerbox.BlockEntityShulkerBoxContainerHolderComponentImpl;
+import org.allaymc.server.blockentity.data.BlockEntityId;
+import org.allaymc.server.blockentity.impl.*;
+import org.allaymc.server.container.impl.*;
+
+/**
+ * @author daoge_cmd
+ */
+@SuppressWarnings("unused")
+@UtilityClass
+public final class BlockEntityTypeInitializer {
+    public static void initBanner() {
+        BlockEntityTypes.BANNER = AllayBlockEntityType
+                .builder(BlockEntityBannerImpl.class)
+                .name(BlockEntityId.BANNER)
+                .addComponent(BlockEntityBannerBaseComponentImpl::new, BlockEntityBannerBaseComponentImpl.class)
+                .build();
+    }
+
+    public static void initCommandBlock() {
+        BlockEntityTypes.COMMAND_BLOCK = AllayBlockEntityType
+                .builder(BlockEntityCommandBlockImpl.class)
+                .name(BlockEntityId.COMMAND_BLOCK)
+                .addComponent(BlockEntityCommandBlockBaseComponentImpl::new, BlockEntityCommandBlockBaseComponentImpl.class)
+                .build();
+    }
+
+    public static void initJukebox() {
+        BlockEntityTypes.JUKEBOX = AllayBlockEntityType
+                .builder(BlockEntityJukeboxImpl.class)
+                .name(BlockEntityId.JUKEBOX)
+                .addComponent(BlockEntityJukeboxBaseComponentImpl::new, BlockEntityJukeboxBaseComponentImpl.class)
+                .build();
+    }
+
+    public static void initBarrel() {
+        BlockEntityTypes.BARREL = AllayBlockEntityType
+                .builder(BlockEntityBarrelImpl.class)
+                .name(BlockEntityId.BARREL)
+                .addComponent(BlockEntityBarrelBaseComponentImpl::new, BlockEntityBarrelBaseComponentImpl.class)
+                .addComponent(() -> new BlockEntityContainerHolderComponentImpl(BarrelContainerImpl::new), BlockEntityContainerHolderComponentImpl.class)
+                .build();
+    }
+
+    public static void initHopper() {
+        BlockEntityTypes.HOPPER = AllayBlockEntityType
+                .builder(BlockEntityHopperImpl.class)
+                .name(BlockEntityId.HOPPER)
+                .addComponent(BlockEntityHopperBaseComponentImpl::new, BlockEntityHopperBaseComponentImpl.class)
+                .addComponent(() -> new BlockEntityContainerHolderComponentImpl(HopperContainerImpl::new), BlockEntityContainerHolderComponentImpl.class)
+                .build();
+    }
+
+    public static void initDispenser() {
+        BlockEntityTypes.DISPENSER = AllayBlockEntityType
+                .builder(BlockEntityDispenserImpl.class)
+                .name(BlockEntityId.DISPENSER)
+                .addComponent(BlockEntityDispenserBaseComponentImpl::new, BlockEntityDispenserBaseComponentImpl.class)
+                .addComponent(() -> new BlockEntityContainerHolderComponentImpl(DispenserContainerImpl::new), BlockEntityContainerHolderComponentImpl.class)
+                .build();
+    }
+
+    public static void initDropper() {
+        BlockEntityTypes.DROPPER = AllayBlockEntityType
+                .builder(BlockEntityDropperImpl.class)
+                .name(BlockEntityId.DROPPER)
+                .addComponent(BlockEntityDropperBaseComponentImpl::new, BlockEntityDropperBaseComponentImpl.class)
+                .addComponent(() -> new BlockEntityContainerHolderComponentImpl(DropperContainerImpl::new), BlockEntityContainerHolderComponentImpl.class)
+                .build();
+    }
+
+    public static void initChest() {
+        BlockEntityTypes.CHEST = AllayBlockEntityType
+                .builder(BlockEntityChestImpl.class)
+                .name(BlockEntityId.CHEST)
+                .addComponent(BlockEntityChestBaseComponentImpl::new, BlockEntityChestBaseComponentImpl.class)
+                .addComponent(BlockEntityChestContainerHolderComponentImpl::new, BlockEntityChestContainerHolderComponentImpl.class)
+                .addComponent(BlockEntityPairableComponentImpl::new, BlockEntityPairableComponentImpl.class)
+                .build();
+    }
+
+    public static void initShulkerBox() {
+        BlockEntityTypes.SHULKER_BOX = AllayBlockEntityType
+                .builder(BlockEntityShulkerBoxImpl.class)
+                .name(BlockEntityId.SHULKER_BOX)
+                .addComponent(BlockEntityShulkerBoxBaseComponentImpl::new, BlockEntityShulkerBoxBaseComponentImpl.class)
+                .addComponent(BlockEntityShulkerBoxContainerHolderComponentImpl::new, BlockEntityShulkerBoxContainerHolderComponentImpl.class)
+                .build();
+    }
+
+    public static void initFurnace() {
+        BlockEntityTypes.FURNACE = AllayBlockEntityType
+                .builder(BlockEntityFurnaceImpl.class)
+                .name(BlockEntityId.FURNACE)
+                .addComponent(BlockEntityFurnaceBaseComponentImpl::new, BlockEntityFurnaceBaseComponentImpl.class)
+                .addComponent(() -> new BlockEntityContainerHolderComponentImpl(FurnaceContainerImpl::new), BlockEntityContainerHolderComponentImpl.class)
+                .build();
+        BlockEntityTypes.BLAST_FURNACE = AllayBlockEntityType
+                .builder(BlockEntityFurnaceImpl.class)
+                .name(BlockEntityId.BLAST_FURNACE)
+                .addComponent(BlockEntityBlastFurnaceBaseComponentImpl::new, BlockEntityBlastFurnaceBaseComponentImpl.class)
+                .addComponent(() -> new BlockEntityContainerHolderComponentImpl(BlastFurnaceContainerImpl::new), BlockEntityContainerHolderComponentImpl.class)
+                .build();
+        BlockEntityTypes.SMOKER = AllayBlockEntityType
+                .builder(BlockEntityFurnaceImpl.class)
+                .name(BlockEntityId.SMOKER)
+                .addComponent(BlockEntitySmokerFurnaceBaseComponentImpl::new, BlockEntitySmokerFurnaceBaseComponentImpl.class)
+                .addComponent(() -> new BlockEntityContainerHolderComponentImpl(SmokerContainerImpl::new), BlockEntityContainerHolderComponentImpl.class)
+                .build();
+    }
+
+    public static void initSign() {
+        BlockEntityTypes.SIGN = AllayBlockEntityType
+                .builder(BlockEntitySignImpl.class)
+                .name(BlockEntityId.SIGN)
+                .addComponent(BlockEntitySignBaseComponentImpl::new, BlockEntitySignBaseComponentImpl.class)
+                .build();
+        BlockEntityTypes.HANGING_SIGN = AllayBlockEntityType
+                .builder(BlockEntitySignImpl.class)
+                .name(BlockEntityId.HANGING_SIGN)
+                .addComponent(BlockEntitySignBaseComponentImpl::new, BlockEntitySignBaseComponentImpl.class)
+                .build();
+    }
+
+    public static void initEnchantTable() {
+        BlockEntityTypes.ENCHANT_TABLE = AllayBlockEntityType
+                .builder(BlockEntityEnchantTableImpl.class)
+                .name(BlockEntityId.ENCHANT_TABLE)
+                .addComponent(BlockEntityEnchantTableBaseComponentImpl::new, BlockEntityEnchantTableBaseComponentImpl.class)
+                .build();
+    }
+
+    public static void initBeacon() {
+        BlockEntityTypes.BEACON = AllayBlockEntityType
+                .builder(BlockEntityBeaconImpl.class)
+                .name(BlockEntityId.BEACON)
+                .addComponent(BlockEntityBeaconBaseComponentImpl::new, BlockEntityBeaconBaseComponentImpl.class)
+                .build();
+    }
+
+    public static void initBrewingStand() {
+        BlockEntityTypes.BREWING_STAND = AllayBlockEntityType
+                .builder(BlockEntityBrewingStandImpl.class)
+                .name(BlockEntityId.BREWING_STAND)
+                .addComponent(BlockEntityBrewingStandBaseComponentImpl::new, BlockEntityBrewingStandBaseComponentImpl.class)
+                .addComponent(() -> new BlockEntityContainerHolderComponentImpl(BrewingStandContainerImpl::new), BlockEntityContainerHolderComponentImpl.class)
+                .build();
+    }
+
+    public static void initEnderChest() {
+        BlockEntityTypes.ENDER_CHEST = AllayBlockEntityType
+                .builder(BlockEntityEnderChestImpl.class)
+                .name(BlockEntityId.ENDER_CHEST)
+                .addComponent(BlockEntityEnderChestBaseComponentImpl::new, BlockEntityEnderChestBaseComponentImpl.class)
+                .build();
+    }
+
+    public static void initFlowerPot() {
+        BlockEntityTypes.FLOWER_POT = AllayBlockEntityType
+                .builder(BlockEntityFlowerPotImpl.class)
+                .name(BlockEntityId.FLOWER_POT)
+                .addComponent(BlockEntityFlowerPotBaseComponentImpl::new, BlockEntityFlowerPotBaseComponentImpl.class)
+                .build();
+    }
+
+    public static void initItemFrame() {
+        BlockEntityTypes.ITEM_FRAME = AllayBlockEntityType
+                .builder(BlockEntityItemFrameImpl.class)
+                .name(BlockEntityId.ITEM_FRAME)
+                .addComponent(BlockEntityItemFrameBaseComponentImpl::new, BlockEntityItemFrameBaseComponentImpl.class)
+                .build();
+        BlockEntityTypes.GLOW_ITEM_FRAME = AllayBlockEntityType
+                .builder(BlockEntityItemFrameImpl.class)
+                .name(BlockEntityId.GLOW_ITEM_FRAME)
+                .addComponent(BlockEntityItemFrameBaseComponentImpl::new, BlockEntityItemFrameBaseComponentImpl.class)
+                .build();
+    }
+
+    public static void initBed() {
+        BlockEntityTypes.BED = AllayBlockEntityType
+                .builder(BlockEntityBedImpl.class)
+                .name(BlockEntityId.BED)
+                .addComponent(BlockEntityBedBaseComponentImpl::new, BlockEntityBedBaseComponentImpl.class)
+                .build();
+    }
+
+    public static void initBell() {
+        BlockEntityTypes.BELL = AllayBlockEntityType
+                .builder(BlockEntityBellImpl.class)
+                .name(BlockEntityId.BELL)
+                .addComponent(BlockEntityBellBaseComponentImpl::new, BlockEntityBellBaseComponentImpl.class)
+                .build();
+    }
+
+    public static void initLectern() {
+        BlockEntityTypes.LECTERN = AllayBlockEntityType
+                .builder(BlockEntityLecternImpl.class)
+                .name(BlockEntityId.LECTERN)
+                .addComponent(BlockEntityLecternBaseComponentImpl::new, BlockEntityLecternBaseComponentImpl.class)
+                .build();
+    }
+
+    public static void initNoteblock() {
+        BlockEntityTypes.NOTEBLOCK = AllayBlockEntityType
+                .builder(BlockEntityNoteblockImpl.class)
+                .name(BlockEntityId.MUSIC)
+                .addComponent(BlockEntityNoteblockBaseComponentImpl::new, BlockEntityNoteblockBaseComponentImpl.class)
+                .build();
+    }
+
+    public static void initHead() {
+        BlockEntityTypes.HEAD = AllayBlockEntityType
+                .builder(BlockEntityHeadImpl.class)
+                .name(BlockEntityId.SKULL)
+                .addComponent(BlockEntityHeadBaseComponentImpl::new, BlockEntityHeadBaseComponentImpl.class)
+                .build();
+    }
+
+    public static void initComparator() {
+        BlockEntityTypes.COMPARATOR = AllayBlockEntityType
+                .builder(BlockEntityComparatorImpl.class)
+                .name(BlockEntityId.COMPARATOR)
+                .addComponent(BlockEntityComparatorBaseComponentImpl::new, BlockEntityComparatorBaseComponentImpl.class)
+                .build();
+    }
+
+    public static void initTarget() {
+        BlockEntityTypes.TARGET = AllayBlockEntityType
+                .builder(BlockEntityTargetImpl.class)
+                .name(BlockEntityId.TARGET)
+                .addComponent(BlockEntityTargetBaseComponentImpl::new, BlockEntityTargetBaseComponentImpl.class)
+                .build();
+    }
+
+    public static void initShelf() {
+        BlockEntityTypes.SHELF = AllayBlockEntityType
+                .builder(BlockEntityShelfImpl.class)
+                .name(BlockEntityId.SHELF)
+                .addComponent(BlockEntityShelfContainerHolderComponentImpl::new, BlockEntityShelfContainerHolderComponentImpl.class)
+                .build();
+    }
+
+    public static void initChiseledBookshelf() {
+        BlockEntityTypes.CHISELED_BOOKSHELF = AllayBlockEntityType
+                .builder(BlockEntityChiseledBookshelfImpl.class)
+                .name(BlockEntityId.CHISELED_BOOKSHELF)
+                .addComponent(BlockEntityChiseledBookshelfContainerHolderComponentImpl::new, BlockEntityChiseledBookshelfContainerHolderComponentImpl.class)
+                .build();
+    }
+
+    public static void initCampfire() {
+        BlockEntityTypes.CAMPFIRE = AllayBlockEntityType
+                .builder(BlockEntityCampfireImpl.class)
+                .name(BlockEntityId.CAMPFIRE)
+                .addComponent(BlockEntityCampfireBaseComponentImpl::new, BlockEntityCampfireBaseComponentImpl.class)
+                .build();
+        BlockEntityTypes.SOUL_CAMPFIRE = AllayBlockEntityType
+                .builder(BlockEntityCampfireImpl.class)
+                .name(BlockEntityId.CAMPFIRE)
+                .addComponent(BlockEntitySoulCampfireBaseComponentImpl::new, BlockEntitySoulCampfireBaseComponentImpl.class)
+                .build();
+    }
+
+    public static void initPistonArm() {
+        BlockEntityTypes.PISTON_ARM = AllayBlockEntityType
+                .builder(BlockEntityPistonArmImpl.class)
+                .name(BlockEntityId.PISTON_ARM)
+                .addComponent(BlockEntityPistonArmBaseComponentImpl::new, BlockEntityPistonArmBaseComponentImpl.class)
+                .build();
+    }
+
+    public static void initMovingBlock() {
+        BlockEntityTypes.MOVING_BLOCK = AllayBlockEntityType
+                .builder(BlockEntityMovingBlockImpl.class)
+                .name(BlockEntityId.MOVING_BLOCK)
+                .addComponent(BlockEntityMovingBlockBaseComponentImpl::new, BlockEntityMovingBlockBaseComponentImpl.class)
+                .build();
+    }
+
+    public static void initCauldron() {
+        BlockEntityTypes.CAULDRON = AllayBlockEntityType
+                .builder(BlockEntityCauldronImpl.class)
+                .name(BlockEntityId.CAULDRON)
+                .addComponent(BlockEntityCauldronBaseComponentImpl::new, BlockEntityCauldronBaseComponentImpl.class)
+                .build();
+    }
+
+    public static void initDecoratedPot() {
+        BlockEntityTypes.DECORATED_POT = AllayBlockEntityType
+                .builder(BlockEntityDecoratedPotImpl.class)
+                .name(BlockEntityId.DECORATED_POT)
+                .addComponent(BlockEntityDecoratedPotBaseComponentImpl::new, BlockEntityDecoratedPotBaseComponentImpl.class)
+                .build();
+    }
+}

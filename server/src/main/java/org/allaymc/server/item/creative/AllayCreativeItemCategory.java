@@ -1,0 +1,70 @@
+package org.allaymc.server.item.creative;
+
+import com.google.common.base.Preconditions;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import lombok.Getter;
+import org.allaymc.api.item.ItemStack;
+import org.allaymc.api.item.creative.CreativeItemCategory;
+import org.allaymc.api.item.creative.CreativeItemGroup;
+import org.allaymc.api.item.interfaces.ItemAirStack;
+
+import java.util.Collections;
+import java.util.Map;
+
+/**
+ * @author daoge_cmd
+ */
+public class AllayCreativeItemCategory implements CreativeItemCategory {
+    protected final AllayCreativeItemRegistry registry;
+    @Getter
+    protected final Type type;
+
+    protected Map<Integer, CreativeItemGroup> groups;
+    protected Map<String, CreativeItemGroup> namedGroups;
+
+    public AllayCreativeItemCategory(AllayCreativeItemRegistry registry, Type type) {
+        this.registry = registry;
+        this.type = type;
+        this.groups = new Int2ObjectOpenHashMap<>();
+        this.namedGroups = new Object2ObjectOpenHashMap<>();
+    }
+
+    @Override
+    public CreativeItemGroup getGroup(int index) {
+        return groups.get(index);
+    }
+
+    @Override
+    public CreativeItemGroup getNamedGroup(String name) {
+        if (name.isBlank()) {
+            throw new IllegalArgumentException("Group name cannot be blank");
+        }
+
+        return namedGroups.get(name);
+    }
+
+    @Override
+    public CreativeItemGroup registerGroup(String name, ItemStack icon) {
+        registry.ensureMutable();
+        Preconditions.checkNotNull(name);
+        Preconditions.checkNotNull(icon);
+        var group = new AllayCreativeItemGroup(registry, this, name, icon);
+        groups.put(group.getIndex(), group);
+        namedGroups.put(name, group);
+        return group;
+    }
+
+    @Override
+    public CreativeItemGroup registerUnnamedGroup() {
+        registry.ensureMutable();
+        var group = new AllayCreativeItemGroup(registry, this, "", ItemAirStack.AIR_STACK);
+        groups.put(group.getIndex(), group);
+        return group;
+    }
+
+    @Override
+    public Map<Integer, CreativeItemGroup> getGroups() {
+        return Collections.unmodifiableMap(groups);
+    }
+}

@@ -1,0 +1,7 @@
+black
+toml
+mkdocs
+mkdocs-material
+mkdocs-git-revision-date-localized-plugin
+mkdocs-gen-files
+mdx_truly_sane_lists

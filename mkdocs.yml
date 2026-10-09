@@ -1,0 +1,165 @@
+site_name: AllayMC
+site_url: https://docs.allaymc.org
+site_author: daoge_cmd
+
+repo_name: AllayMC/Allay
+repo_url: https://github.com/AllayMC/Allay
+
+copyright: Copyright &copy; 2023 - 2024 AllayMC
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/AllayMC
+    - icon: fontawesome/brands/discord
+      link: https://discord.gg/ngkkE4hPTU
+
+extra_javascript:
+  - https://cdn.jsdelivr.net/npm/mathjax@2/MathJax.js?config=TeX-AMS_CHTML
+
+extra_css:
+  - stylesheets/extra.css
+
+plugins:
+  - search
+  - git-revision-date-localized:
+      enable_creation_date: true
+  - gen-files:
+      scripts:
+        - docs/gen_event_list.py
+
+theme:
+  name: 'material'
+  custom_dir: docs/overrides
+  logo: assets/logo/allay-chan-480x.png
+  favicon: assets/logo/allay-chan-480x.png
+  features:
+    - announce.dismiss
+    - content.action.edit
+    - content.action.view
+    - content.code.annotate
+    - content.code.copy
+    - content.tabs.link
+    - navigation.footer
+    - navigation.indexes
+    # - navigation.instant
+    # - navigation.instant.prefetch
+    # - navigation.instant.progress
+    # - navigation.prune
+    - navigation.sections
+    - navigation.tabs
+    # - navigation.tabs.sticky
+    - navigation.top
+    - navigation.tracking
+    - search.highlight
+    - search.share
+    - search.suggest
+    - toc.follow
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.magiclink:
+      normalize_issue_symbols: true
+      repo_url_shorthand: true
+      user: squidfunk
+      repo: mkdocs-material
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.snippets:
+      auto_append:
+        - includes/mkdocs.md
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+      combine_header_slug: true
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+  - mdx_truly_sane_lists
+
+nav:
+  - Home: index.md
+
+  - Getting Started:
+      - Installation: getting-started/installation.md
+      - Use Terra: getting-started/use-terra.md
+
+  - Plugins: https://hub.allaymc.org/
+
+  - Tutorials:
+      - Create Your First Plugin: tutorials/create-your-first-plugin.md
+      - Register Commands: tutorials/register-commands.md
+      - Use Permission: tutorials/use-permission.md
+      - Register Event Handlers: tutorials/register-event-listeners.md
+      - Schedule Tasks: tutorials/schedule-tasks.md
+      - Use Config: tutorials/use-config.md
+      - Use Color Codes: tutorials/use-color-codes.md
+      - Use Forms: tutorials/use-forms.md
+      - Use Scoreboards: tutorials/use-scoreboards.md
+      - Use BossBars: tutorials/use-bossbars.md
+      - Use Primitive Shapes: tutorials/use-primitive-shapes.md
+      - Block API: tutorials/block-api.md
+      - Item API: tutorials/item-api.md
+      - Container API: tutorials/container-api.md
+      - Persistent Data Container: tutorials/persistent-data-container.md
+      - Use i18n: tutorials/use-i18n.md
+
+  - Advanced:
+      - Custom Block API: advanced/custom-block-api.md
+      - Custom Item API: advanced/custom-item-api.md
+      - Event List: advanced/event-list.md
+      - Block and Item Id: advanced/block-and-item-id.md
+
+  - Development:
+      - Update to The Next Protocol Version: development/update-to-the-next-protocol-version.md
+      - Version of Allay: development/version-of-allay.md
+      - Chunk Freezing Issue: development/chunk-freezing-issue.md
+      - Component Injection System: development/component-injection-system.md
+
+  - Javadoc: https://javadoc.io/doc/org.allaymc.allay/api/latest/index.html
+
+  - Changelog: changelog.md

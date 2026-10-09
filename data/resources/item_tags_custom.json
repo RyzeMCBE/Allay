@@ -1,0 +1,70 @@
+{
+  "minecraft:beacon_payment": [
+    "minecraft:iron_ingot",
+    "minecraft:gold_ingot",
+    "minecraft:diamond",
+    "minecraft:emerald",
+    "minecraft:netherite_ingot"
+  ],
+  "minecraft:head": [
+    "minecraft:creeper_head",
+    "minecraft:dragon_head",
+    "minecraft:piglin_head",
+    "minecraft:player_head",
+    "minecraft:skull",
+    "minecraft:skeleton_skull",
+    "minecraft:wither_skeleton_skull",
+    "minecraft:zombie_head"
+  ],
+  "minecraft:dye": [
+    "minecraft:white_dye",
+    "minecraft:orange_dye",
+    "minecraft:magenta_dye",
+    "minecraft:light_blue_dye",
+    "minecraft:yellow_dye",
+    "minecraft:lime_dye",
+    "minecraft:pink_dye",
+    "minecraft:gray_dye",
+    "minecraft:light_gray_dye",
+    "minecraft:cyan_dye",
+    "minecraft:purple_dye",
+    "minecraft:blue_dye",
+    "minecraft:brown_dye",
+    "minecraft:green_dye",
+    "minecraft:red_dye",
+    "minecraft:black_dye"
+  ],
+  "minecraft:allow_offhand": [
+    "minecraft:shield",
+    "minecraft:arrow",
+    "minecraft:firework_rocket",
+    "minecraft:totem_of_undying",
+    "minecraft:filled_map",
+    "minecraft:nautilus_shell",
+    "minecraft:sparkler"
+  ],
+  "minecraft:chiseled_bookshelf_book": [
+    "minecraft:book",
+    "minecraft:enchanted_book",
+    "minecraft:writable_book",
+    "minecraft:written_book"
+  ],
+  "minecraft:fireproof": [
+    "minecraft:ancient_debris",
+    "minecraft:netherite_axe",
+    "minecraft:netherite_block",
+    "minecraft:netherite_boots",
+    "minecraft:netherite_chestplate",
+    "minecraft:netherite_helmet",
+    "minecraft:netherite_hoe",
+    "minecraft:netherite_horse_armor",
+    "minecraft:netherite_ingot",
+    "minecraft:netherite_leggings",
+    "minecraft:netherite_nautilus_armor",
+    "minecraft:netherite_pickaxe",
+    "minecraft:netherite_scrap",
+    "minecraft:netherite_shovel",
+    "minecraft:netherite_spear",
+    "minecraft:netherite_sword"
+  ]
+}

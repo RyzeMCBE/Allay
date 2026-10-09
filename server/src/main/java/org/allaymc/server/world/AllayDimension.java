@@ -1,0 +1,517 @@
+package org.allaymc.server.world;
+
+import com.google.common.base.Preconditions;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import org.allaymc.api.block.data.BlockFace;
+import org.allaymc.api.block.dto.Block;
+import org.allaymc.api.block.dto.PlayerInteractInfo;
+import org.allaymc.api.block.type.BlockState;
+import org.allaymc.api.entity.Entity;
+import org.allaymc.api.entity.EntityInitInfo;
+import org.allaymc.api.entity.interfaces.EntityPlayer;
+import org.allaymc.api.entity.type.EntityTypes;
+import org.allaymc.api.eventbus.event.block.BlockBreakEvent;
+import org.allaymc.api.eventbus.event.block.BlockPlaceEvent;
+import org.allaymc.api.eventbus.event.world.LightningStrikeEvent;
+import org.allaymc.api.item.ItemStack;
+import org.allaymc.api.math.position.Position3i;
+import org.allaymc.api.player.ClientState;
+import org.allaymc.api.player.Player;
+import org.allaymc.api.primitiveshape.PrimitiveShape;
+import org.allaymc.api.registry.Registries;
+import org.allaymc.api.scheduler.Scheduler;
+import org.allaymc.api.server.Server;
+import org.allaymc.api.utils.hash.HashUtils;
+import org.allaymc.api.world.Dimension;
+import org.allaymc.api.world.WorldViewer;
+import org.allaymc.api.world.data.Weather;
+import org.allaymc.api.world.dimension.DimensionType;
+import org.allaymc.api.world.dimension.DimensionTypes;
+import org.allaymc.api.world.generator.WorldGenerator;
+import org.allaymc.api.world.particle.BlockBreakParticle;
+import org.allaymc.api.world.poi.PoiType;
+import org.allaymc.server.network.processor.login.SetLocalPlayerAsInitializedPacketProcessor;
+import org.allaymc.server.scheduler.AllayScheduler;
+import org.allaymc.server.world.chunk.AllayUnsafeChunk;
+import org.allaymc.server.world.light.AllayLightEngine;
+import org.allaymc.server.world.light.NoLightEngine;
+import org.allaymc.server.world.manager.AllayBlockUpdateManager;
+import org.allaymc.server.world.manager.AllayChunkManager;
+import org.allaymc.server.world.manager.AllayEntityManager;
+import org.jctools.maps.NonBlockingHashSet;
+import org.jetbrains.annotations.UnmodifiableView;
+import org.joml.Vector3i;
+import org.joml.Vector3ic;
+
+import java.util.Collections;
+import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
+
+import static org.allaymc.api.block.type.BlockTypes.*;
+
+/**
+ * @author daoge_cmd | Cool_Loong
+ */
+@Slf4j
+@Getter
+public class AllayDimension implements Dimension {
+
+    /**
+     * The probability of lightning striking per chunk per tick during a thunderstorm.
+     * Based on Minecraft: 1/100,000 chance per chunk per tick.
+     */
+    protected static final int LIGHTNING_STRIKE_CHANCE = 100000;
+
+    protected final AllayWorld world;
+    protected final DimensionType dimensionType;
+    protected final WorldGenerator worldGenerator;
+    protected final AllayChunkManager chunkManager;
+    protected final AllayEntityManager entityManager;
+    protected final AllayBlockUpdateManager blockUpdateManager;
+    protected final Scheduler scheduler;
+    protected final AllayLightEngine lightEngine;
+    protected final Set<Player> players;
+    protected final Set<PrimitiveShape> primitiveShapes;
+
+    public AllayDimension(AllayWorld world, WorldGenerator worldGenerator, DimensionType dimensionType, boolean enableLightCalculation, boolean useVirtualThread) {
+        this.world = world;
+        this.dimensionType = dimensionType;
+        this.worldGenerator = worldGenerator;
+        this.chunkManager = new AllayChunkManager(this, worldGenerator, world.getWorldStorage());
+        this.entityManager = new AllayEntityManager(this, world.getWorldStorage());
+        this.blockUpdateManager = new AllayBlockUpdateManager(this);
+        this.scheduler = new AllayScheduler(Server.getInstance().getVirtualThreadPool());
+        this.lightEngine = enableLightCalculation ? new AllayLightEngine(this, useVirtualThread) : new NoLightEngine(this);
+        this.players = new NonBlockingHashSet<>();
+        this.primitiveShapes = new NonBlockingHashSet<>();
+        worldGenerator.setDimension(this);
+    }
+
+    public void startTick() {
+        this.lightEngine.startTick();
+    }
+
+    public void tick(long currentTick) {
+        tickLightning();
+        this.scheduler.tick();
+        this.entityManager.tick(currentTick);
+        this.chunkManager.tick(currentTick);
+        this.blockUpdateManager.tick();
+        this.chunkManager.forEachLoadedChunks(c -> {
+            var chunk = (AllayUnsafeChunk) c.toUnsafeChunk();
+            chunk.sendBlockUpdates();
+            chunk.performChunkTasks();
+        });
+    }
+
+    public void shutdown() {
+        this.scheduler.shutdown();
+        // Shutdown light service first, because when unloading chunks, chunk service
+        // will send updates to light service which is meaningless
+        this.lightEngine.shutdown();
+        // Batch all chunk and entity writes into a single db.write() call for fast shutdown
+        world.getWorldStorage().startBatchWrite();
+        try {
+            this.chunkManager.shutdown();
+            // EntityService should be shutdown after chunk service, because it requires
+            // the callback AllayEntityService.onChunkUnload() to be called
+            this.entityManager.shutdown();
+        } finally {
+            world.getWorldStorage().flushBatchWrite();
+        }
+    }
+
+    public void addPlayer(Player player) {
+        addPlayer(player, () -> {
+        });
+    }
+
+    public void addPlayer(Player player, Runnable runnable) {
+        var entity = Preconditions.checkNotNull(player.getControlledEntity());
+        this.players.add(player);
+        this.chunkManager.addChunkLoader(entity);
+        this.entityManager.addEntity(entity, runnable);
+        if (player.getClientState() == ClientState.IN_GAME) {
+            // Only send primitive shapes to the players when they are in-game. This
+            // solves the issue that primitive shapes won't be displayed if the player
+            // haven't fully joined. When the player join, the primitive shapes will be
+            // sent to the player after the player is fully joined.
+            // See SetLocalPlayerAsInitializedPacketProcessor.
+            addPrimitiveShapesTo(player);
+        }
+    }
+
+    /**
+     * Set this method to public because it is used in {@link SetLocalPlayerAsInitializedPacketProcessor}
+     */
+    public void addPrimitiveShapesTo(WorldViewer viewer) {
+        for (var primitiveShape : primitiveShapes) {
+            // Let's send all the primitive shapes in one packet to improve performance
+            primitiveShape.addViewer(viewer, false);
+        }
+        viewer.viewPrimitiveShapes(primitiveShapes);
+    }
+
+    public void removePlayer(Player player) {
+        removePlayer(player, () -> {
+        });
+    }
+
+    public void removePlayer(Player player, Runnable runnable) {
+        var entity = Preconditions.checkNotNull(player.getControlledEntity());
+        if (entity.isSpawned()) {
+            // When the player respawns to another dimension after death, the player entity has already been unloaded
+            // Therefore, when unloading the player entity, we need to check if the player entity has been spawned
+            this.entityManager.removeEntity(entity, runnable);
+            this.chunkManager.removeChunkLoader(entity);
+            this.players.remove(player);
+        } else {
+            this.chunkManager.removeChunkLoader(entity);
+            this.players.remove(player);
+            // Run the callback directly
+            runnable.run();
+        }
+        removePrimitiveShapesFrom(player);
+    }
+
+    protected void removePrimitiveShapesFrom(WorldViewer viewer) {
+        for (var primitiveShape : primitiveShapes) {
+            // Let's send all the remove notices in one packet to improve performance
+            primitiveShape.removeViewer(viewer, false);
+        }
+        viewer.removePrimitiveShapes(primitiveShapes);
+    }
+
+    @Override
+    @UnmodifiableView
+    public Set<Player> getPlayers() {
+        return Collections.unmodifiableSet(this.players);
+    }
+
+    @Override
+    public void addPrimitiveShape(PrimitiveShape primitiveShape) {
+        this.primitiveShapes.add(primitiveShape);
+        for (var player : this.players) {
+            primitiveShape.addViewer(player);
+        }
+    }
+
+    @Override
+    public void removePrimitiveShape(PrimitiveShape primitiveShape) {
+        this.primitiveShapes.remove(primitiveShape);
+        for (var player : this.players) {
+            primitiveShape.removeViewer(player);
+        }
+    }
+
+    @Override
+    @UnmodifiableView
+    public Set<PrimitiveShape> getPrimitiveShapes() {
+        return Collections.unmodifiableSet(this.primitiveShapes);
+    }
+
+    @Override
+    public void removeAllPrimitiveShapes() {
+        for (var player : players) {
+            removePrimitiveShapesFrom(player);
+        }
+        this.primitiveShapes.clear();
+    }
+
+    @Override
+    public boolean setBlockState(int x, int y, int z, BlockState blockState, int layer, boolean send, boolean update, boolean callBlockBehavior, PlayerInteractInfo placementInfo) {
+        var chunk = getChunkManager().getChunkByDimensionPos(x, z);
+        if (chunk == null) {
+            return false;
+        }
+
+        var xIndex = x & 15;
+        var zIndex = z & 15;
+        var oldBlockState = chunk.getBlockState(xIndex, y, zIndex, layer);
+
+        var event = new BlockPlaceEvent(new Block(blockState, new Position3i(x, y, z, this), layer), oldBlockState, placementInfo);
+        if (!event.call()) {
+            return false;
+        }
+
+        var blockPos = new Position3i(x, y, z, this);
+        var oldBlock = new Block(oldBlockState, blockPos, layer);
+        if (callBlockBehavior) {
+            // onReplace must be called before onPlace to ensure the old block entity
+            // is removed before the new one is created. This prevents block entity type
+            // mismatch issues (e.g., when a piston replaces MovingBlock with the original block)
+            oldBlockState.getBehavior().onReplace(oldBlock, blockState, placementInfo);
+            blockState.getBehavior().onPlace(oldBlock, blockState, placementInfo);
+        }
+        chunk.setBlockState(xIndex, y, zIndex, blockState, layer, send);
+
+        // Update POI index when main-layer blocks change
+        if (layer == 0) {
+            var oldPoi = Registries.POI_TYPES.get(oldBlockState.getBlockType());
+            var newPoi = Registries.POI_TYPES.get(blockState.getBlockType());
+            if (oldPoi != newPoi) {
+                if (oldPoi != null) chunk.removePoi(xIndex, y, zIndex);
+                if (newPoi != null) chunk.addPoi(xIndex, y, zIndex, newPoi);
+            }
+        }
+
+        if (update) {
+            updateAround(x, y, z, oldBlockState);
+        }
+
+        if (callBlockBehavior) {
+            chunk.getBlockState(xIndex, y, zIndex, layer == 0 ? 1 : 0).getBehavior().afterNeighborLayerReplace(oldBlock, blockState, placementInfo);
+            blockState.getBehavior().afterPlaced(oldBlock, blockState, placementInfo);
+            oldBlockState.getBehavior().afterReplaced(oldBlock, blockState, placementInfo);
+        }
+
+        return true;
+    }
+
+    @Override
+    public Vector3ic findNearestPoi(PoiType type, int x, int y, int z, int chunkRadius) {
+        int cx = x >> 4, cz = z >> 4;
+        Vector3ic nearest = null;
+        double nearestDistSq = Double.MAX_VALUE;
+
+        for (int dx = -chunkRadius; dx <= chunkRadius; dx++) {
+            for (int dz = -chunkRadius; dz <= chunkRadius; dz++) {
+                var chunk = chunkManager.getChunk(cx + dx, cz + dz);
+                if (chunk == null) continue;
+                for (var entry : chunk.getPoiEntries().entrySet()) {
+                    if (entry.getValue() != type) continue;
+                    int hash = entry.getKey();
+                    int px = HashUtils.getXFromHashChunkXYZ(hash) + ((cx + dx) << 4);
+                    int py = HashUtils.getYFromHashChunkXYZ(hash);
+                    int pz = HashUtils.getZFromHashChunkXYZ(hash) + ((cz + dz) << 4);
+                    double distSq = (double) (px - x) * (px - x) + (double) (py - y) * (py - y) + (double) (pz - z) * (pz - z);
+                    if (distSq < nearestDistSq) {
+                        nearestDistSq = distSq;
+                        nearest = new Vector3i(px, py, pz);
+                    }
+                }
+            }
+        }
+        return nearest;
+    }
+
+    @Override
+    public boolean breakBlock(int x, int y, int z, ItemStack usedItem, Entity entity, boolean sendParticle) {
+        var block = getBlockState(x, y, z);
+        if (block.getBlockType() == AIR) {
+            return false;
+        }
+
+        var event = new BlockBreakEvent(
+                new Block(block, new Position3i(x, y, z, this), 0),
+                usedItem, entity
+        );
+        if (!event.call()) {
+            return false;
+        }
+
+        if (sendParticle) {
+            addParticle(x + 0.5f, y + 0.5f, z + 0.5f, new BlockBreakParticle(block));
+        }
+
+        block.getBehavior().onBreak(
+                new Block(block, new Position3i(x, y, z, this), 0),
+                usedItem, entity
+        );
+
+        setBlockState(x, y, z, AIR.getDefaultState());
+
+        if (entity instanceof EntityPlayer player) {
+            player.exhaust(0.005f);
+        }
+
+        return true;
+    }
+
+    @Override
+    public int getPowerAt(Vector3ic pos) {
+        int maxPower = 0;
+
+        for (BlockFace face : BlockFace.VALUES) {
+            Vector3ic neighborPos = face.offsetPos(pos);
+            BlockState neighborState = this.getBlockState(neighborPos);
+
+            // Check direct weak power from neighbor
+            Block neighborBlock = new Block(neighborState, new Position3i(neighborPos, this));
+            int signal = neighborState.getBehavior().getWeakPower(neighborBlock, face.opposite());
+            maxPower = Math.max(maxPower, signal);
+
+            // Check strong power through solid blocks
+            // Exclude face.opposite() because that's the direction pointing back to pos
+            if (neighborState.getBlockStateData().isSolid()) {
+                int strongPower = this.getStrongPowerAt(neighborPos, face.opposite());
+                maxPower = Math.max(maxPower, strongPower);
+            }
+        }
+
+        return maxPower;
+    }
+
+    @Override
+    public int getStrongPowerAt(Vector3ic pos, BlockFace... excludeFaces) {
+        int maxPower = 0;
+
+        for (BlockFace face : BlockFace.VALUES) {
+            if (excludeFaces.length > 0 && containsFace(excludeFaces, face)) continue;
+
+            Vector3ic checkPos = face.offsetPos(pos);
+            BlockState state = this.getBlockState(checkPos);
+
+            Block checkBlock = new Block(state, new Position3i(checkPos, this));
+            int strongPower = state.getBehavior().getStrongPower(checkBlock, face.opposite());
+            maxPower = Math.max(maxPower, strongPower);
+        }
+
+        return maxPower;
+    }
+
+    @Override
+    public int getWeakPowerAt(Vector3ic pos, BlockFace... excludeFaces) {
+        int maxPower = 0;
+
+        for (BlockFace face : BlockFace.VALUES) {
+            if (excludeFaces.length > 0 && containsFace(excludeFaces, face)) continue;
+
+            Vector3ic checkPos = face.offsetPos(pos);
+            BlockState state = this.getBlockState(checkPos);
+
+            Block checkBlock = new Block(state, new Position3i(checkPos, this));
+            int weakPower = state.getBehavior().getWeakPower(checkBlock, face.opposite());
+            maxPower = Math.max(maxPower, weakPower);
+
+            // Check strong power through solid blocks
+            // A solid block receiving strong power provides weak power to adjacent blocks
+            // Exclude face.opposite() because that's the direction pointing back to pos
+            if (state.getBlockStateData().isSolid()) {
+                int strongPower = this.getStrongPowerAt(checkPos, face.opposite());
+                maxPower = Math.max(maxPower, strongPower);
+            }
+        }
+
+        return maxPower;
+    }
+
+    private static boolean containsFace(BlockFace[] faces, BlockFace target) {
+        for (BlockFace face : faces) {
+            if (face == target) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public void updateComparatorOutputLevel(int x, int y, int z) {
+        var sourcePos = new Vector3i(x, y, z);
+        // Check horizontal neighbors for diodes
+        for (BlockFace face : BlockFace.getHorizontalBlockFaces()) {
+            var offset = face.getOffset();
+            int nx = x + offset.x();
+            int ny = y + offset.y();
+            int nz = z + offset.z();
+
+            if (!getChunkManager().isChunkLoaded(nx >> 4, nz >> 4)) {
+                continue;
+            }
+
+            BlockState neighborState = getBlockState(nx, ny, nz);
+            var neighborPos = new Vector3i(nx, ny, nz);
+
+            if (isDiode(neighborState)) {
+                // Direct neighbor is a diode, update it
+                blockUpdateManager.neighborBlockUpdate(neighborPos, sourcePos, face.opposite(), null);
+            } else if (neighborState.getBlockStateData().isSolid()) {
+                // Neighbor is solid, check if there's a diode on the other side
+                int nx2 = nx + offset.x();
+                int nz2 = nz + offset.z();
+
+                if (!getChunkManager().isChunkLoaded(nx2 >> 4, nz2 >> 4)) {
+                    continue;
+                }
+
+                BlockState behindState = getBlockState(nx2, ny, nz2);
+                if (isDiode(behindState)) {
+                    var behindPos = new Vector3i(nx2, ny, nz2);
+                    blockUpdateManager.neighborBlockUpdate(behindPos, neighborPos, face.opposite(), null);
+                }
+            }
+        }
+    }
+
+    /**
+     * Checks if a block state is a redstone diode (repeater or comparator).
+     */
+    private boolean isDiode(BlockState state) {
+        var type = state.getBlockType();
+        return type == POWERED_REPEATER ||
+               type == UNPOWERED_REPEATER ||
+               type == POWERED_COMPARATOR ||
+               type == UNPOWERED_COMPARATOR;
+    }
+
+    /**
+     * Handles random lightning spawning during thunderstorms.
+     * Lightning has a 1/100,000 chance to strike per loaded chunk per tick.
+     */
+    protected void tickLightning() {
+        if (world.getWeather() != Weather.THUNDER) {
+            return;
+        }
+
+        // Only spawn lightning in overworld
+        if (dimensionType != DimensionTypes.OVERWORLD) {
+            return;
+        }
+
+        var rand = ThreadLocalRandom.current();
+        var loadedChunks = chunkManager.getLoadedChunks();
+        for (var chunk : loadedChunks) {
+            // 1/100,000 chance per chunk per tick
+            if (rand.nextInt(LIGHTNING_STRIKE_CHANCE) != 0) {
+                continue;
+            }
+
+            // Random position within the chunk
+            int x = (chunk.getX() << 4) + rand.nextInt(16);
+            int z = (chunk.getZ() << 4) + rand.nextInt(16);
+            int y = getHeight(x, z) + 1;
+
+            // Check if the position can see the sky
+            if (!canPosSeeSky(x, y, z)) {
+                continue;
+            }
+
+            // Spawn lightning at the position
+            strikeLightning(x, y, z, LightningStrikeEvent.Cause.WEATHER);
+        }
+    }
+
+    @Override
+    public boolean strikeLightning(double x, double y, double z, LightningStrikeEvent.Cause cause) {
+        var lightningBolt = EntityTypes.LIGHTNING_BOLT.createEntity(
+                EntityInitInfo.builder()
+                        .dimension(this)
+                        .pos(x, y, z)
+                        .build()
+        );
+
+        var event = new LightningStrikeEvent(this, lightningBolt, cause);
+        if (!event.call()) {
+            return false;
+        }
+
+        entityManager.addEntity(lightningBolt);
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "world=" + this.world.getName() + " dimension=" + this.dimensionType.getIdentifier();
+    }
+}
