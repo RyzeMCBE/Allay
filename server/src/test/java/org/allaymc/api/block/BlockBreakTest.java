@@ -31,7 +31,7 @@ public class BlockBreakTest {
                 breakingBlock.getBlockType().getDefaultState(),
                 usedItem,
                 player
-        ));
+        ), () -> "Bloque=" + breakingBlock.getBlockType() + ", item=" + usedItem + ", suelo=" + isOnGround + ", agua=" + isInWater);
     }
 
     /**
