@@ -142,18 +142,26 @@ Para desarrollo, el proyecto también contempla:
 > [!WARNING]
 > Antes de modificar mundos, dimensiones o portales en un servidor con jugadores, haz una copia de seguridad. Verifica siempre que la revisión elegida admite los datos y el protocolo del cliente utilizado.
 
-## 🔁 Compilación automática en GitHub
+## 🔁 Compilaciones automáticas y versiones beta/oficiales
 
-El archivo [<code>.github/workflows/gradle.yml</code>](.github/workflows/gradle.yml) configura **GitHub Actions** para:
+El workflow [`.github/workflows/gradle.yml`](.github/workflows/gradle.yml)
+ejecuta compilación y pruebas en `main` y pull requests, y conserva el JAR
+como artefacto temporal de GitHub Actions.
 
-- Ejecutar Gradle con **Java 21**.
-- Iniciarse al actualizar <code>main</code>, abrir o actualizar pull requests, publicar etiquetas que comiencen por <code>v</code>, o lanzarlo manualmente.
-- Ejecutar <code>./gradlew build --no-daemon</code>.
-- Subir los JAR de <code>server/build/libs/</code> como **artefactos descargables** solamente cuando la compilación finalice correctamente.
+El workflow [`.github/workflows/release.yml`](.github/workflows/release.yml)
+publica **GitHub Releases con el JAR ejecutable y SHA-256** al crear
+etiquetas verificadas en `main`:
 
-**Los artefactos de Actions no se publican automáticamente como GitHub Releases.**
+- **Beta:** `v0.14.1-beta.1` → `Allay-0.14.1-beta.1.jar` (pre-release).
+- **Oficial:** `v0.14.1` → `Allay-0.14.1.jar` (estable).
 
-Consulta el [historial de compilaciones](https://github.com/RyzeMCBE/Allay/actions/workflows/gradle.yml) para comprobar resultados y descargar el JAR de una ejecución exitosa.
+Antes de publicar, Gradle ejecuta las pruebas y genera un JAR limpio con
+el número de versión correspondiente al tag. También se puede lanzar
+manualmente desde Actions para validar y generar artefactos **sin publicar**.
+
+**[Guía completa de versiones beta y oficiales](docs/RELEASES-RYZEMCBE.md)** ·
+[**GitHub Releases**](https://github.com/RyzeMCBE/Allay/releases) ·
+[**GitHub Actions**](https://github.com/RyzeMCBE/Allay/actions)
 
 ## 🧩 Desarrollo de plugins con VS Code
 
