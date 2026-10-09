@@ -1,0 +1,156 @@
+name: Allay · Beta y versión oficial
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version_tag:
+        description: 'Versión para simular sin publicar (v0.14.1-beta.1 o v0.14.1)'
+        required: true
+        default: 'v0.14.1-beta.1'
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: allay-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Compilar, probar y generar JAR
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.version_tag || github.ref_name }}
+
+    steps:
+      - name: Descargar código con Protocol y StateUpdater
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Preparar Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Configurar Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Validar tag, versión y rama
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="$RELEASE_TAG"
+          if [[ ! "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-beta\.[1-9][0-9]*)?$ ]]; then
+            echo "::error::Usa vX.Y.Z (oficial) o vX.Y.Z-beta.N (beta, N >= 1)."
+            exit 1
+          fi
+
+          version="${tag#v}"
+          base="${version%%-beta.*}"
+          configured="$(sed -n 's/^server.version=//p' gradle.properties | tr -d '\r')"
+          if [[ "$base" != "$configured" ]]; then
+            echo "::error::El tag requiere server.version=$base, pero se encontró $configured."
+            exit 1
+          fi
+
+          if [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
+            git fetch origin main
+            if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+              echo "::error::El tag debe apuntar a un commit integrado en main."
+              exit 1
+            fi
+          fi
+
+          if [[ "$version" == *-beta.* ]]; then
+            channel=beta
+          else
+            channel=stable
+          fi
+          echo "RELEASE_VERSION=$version" >> "$GITHUB_ENV"
+          echo "RELEASE_CHANNEL=$channel" >> "$GITHUB_ENV"
+
+      - name: Compilar y ejecutar pruebas
+        shell: bash
+        run: |
+          chmod +x ./gradlew
+          ./gradlew clean build :server:shadowJar --no-daemon \
+            -Pserver.version="$RELEASE_VERSION" \
+            -Pallay.is-dev-build=false
+
+      - name: Preparar JAR y SHA-256
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t jars < <(find server/build/libs -maxdepth 1 -type f \
+            -name 'allay-server-*-shaded.jar' | sort)
+          if (( ${#jars[@]} != 1 )); then
+            echo "::error::Se esperaba exactamente un JAR ejecutable."
+            exit 1
+          fi
+
+          jar="${jars[0]}"
+          prefix="allay-server-${RELEASE_VERSION}-"
+          if [[ "${jar##*/}" != "$prefix"*"-shaded.jar" ]]; then
+            echo "::error::El JAR no contiene la versión $RELEASE_VERSION: ${jar##*/}"
+            exit 1
+          fi
+
+          mkdir -p dist
+          cp "$jar" "dist/Allay-${RELEASE_VERSION}.jar"
+          (
+            cd dist
+            sha256sum "Allay-${RELEASE_VERSION}.jar" > "Allay-${RELEASE_VERSION}.jar.sha256"
+            sha256sum -c "Allay-${RELEASE_VERSION}.jar.sha256"
+          )
+
+      - name: Conservar informes de pruebas
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allay-tests-${{ github.sha }}
+          path: |
+            server/build/test-results/test/**
+            server/build/reports/tests/test/**
+          if-no-files-found: ignore
+
+      - name: Adjuntar JAR al workflow
+        uses: actions/upload-artifact@v4
+        with:
+          name: allay-${{ env.RELEASE_VERSION }}-${{ github.sha }}
+          path: |
+            dist/Allay-*.jar
+            dist/Allay-*.sha256
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Crear GitHub Release con el JAR
+        if: github.event_name == 'push'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            echo "::error::Este release ya existe. No se sobreescriben versiones publicadas."
+            exit 1
+          fi
+
+          args=(--verify-tag --target "$GITHUB_SHA" \
+            --title "RyzeMCBE Allay $RELEASE_VERSION" --generate-notes)
+          if [[ "$RELEASE_CHANNEL" == "beta" ]]; then
+            args+=(--prerelease)
+          fi
+
+          gh release create "$RELEASE_TAG" \
+            "dist/Allay-${RELEASE_VERSION}.jar" \
+            "dist/Allay-${RELEASE_VERSION}.jar.sha256" \
+            "${args[@]}"
