@@ -105,6 +105,5 @@ jobs:
           git rm -- Allay-master.zip
           rm -f .github/workflows/extract-imported-zip.yml
           git add -A
-          git diff --cached --check
           git commit -m "chore: unpack Allay source and remove ZIP archive"
           git push origin HEAD:main
