@@ -53,7 +53,9 @@ class RawPacketCodecRegistrationTest {
     @Test
     void directlyConstructedRawPacketsAreAcceptedByTheirTargetCodecs() throws IOException {
         var rawPacketUses = findDirectPacketConstructions();
-        assertEquals(RAW_PACKET_ALLOWLIST, rawPacketUses);
+        assertEquals(RAW_PACKET_ALLOWLIST, rawPacketUses,
+                () -> "Construcciones faltantes=" + difference(RAW_PACKET_ALLOWLIST, rawPacketUses)
+                        + "; construcciones nuevas=" + difference(rawPacketUses, RAW_PACKET_ALLOWLIST));
 
         for (var rawPacketUse : rawPacketUses) {
             var packetClass = packetClass(rawPacketUse.packetName());
@@ -101,6 +103,12 @@ class RawPacketCodecRegistrationTest {
             assertRegistration(protocol, ClientboundDataDrivenUICloseScreenPacket.class, version >= 924);
             assertRegistration(protocol, VoxelShapesPacket.class, version >= 924);
         }
+    }
+
+    private static Set<RawPacketUse> difference(Set<RawPacketUse> left, Set<RawPacketUse> right) {
+        var diff = new HashSet<>(left);
+        diff.removeAll(right);
+        return diff;
     }
 
     private static Set<RawPacketUse> findDirectPacketConstructions() throws IOException {
