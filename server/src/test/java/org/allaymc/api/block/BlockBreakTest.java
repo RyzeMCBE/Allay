@@ -10,12 +10,14 @@ import org.allaymc.api.item.interfaces.ItemAirStack;
 import org.allaymc.api.item.type.ItemTypes;
 import org.allaymc.server.container.impl.PlayerArmorContainerImpl;
 import org.allaymc.testutils.AllayTestExtension;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.reset;
 
 /**
  * @author IWareQ
@@ -23,6 +25,12 @@ import static org.mockito.Mockito.when;
 @ExtendWith(AllayTestExtension.class)
 public class BlockBreakTest {
     private static final EntityPlayer player = mock(EntityPlayer.class);
+
+    @BeforeEach
+    void clearPlayerMockState() {
+        // Cada prueba configura efectos y equipo diferentes; evita que se filtren a otras.
+        reset(player);
+    }
 
     private static void testBreakTime(double expectedSeconds, BlockBehavior breakingBlock, ItemStack usedItem, boolean isOnGround, boolean isInWater) {
         when(player.isOnGround()).thenReturn(isOnGround);
