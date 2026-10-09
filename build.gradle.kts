@@ -53,7 +53,7 @@ subprojects {
     }
 
     if (project.name in listOf("api", "server")) {
-        apply(plugin = "com.vanniktech.maven.publish")
+        if (project.name == "server") apply(plugin = "com.vanniktech.maven.publish")
 
         project.version = rootProject.property(project.name + ".version").toString() +
                 if (rootProject.property("allay.is-dev-build").toString().toBoolean()) "-dev" else ""
@@ -62,7 +62,7 @@ subprojects {
             withSourcesJar()
         }
 
-        configure<MavenPublishBaseExtension> {
+        if (project.name == "server") configure<MavenPublishBaseExtension> {
             publishToMavenCentral()
             signAllPublications()
 
