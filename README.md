@@ -1,178 +1,221 @@
-<!-- PROJECT LOGO -->
-<br/>
 <div align="center">
 
-<a href="https://github.com/AllayMC/Allay">
-    <img src="docs/assets/logo/allay-chan-640x.png" alt="Logo" width="200" height="200">
-</a>
-<h3 align="center">Allay</h3>
+<img src="docs/assets/logo/allay-chan-640x.png" alt="Logotipo de Allay" width="170">
 
-The next-generation Minecraft: Bedrock Edition server software aims to be reliable, fast and feature-rich
+# Allay · RyzeMCBE
 
-<a href="https://github.com/AllayMC/Allay/actions"><img src="https://github.com/AllayMC/Allay/actions/workflows/gradle.yml/badge.svg" alt="Build"/></a>
-<a href="https://docs.allaymc.org"><img src="https://readthedocs.org/projects/allaymc/badge/?version=latest" alt="Documentation Status"></a>
-[![javadoc](https://javadoc.io/badge2/org.allaymc.allay/api/javadoc.svg)](https://javadoc.io/doc/org.allaymc.allay/api)
-[![api](https://img.shields.io/maven-central/v/org.allaymc.allay/api?label=api)](https://central.sonatype.com/artifact/org.allaymc.allay/api)
-[![server](https://img.shields.io/maven-central/v/org.allaymc.allay/server?label=server)](https://central.sonatype.com/artifact/org.allaymc.allay/server)
-[![codecov](https://codecov.io/gh/AllayMC/Allay/graph/badge.svg?token=EI8EDEKI51)](https://codecov.io/gh/AllayMC/Allay)
-<a href="https://app.codacy.com/gh/AllayMC/Allay/dashboard"><img src="https://app.codacy.com/project/badge/Grade/30e264923da2425a8b777a84b4028334"></a>
-<a href="https://discord.gg/ngkkE4hPTU"><img src="https://img.shields.io/discord/1147136608290750526?label=discord&color=7289DA&logo=discord" alt="Discord" /></a>
-[![qq](https://img.shields.io/badge/QQ-1072132791-purple)](https://qm.qq.com/q/peseHA0xN0)
-<a href="https://feedback.minecraft.net/hc/en-us/sections/360001186971-Release-Changelogs"><img src="https://img.shields.io/badge/minecraft-1.21.90(NetEase) ~ 1.26.40-green" /></a>
-[![GitHub License](https://img.shields.io/github/license/allaymc/allay)](LICENSE)
-[![Ko-Fi](https://img.shields.io/badge/Buy_Me_a_Coffee-f37574?logo=kofi&logoColor=white)](https://ko-fi.com/AllayMC)
+### Software de servidor para Minecraft Bedrock Edition
+
+**Fork de Allay mantenido por RyzeMCBE Development Studio.**
+
+[![Compilación](https://github.com/RyzeMCBE/Allay/actions/workflows/gradle.yml/badge.svg)](https://github.com/RyzeMCBE/Allay/actions/workflows/gradle.yml)
+[![Java 21](https://img.shields.io/badge/Java-21-f97316)](https://github.com/RyzeMCBE/Allay)
+[![Licencia](https://img.shields.io/badge/Licencia-LGPL--3.0-blue)](LICENSE)
+[![Estado](https://img.shields.io/badge/Estado-En%20desarrollo-orange)](https://github.com/RyzeMCBE/Allay/actions)
+
+[**Código fuente**](https://github.com/RyzeMCBE/Allay) · [**Compilaciones**](https://github.com/RyzeMCBE/Allay/actions) · [**Reportar problemas**](https://github.com/RyzeMCBE/Allay/issues) · [**Organización**](https://github.com/RyzeMCBE)
 
 </div>
 
-## 📖 Introduction
+---
 
-Allay is a third-party server software for Minecraft: Bedrock Edition written from scratch, with the goal of being
-reliable, fast and feature-rich.
+## 📖 ¿Qué es Allay?
 
-## 🎯 Why Allay?
+**Allay** es un software de servidor independiente para **Minecraft: Bedrock Edition**, desarrollado en **Java 21**. Su arquitectura separa la API pública de la implementación del servidor y permite crear extensiones para la JVM.
 
-- **Fast**: Allay is very fast. Compared to almost all other server software, Allay is far more performant in almost all aspects. The written from
-scratch codebase allows us to re-examine performance critical points and solve problems in the most efficient way.
-- **Reliable**: Allay is designed to be reliable. To achieve this goal, we have written a lot of unit tests to ensure the stability of the project.
-- **Hassle-free**: Allay is designed to be user-friendly and is ready to use right out of the box. We also have complete documentation to guide you 
-in your deployment. 
-- **Developer-friendly**: Our api is seperated from the implementation and is well-documented. No more wasting time looking at the implementation.
-- **Feature-rich**: One of our goal is to be feature-rich. Thanks to the architecture of Allay, adding new features is very easy for us.
-- **Cross-platform**: Benefit from JVM, allay can run on almost any platform.
-- **Multi-version**: Allay has multi-version support. No longer worry about losing your players due to version updates.
+Este repositorio contiene un **fork de trabajo de [AllayMC/Allay](https://github.com/AllayMC/Allay)** bajo la organización **RyzeMCBE Development Studio**. Lo utilizamos como base para estudiar, integrar y mantener funcionalidades relacionadas con protocolos, compatibilidad, mundos, dimensiones y rendimiento.
 
-## 🛠️ Getting Started
+> [!IMPORTANT]
+> **Estado de este fork: desarrollo y validación.** El código está disponible en la rama principal, pero la compilación revisada el **9 de octubre de 2026** falló por la ausencia de un archivo necesario en el protocolo local. No afirmamos que esta revisión esté lista para producción. Comprueba el [estado actual de GitHub Actions](https://github.com/RyzeMCBE/Allay/actions) antes de utilizarla.
 
-Allay is written and running in java 21, so you need to install java 21. There are
-several version of java, and we recommend you to use [GraalVM](https://www.graalvm.org/) for the best performance.
-[OpenJDK](https://adoptopenjdk.net/) is also a good choice if you want to have a stable experience.
+## 🚀 Características y áreas de trabajo
 
-After you have installed java 21, there are two ways to install Allay:
+| Área | Descripción |
+| --- | --- |
+| 🌐 **Multiversión** | Arquitectura para gestionar familias de protocolos Bedrock. La compatibilidad real depende de las implementaciones y pruebas de cada versión. |
+| ⚡ **Rendimiento** | Herramientas y diseño orientados a un servidor eficiente sobre la JVM. |
+| 🧩 **Plugins** | API para extensiones en Java y otros lenguajes compatibles con la JVM. |
+| 🌍 **Mundos y dimensiones** | Sistemas de mundo con Overworld, Nether, End y soporte de tipos de dimensión personalizables. |
+| 🚪 **Portales** | Componentes y eventos relacionados con portales del Nether y del End. |
+| 🧱 **Contenido de Bedrock** | Bloques, ítems, entidades, inventarios y serialización vinculada a protocolos. |
+| 🧪 **Pruebas** | Tareas Gradle, pruebas automatizadas y pruebas de regresión. |
 
-### ⚡ Use AllayLauncher
+La presencia de un componente en el código no garantiza que todas sus mecánicas estén verificadas en este fork.
 
-[AllayLauncher](https://github.com/AllayMC/AllayLauncher) is the launcher for allay. It has some cool features such as auto-updating, daemon mode
-and java checker. To use it, just run the following command based on your OS:
+## 🆕 Novedades documentadas
 
-Linux:
+El archivo [CHANGELOG.md](CHANGELOG.md) identifica la línea **Allay 0.14.1 / API 0.30.0** como *no publicada* y enumera, entre otros cambios:
 
-```bash
-wget -qO- https://raw.githubusercontent.com/AllayMC/AllayLauncher/refs/heads/main/scripts/install_linux.sh | bash
-```
+- Incorporación de soporte para **Minecraft Bedrock 1.26.40** (protocolo **v2168**).
+- Soporte para **NetEase 1.21.124** (protocolo **v860**).
+- Nueva arquitectura multiversión **mvv2**.
+- Corrección de recogida de flechas con efectos y encantamiento Infinity.
 
-Windows (PowerShell):
+Las versiones anteriores del historial también documentan APIs para dimensiones y biomas personalizados, sistemas de portales, cambios de inventarios y otras mecánicas.
 
-```powershell
-Invoke-Expression (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/AllayMC/AllayLauncher/refs/heads/main/scripts/install_windows.ps1").Content
-```
+**Importante:** estas son funcionalidades descritas en el código importado, **no una lista de versiones certificadas** por RyzeMCBE. No se garantiza compatibilidad con todas las versiones de Bedrock ni con versiones posteriores a las que aparecen en el historial.
 
-### 🔨 Install Allay Manually
+## 🏗️ Estructura del repositorio
 
-If you platform does not support AllayLauncher, don't be worry! You can also install Allay manually. Just
-download the `allay-server-*-shaded.jar` file from our release page. Move it to the folder you want and run:
+~~~text
+Allay/
+├── api/                   API pública y contratos para plugins
+├── server/                Implementación del servidor y pruebas
+├── data/                  Datos y recursos auxiliares
+├── codegen/               Herramientas de generación de código
+├── docs/                  Documentación y recursos gráficos
+├── gradle/                Wrapper y catálogo de dependencias
+├── .github/workflows/     Compilación automática
+├── build.gradle.kts       Configuración principal de Gradle
+├── settings.gradle.kts    Módulos y resolución del protocolo
+├── .gitmodules            Referencia al repositorio de protocolo
+└── gradlew                Ejecutor Gradle para Linux/macOS
+~~~
 
-```shell
-java -jar allay-server-*-shaded.jar
-```
+El código fuente se encuentra directamente en el repositorio: **ya no existe el archivo comprimido Allay-master.zip**.
 
-## 🌟 Plugins
+## 🛠️ Requisitos
 
-Allay supports running plugins written in Java, Kotlin, Scala (JVM based language).
+- **JDK 21** configurado.
+- Git.
+- Acceso a las dependencias Maven/Gradle necesarias.
+- Código correcto del protocolo local **protocol-local**.
+- En Linux, permisos de ejecución para el Gradle Wrapper.
 
-### Use Plugin Template
+### ⚠️ Dependencia local de protocolo
 
-The quickest way to create a new plugin is to use our plugin template!
-You can check out the following plugin templates:
+En este fork, el archivo <code>.gitmodules</code> declara el submódulo **[Mykoss/Protocol](https://github.com/Mykoss/Protocol)** con la ruta <code>protocol-local</code>.
 
-- [JavaPluginTemplate](https://github.com/AllayMC/JavaPluginTemplate)
-- [KotlinPluginTemplate](https://github.com/MineBuilders/allaymc-kotlin-plugin-template)
-- [ScalaPluginTemplate](https://github.com/AllayMC/ScalaPluginTemplate)
+Además, <code>settings.gradle.kts</code> requiere que exista un archivo de prueba de regresión específico:
 
-### Use Allay Gradle Plugin
+~~~text
+protocol-local/bedrock-codec/src/test/java/org/cloudburstmc/protocol/bedrock/codec/v2168/serializer/ItemStackResponseSerializer_v2168Test.java
+~~~
 
-Allay provides a Gradle plugin to make it much easier to develop Allay plugin. Check out
-[AllayGradle](https://github.com/AllayMC/AllayGradle) for more information about how to use it.
+**En la última revisión del árbol, la carpeta protocol-local no estaba incorporada.** Por eso el proceso de compilación detectó la falta del ajuste v2168. Si la inicialización del submódulo no recupera el archivo indicado, será necesario corregir su referencia o contenido. No recomendamos omitir esta verificación para esconder el error.
 
-### Use Allay in Existing Project
+## 📥 Clonar y compilar
 
-Allay API is published to the Maven Central. If you have an existing project and want to use Allay in it, simply
-add the following dependencies to your project:
+En Ubuntu o cualquier distribución Linux con Java 21:
 
-```kts
+~~~bash
+git clone --recurse-submodules https://github.com/RyzeMCBE/Allay.git
+cd Allay
+
+git submodule sync --recursive
+git submodule update --init --recursive
+
+chmod +x gradlew
+./gradlew build --no-daemon
+~~~
+
+Para generar únicamente el JAR distribuible con dependencias incluidas:
+
+~~~bash
+./gradlew :server:shadowJar --no-daemon
+~~~
+
+El archivo generado, **si la compilación tiene éxito**, debería encontrarse en <code>server/build/libs/</code> y seguir un patrón parecido a:
+
+~~~text
+allay-server-<versión>-<commit>-shaded.jar
+~~~
+
+En Windows, utiliza <code>gradlew.bat</code> en lugar de <code>./gradlew</code>.
+
+## ▶️ Iniciar el servidor
+
+Después de obtener un JAR válido, crea un directorio para ejecutar Allay y utiliza el nombre real del archivo:
+
+~~~bash
+java -jar allay-server-<versión>-<commit>-shaded.jar
+~~~
+
+Para desarrollo, el proyecto también contempla:
+
+~~~bash
+./gradlew :server:runShadow
+~~~
+
+> [!WARNING]
+> Antes de modificar mundos, dimensiones o portales en un servidor con jugadores, haz una copia de seguridad. Verifica siempre que la revisión elegida admite los datos y el protocolo del cliente utilizado.
+
+## 🔁 Compilación automática en GitHub
+
+El archivo [<code>.github/workflows/gradle.yml</code>](.github/workflows/gradle.yml) configura **GitHub Actions** para:
+
+- Ejecutar Gradle con **Java 21**.
+- Iniciarse al actualizar <code>main</code>, abrir o actualizar pull requests, publicar etiquetas que comiencen por <code>v</code>, o lanzarlo manualmente.
+- Ejecutar <code>./gradlew build --no-daemon</code>.
+- Subir los JAR de <code>server/build/libs/</code> como **artefactos descargables** solamente cuando la compilación finalice correctamente.
+
+**Los artefactos de Actions no se publican automáticamente como GitHub Releases.**
+
+Consulta el [historial de compilaciones](https://github.com/RyzeMCBE/Allay/actions/workflows/gradle.yml) para comprobar resultados y descargar el JAR de una ejecución exitosa.
+
+## 🧩 Desarrollo de plugins
+
+Los plugins pueden desarrollarse en Java u otros lenguajes de la JVM. Como referencia del ecosistema original:
+
+- [Plantilla para Java](https://github.com/AllayMC/JavaPluginTemplate)
+- [Plantilla para Kotlin](https://github.com/MineBuilders/allaymc-kotlin-plugin-template)
+- [Plantilla para Scala](https://github.com/AllayMC/ScalaPluginTemplate)
+- [AllayGradle](https://github.com/AllayMC/AllayGradle)
+
+Ejemplo para utilizar una **versión publicada de la API original** en Gradle Kotlin DSL:
+
+~~~kotlin
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    compileOnly(group = "org.allaymc.allay", name = "api", version = "<version>")
+    compileOnly("org.allaymc.allay:api:<versión-publicada>")
 }
-```
+~~~
 
-You can also use the snapshot version that is under development. To fetch the snapshot version, the central snapshot
-repository needs to be added:
+No supongas que las versiones publicadas por AllayMC incluyen todas las modificaciones internas de RyzeMCBE.
 
-```kts
-repositories {
-    mavenCentral()
-    // Add the central snapshot repository
-    maven("https://central.sonatype.com/repository/maven-snapshots/")
-}
+## 🧪 Comandos útiles para desarrolladores
 
-dependencies {
-    // Add `-SNAPSHOT` suffix to the version to use the snapshot version, an example is `0.19.0-SNAPSHOT`
-    compileOnly(group = "org.allaymc.allay", name = "api", version = "<version>-SNAPSHOT")
-}
-```
+~~~bash
+# Compilar todos los módulos y ejecutar las pruebas
+./gradlew build
 
-## 🙌 Contributing
+# Ejecutar pruebas del módulo servidor
+./gradlew :server:test
 
-Contributions are welcomed! And please read [CONTRIBUTING.md](CONTRIBUTING.md) before contributing.
-There are several ways you can contribute:
+# Crear el JAR ejecutable
+./gradlew :server:shadowJar
 
-### Submitting a Pull Request
+# Generar el informe de cobertura
+./gradlew :server:jacocoTestReport
+~~~
 
-We appreciate code contributions. If you've fixed a bug or implemented a new feature, please submit
-a pull request! Please ensure your code follows our coding standards and include tests where possible.
+## 🤝 Contribuciones y reportes
 
-This project exists thanks to the participation of the following developers:
+Puedes presentar propuestas, correcciones o reportes mediante las [issues](https://github.com/RyzeMCBE/Allay/issues) y los pull requests cuando estén habilitados. Revisa [CONTRIBUTING.md](CONTRIBUTING.md) y [AGENTS.md](AGENTS.md) antes de enviar cambios.
 
-![contributors](https://contrib.rocks/image?repo=AllayMC/Allay)
+Para informar de un error incluye la versión exacta de Bedrock, protocolo, sistema operativo, revisión de Git, pasos para reproducirlo y registros relevantes. **Nunca compartas contraseñas, tokens o datos privados en logs públicos.**
 
-### Feedback
+## ⚖️ Licencias y créditos
 
-Your feedback can make this project better. If you find a problem/have a new idea, feel free to raise it in
-the [issues page](https://github.com/AllayMC/Allay/issues). Ensure to include a detailed description of the 
-bug and steps to reproduce it.
+Allay fue creado originalmente por el equipo de **[AllayMC](https://github.com/AllayMC)**. Este repositorio es un fork independiente mantenido por RyzeMCBE: reconocemos y conservamos los créditos de sus autores y colaboradores.
 
-## 🎫 License
+El proyecto principal incluye la licencia **[LGPL-3.0](LICENSE)**; los directorios <code>data/</code> y <code>codegen/</code> contienen sus respectivas licencias **MIT**. Otros recursos pueden tener condiciones propias; consulta los avisos incluidos.
 
-Copyright **© 2023-2025 AllayMC**, all rights reserved. If not otherwise specified, project content is open source under
-the LGPL-3.0 license. The contents of the following folders are open-sourced under the MIT license:
+También agradecemos a los proyectos citados en el repositorio original: [Endstone](https://github.com/EndstoneMC/Endstone), [Cloudburst Protocol](https://github.com/CloudburstMC/Protocol), [df-mc](https://github.com/df-mc), [gophertunnel](https://github.com/Sandertv/gophertunnel), [PocketMine-MP](https://github.com/pmmp/PocketMine-MP) y [YourKit](https://www.yourkit.com/).
 
-- data
-- codegen
+---
 
-## ❤️ Special Thanks
+<div align="center">
 
-- [Endstone](https://github.com/EndstoneMC/Endstone): Endstone's build-in DevTools is essential for Allay to dump key data from BDS
-- [Protocol](https://github.com/CloudburstMC/Protocol): The protocol library and implementation of RakNet used by Allay
-- [df-mc](https://github.com/df-mc): References for some key API designs
-- [gophertunnel](https://github.com/Sandertv/gophertunnel): The protocol library for reference which is well-documented
-- [pmmp](https://github.com/pmmp/PocketMine-MP): Provides a lot of useful information in many ways
+### 🦊 RyzeMCBE Development Studio
 
-[![YourKit-Logo](https://www.yourkit.com/images/yklogo.png)](https://www.yourkit.com/)
+**Desarrollo de software, compatibilidad y herramientas para comunidades.**
 
-YourKit has granted AllayMC team an open-source license to their
-outstanding Java profiler, allowing us to make our software as performant as it
-can be!
+[Organización](https://github.com/RyzeMCBE) · [Nuestro fork](https://github.com/RyzeMCBE/Allay) · [Proyecto original](https://github.com/AllayMC/Allay)
 
-YourKit supports open source projects with innovative and intelligent tools for
-monitoring and profiling Java and .NET applications. YourKit is the creator of
-the [YourKit Java Profiler](https://www.yourkit.com/java/profiler/), [YourKit .NET Profiler](https://www.yourkit.com/.net/profiler/),
-and [YourKit YouMonitor](https://www.yourkit.com/youmonitor/).
+<sub>Proyecto independiente. Minecraft es una marca de Mojang Studios. No afiliado con Mojang Studios ni con Microsoft.</sub>
 
-## 👀 Stargazers over time
-
-[![Stargazers over time](https://starchart.cc/AllayMC/Allay.svg)](https://starchart.cc/AllayMC/Allay)
-
-[//]: # (Allay is the cutest software in the world!)
+</div>
