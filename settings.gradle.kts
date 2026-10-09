@@ -28,3 +28,24 @@ includeBuild("protocol-local") {
             .using(project(":bedrock-connection"))
     }
 }
+
+val stateUpdaterDir = file("stateupdater-local")
+check(stateUpdaterDir.resolve("settings.gradle.kts").isFile) {
+    """
+    stateupdater-local is missing.
+    Initialize the Git submodules before building:
+      git submodule sync --recursive
+      git submodule update --init --recursive
+    """.trimIndent()
+}
+
+includeBuild("stateupdater-local") {
+    dependencySubstitution {
+        substitute(module("org.allaymc.stateupdater:common"))
+            .using(project(":common"))
+        substitute(module("org.allaymc.stateupdater:block-updater"))
+            .using(project(":block-updater"))
+        substitute(module("org.allaymc.stateupdater:item-updater"))
+            .using(project(":item-updater"))
+    }
+}

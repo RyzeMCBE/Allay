@@ -2,3 +2,8 @@
 	path = protocol-local
 	url = https://github.com/RyzeMCBE/Protocol.git
 	branch = main
+
+[submodule "stateupdater-local"]
+	path = stateupdater-local
+	url = https://github.com/RyzeMCBE/StateUpdater.git
+	branch = main
