@@ -41,6 +41,10 @@ class RawPacketCodecRegistrationTest {
             new RawPacketUse(
                     "org/allaymc/server/player/AllayPlayer.java",
                     "PlayStatusPacket"
+            ),
+            new RawPacketUse(
+                    "org/allaymc/server/player/AllayPlayer.java",
+                    "InventorySlotPacket"
             )
     );
     private static ProtocolRegistry registry;
