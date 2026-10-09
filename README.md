@@ -155,28 +155,25 @@ El archivo [<code>.github/workflows/gradle.yml</code>](.github/workflows/gradle.
 
 Consulta el [historial de compilaciones](https://github.com/RyzeMCBE/Allay/actions/workflows/gradle.yml) para comprobar resultados y descargar el JAR de una ejecución exitosa.
 
-## 🧩 Desarrollo de plugins
+## 🧩 Desarrollo de plugins con VS Code
 
-Los plugins pueden desarrollarse en Java u otros lenguajes de la JVM. Como referencia del ecosistema original:
+La API propia de RyzeMCBE puede consumirse como dependencia Gradle para obtener
+**autocompletado Java, navegación a fuentes y documentación Javadoc**.
+La publicación de la API es independiente del JAR del servidor y utiliza las
+coordenadas `org.ryzemcbe.allay:api` en GitHub Packages.
 
-- [Plantilla para Java](https://github.com/AllayMC/JavaPluginTemplate)
-- [Plantilla para Kotlin](https://github.com/MineBuilders/allaymc-kotlin-plugin-template)
-- [Plantilla para Scala](https://github.com/AllayMC/ScalaPluginTemplate)
-- [AllayGradle](https://github.com/AllayMC/AllayGradle)
+- En `main` se publican versiones `<api.version>-SNAPSHOT`.
+- Un GitHub Release con etiqueta `api-vX.Y.Z` publica una versión fija,
+  previa compilación y pruebas.
+- GitHub Packages requiere autenticación con un token clásico
+  `read:packages` para los consumidores. No introduzcas tokens en el repositorio.
 
-Ejemplo para utilizar una **versión publicada de la API original** en Gradle Kotlin DSL:
+**Guía paso a paso:** [Desarrollo de plugins y configuración de VS Code](docs/DESARROLLO-PLUGINS.md).
+**Proceso automatizado:** [Publicación de Allay API](.github/workflows/publish-api.yml).
 
-~~~kotlin
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    compileOnly("org.allaymc.allay:api:<versión-publicada>")
-}
-~~~
-
-No supongas que las versiones publicadas por AllayMC incluyen todas las modificaciones internas de RyzeMCBE.
+**Nota:** verifica que el paquete esté publicado antes de declararlo como
+dependencia; compilar el servidor no garantiza por sí solo que GitHub Packages
+haya aceptado la publicación.
 
 ## 🧪 Comandos útiles para desarrolladores
 
