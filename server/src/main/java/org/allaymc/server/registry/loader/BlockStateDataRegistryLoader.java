@@ -111,6 +111,14 @@ public class BlockStateDataRegistryLoader implements RegistryLoader<Void, Map<Bl
                 }
 
                 var blockStateData = fromJson(obj);
+                // El volcado actual marca erróneamente cobblestone como extraíble
+                // a velocidad de herramienta válida incluso cuando se rompe a mano.
+                // En Bedrock, la piedra labrada requiere el pico correcto para sus drops.
+                if (type == BlockId.COBBLESTONE && !blockStateData.requiresCorrectToolForDrops()) {
+                    blockStateData = blockStateData.toBuilder()
+                            .requiresCorrectToolForDrops(true)
+                            .build();
+                }
                 if (!loaded.containsKey(type)) {
                     loaded.put(type, new Int2ObjectOpenHashMap<>());
                 }
