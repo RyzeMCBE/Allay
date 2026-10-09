@@ -85,11 +85,15 @@ jobs:
                           shutil.copyfileobj(src, dst)
                       if info.external_attr >> 16 & 0o111:
                           dest.chmod(0o755)
-                  for item in base.iterdir():
-                      destination = Path.cwd() / item.name
+                  for source in base.rglob("*"):
+                      if not source.is_file():
+                          continue
+                      relative = source.relative_to(base)
+                      destination = Path.cwd() / relative
                       if destination.exists():
                           raise SystemExit(f"ERROR: Existing file conflict: {destination}")
-                      shutil.move(str(item), str(destination))
+                      destination.parent.mkdir(parents=True, exist_ok=True)
+                      shutil.move(str(source), str(destination))
               print(f"Extracted {len(members)} files" +
                     (f"; stripped top directory {trim}" if trim else "; kept original hierarchy"))
           PY
