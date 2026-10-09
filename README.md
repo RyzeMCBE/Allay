@@ -26,7 +26,7 @@
 Este repositorio contiene un **fork de trabajo de [AllayMC/Allay](https://github.com/AllayMC/Allay)** bajo la organización **RyzeMCBE Development Studio**. Lo utilizamos como base para estudiar, integrar y mantener funcionalidades relacionadas con protocolos, compatibilidad, mundos, dimensiones y rendimiento.
 
 > [!IMPORTANT]
-> **Estado de este fork: desarrollo y validación.** El código está disponible en la rama principal, pero la compilación revisada el **9 de octubre de 2026** falló por la ausencia de un archivo necesario en el protocolo local. No afirmamos que esta revisión esté lista para producción. Comprueba el [estado actual de GitHub Actions](https://github.com/RyzeMCBE/Allay/actions) antes de utilizarla.
+> **Estado de este fork: desarrollo y validación.** El código está disponible en la rama principal, y la compilación anterior falló cuando aún faltaba el submódulo del protocolo; este ya fue enlazado y la compilación debe volver a verificarse. No afirmamos que esta revisión esté lista para producción. Comprueba el [estado actual de GitHub Actions](https://github.com/RyzeMCBE/Allay/actions) antes de utilizarla.
 
 ## 🚀 Características y áreas de trabajo
 
@@ -41,6 +41,8 @@ Este repositorio contiene un **fork de trabajo de [AllayMC/Allay](https://github
 | 🧪 **Pruebas** | Tareas Gradle, pruebas automatizadas y pruebas de regresión. |
 
 La presencia de un componente en el código no garantiza que todas sus mecánicas estén verificadas en este fork.
+
+🔗 **Biblioteca de protocolo utilizada:** [RyzeMCBE/Protocol](https://github.com/RyzeMCBE/Protocol) (submódulo `protocol-local`).
 
 ## 🆕 Novedades documentadas
 
@@ -92,7 +94,7 @@ Además, <code>settings.gradle.kts</code> requiere que exista un archivo de prue
 protocol-local/bedrock-codec/src/test/java/org/cloudburstmc/protocol/bedrock/codec/v2168/serializer/ItemStackResponseSerializer_v2168Test.java
 ~~~
 
-**En la última revisión del árbol, la carpeta protocol-local no estaba incorporada.** Por eso el proceso de compilación detectó la falta del ajuste v2168. Si la inicialización del submódulo no recupera el archivo indicado, será necesario corregir su referencia o contenido. No recomendamos omitir esta verificación para esconder el error.
+**Actualización:** el submódulo `protocol-local` ya está conectado a [RyzeMCBE/Protocol](https://github.com/RyzeMCBE/Protocol), y el repositorio de protocolo incluye el archivo de regresión indicado. Para descargarlo debes clonar con `--recurse-submodules` o ejecutar los comandos de sincronización siguientes. La compilación y el funcionamiento del servidor todavía requieren validación; no recomendamos desactivar esta comprobación.
 
 ## 📥 Clonar y compilar
 
