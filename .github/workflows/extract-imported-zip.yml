@@ -103,7 +103,13 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git rm -- Allay-master.zip
-          rm -f .github/workflows/extract-imported-zip.yml
+          # Store imported workflows separately: GITHUB_TOKEN cannot create workflow files.
+          mkdir -p imported-workflows
+          for workflow in .github/workflows/*; do
+            [ -f "$workflow" ] || continue
+            [ "$(basename "$workflow")" = "extract-imported-zip.yml" ] && continue
+            mv "$workflow" "imported-workflows/$(basename "$workflow")"
+          done
           git add -A
           git commit -m "chore: unpack Allay source and remove ZIP archive"
           git push origin HEAD:main
