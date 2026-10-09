@@ -1,0 +1,64 @@
+name: Publicar Allay API
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'api/**'
+      - 'build.gradle.kts'
+      - 'gradle.properties'
+      - '.github/workflows/publish-api.yml'
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    if: github.event_name != 'release' || startsWith(github.event.release.tag_name, 'api-v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Calcular versión
+        shell: bash
+        run: |
+          set -euo pipefail
+          api_version="$(sed -n 's/^api.version=//p' gradle.properties)"
+          if [[ ! "$api_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then exit 1; fi
+          if [[ "$GITHUB_EVENT_NAME" == "release" ]]; then
+            version="${GITHUB_REF_NAME#api-v}"
+            if [[ "$version" != "$api_version" ]]; then
+              echo "::error::La etiqueta debe coincidir con api.version"
+              exit 1
+            fi
+          else
+            version="${api_version}-SNAPSHOT"
+          fi
+          echo "API_VERSION=$version" >> "$GITHUB_ENV"
+      - name: Compilar y probar
+        run: |
+          chmod +x gradlew
+          ./gradlew build --no-daemon -Pryzemcbe.apiVersion="$API_VERSION"
+      - name: Publicar API
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew :api:publishRyzeApiPublicationToRyzeMCBERepository --no-daemon -Pryzemcbe.apiVersion="$API_VERSION"
+      - name: Subir JAR y fuentes
+        uses: actions/upload-artifact@v4
+        with:
+          name: allay-api-${{ github.sha }}
+          path: |
+            api/build/libs/*.jar
+            api/build/publications/ryzeApi/*.pom
+          if-no-files-found: error
