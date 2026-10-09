@@ -135,6 +135,16 @@ public final class BlockEntityTypeInitializer {
                 .build();
     }
 
+    public static void initCrafter() {
+        BlockEntityTypes.CRAFTER = AllayBlockEntityType
+                .builder(BlockEntityCrafterImpl.class)
+                .name(BlockEntityId.CRAFTER)
+                .addComponent(BlockEntityCrafterBaseComponentImpl::new, BlockEntityCrafterBaseComponentImpl.class)
+                .addComponent(() -> new BlockEntityContainerHolderComponentImpl(CrafterContainerImpl::new),
+                        BlockEntityContainerHolderComponentImpl.class)
+                .build();
+    }
+
     public static void initEnchantTable() {
         BlockEntityTypes.ENCHANT_TABLE = AllayBlockEntityType
                 .builder(BlockEntityEnchantTableImpl.class)

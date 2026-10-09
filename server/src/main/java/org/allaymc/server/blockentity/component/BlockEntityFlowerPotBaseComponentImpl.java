@@ -21,6 +21,7 @@ public class BlockEntityFlowerPotBaseComponentImpl extends BlockEntityBaseCompon
 
     @Getter
     private BlockState plantBlock;
+    private NbtMap preservedPlantBlockNbt;
 
     public BlockEntityFlowerPotBaseComponentImpl(BlockEntityInitInfo initInfo) {
         super(initInfo);
@@ -33,6 +34,7 @@ public class BlockEntityFlowerPotBaseComponentImpl extends BlockEntityBaseCompon
         }
 
         plantBlock = block;
+        preservedPlantBlockNbt = null;
 
         var position = getPosition();
         var dimension = position.dimension();
@@ -52,8 +54,11 @@ public class BlockEntityFlowerPotBaseComponentImpl extends BlockEntityBaseCompon
         }
 
         var current = event.getCurrentBlock();
-        current.getDimension().dropItem(plantBlock.toItemStack(), MathUtils.center(current.getPosition()));
+        if (preservedPlantBlockNbt == null) {
+            current.getDimension().dropItem(plantBlock.toItemStack(), MathUtils.center(current.getPosition()));
+        }
         plantBlock = null;
+        preservedPlantBlockNbt = null;
     }
 
     @Override
@@ -65,13 +70,16 @@ public class BlockEntityFlowerPotBaseComponentImpl extends BlockEntityBaseCompon
 
         return savedNbt
                 .toBuilder()
-                .putCompound(TAG_PLANT_BLOCK, this.plantBlock.getBlockStateNBT())
+                .putCompound(TAG_PLANT_BLOCK, preservedPlantBlockNbt != null ? preservedPlantBlockNbt : plantBlock.getBlockStateNBT())
                 .build();
     }
 
     @Override
     public void loadNBT(NbtMap nbt) {
         super.loadNBT(nbt);
-        nbt.listenForCompound(TAG_PLANT_BLOCK, value -> this.plantBlock = NBTIO.getAPI().fromBlockStateNBT(value));
+        nbt.listenForCompound(TAG_PLANT_BLOCK, value -> {
+            this.plantBlock = NBTIO.getAPI().fromBlockStateNBT(value);
+            this.preservedPlantBlockNbt = value;
+        });
     }
 }

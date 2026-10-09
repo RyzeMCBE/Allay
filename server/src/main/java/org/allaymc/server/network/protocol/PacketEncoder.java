@@ -84,14 +84,18 @@ public abstract class PacketEncoder {
         return data;
     }
 
+    public final int networkBlockId(BlockState blockState) {
+        return data.blockNetworkIds().networkId(blockState);
+    }
+
     /** Converts an item stack using the target protocol's item and block definitions. */
     protected final ItemData encodeItemStack(ItemStack itemStack) {
-        return NetworkHelper.toNetwork(itemStack, itemDefinitions, blockDefinitions);
+        return NetworkHelper.toNetwork(itemStack, itemDefinitions, blockDefinitions, this::networkBlockId);
     }
 
     /** Converts item stacks using the target protocol's item and block definitions. */
     protected final List<ItemData> encodeItemStacks(List<ItemStack> itemStacks) {
-        return NetworkHelper.toNetwork(itemStacks, itemDefinitions, blockDefinitions);
+        return NetworkHelper.toNetwork(itemStacks, itemDefinitions, blockDefinitions, this::networkBlockId);
     }
 
     /** Encodes the item definitions advertised to the client. */
@@ -131,6 +135,10 @@ public abstract class PacketEncoder {
 
     /** Encodes the voxel shapes required by the target protocol. */
     public Collection<VoxelShapesPacket> encodeVoxelShapes() {
+        return null;
+    }
+
+    public JigsawStructureDataPacket encodeJigsawStructureData() {
         return null;
     }
 

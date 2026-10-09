@@ -492,6 +492,34 @@ public final class BlockTypeInitializer {
                 .build();
     }
 
+    public static void initCopperChest() {
+        BiFunction<OxidationLevel, Boolean, BlockType<? extends BlockOxidationComponent>> copperChest = (level, waxed) -> switch (level) {
+            case UNAFFECTED -> waxed ? BlockTypes.WAXED_COPPER_CHEST : BlockTypes.COPPER_CHEST;
+            case EXPOSED -> waxed ? BlockTypes.WAXED_EXPOSED_COPPER_CHEST : BlockTypes.EXPOSED_COPPER_CHEST;
+            case WEATHERED -> waxed ? BlockTypes.WAXED_WEATHERED_COPPER_CHEST : BlockTypes.WEATHERED_COPPER_CHEST;
+            case OXIDIZED -> waxed ? BlockTypes.WAXED_OXIDIZED_COPPER_CHEST : BlockTypes.OXIDIZED_COPPER_CHEST;
+        };
+        BlockTypes.COPPER_CHEST = buildCopperChest(BlockId.COPPER_CHEST, OxidationLevel.UNAFFECTED, copperChest);
+        BlockTypes.EXPOSED_COPPER_CHEST = buildCopperChest(BlockId.EXPOSED_COPPER_CHEST, OxidationLevel.EXPOSED, copperChest);
+        BlockTypes.WEATHERED_COPPER_CHEST = buildCopperChest(BlockId.WEATHERED_COPPER_CHEST, OxidationLevel.WEATHERED, copperChest);
+        BlockTypes.OXIDIZED_COPPER_CHEST = buildCopperChest(BlockId.OXIDIZED_COPPER_CHEST, OxidationLevel.OXIDIZED, copperChest);
+        BlockTypes.WAXED_COPPER_CHEST = buildCopperChest(BlockId.WAXED_COPPER_CHEST, OxidationLevel.UNAFFECTED, copperChest);
+        BlockTypes.WAXED_EXPOSED_COPPER_CHEST = buildCopperChest(BlockId.WAXED_EXPOSED_COPPER_CHEST, OxidationLevel.EXPOSED, copperChest);
+        BlockTypes.WAXED_WEATHERED_COPPER_CHEST = buildCopperChest(BlockId.WAXED_WEATHERED_COPPER_CHEST, OxidationLevel.WEATHERED, copperChest);
+        BlockTypes.WAXED_OXIDIZED_COPPER_CHEST = buildCopperChest(BlockId.WAXED_OXIDIZED_COPPER_CHEST, OxidationLevel.OXIDIZED, copperChest);
+    }
+
+    private static BlockType<BlockCopperChestBehavior> buildCopperChest(BlockId blockId, OxidationLevel oxidationLevel, BiFunction<OxidationLevel, Boolean, BlockType<? extends BlockOxidationComponent>> blockTypeFunction) {
+        return AllayBlockType
+                .builder(BlockCopperChestBehaviorImpl.class)
+                .vanillaBlock(blockId)
+                .setProperties(BlockPropertyTypes.MINECRAFT_CARDINAL_DIRECTION)
+                .bindBlockEntity(BlockEntityTypes.CHEST)
+                .setBaseComponentSupplier(BlockCopperChestBaseComponentImpl::new)
+                .addComponent(new BlockOxidationComponentImpl(oxidationLevel, blockTypeFunction))
+                .build();
+    }
+
     public static void initHopper() {
         BlockTypes.HOPPER = AllayBlockType
                 .builder(BlockHopperBehaviorImpl.class)
@@ -519,6 +547,16 @@ public final class BlockTypeInitializer {
                 .setProperties(BlockPropertyTypes.FACING_DIRECTION, BlockPropertyTypes.TRIGGERED_BIT)
                 .bindBlockEntity(BlockEntityTypes.DROPPER)
                 .setBaseComponentSupplier(BlockDropperBaseComponentImpl::new)
+                .build();
+    }
+
+    public static void initCrafter() {
+        BlockTypes.CRAFTER = AllayBlockType
+                .builder(BlockCrafterBehaviorImpl.class)
+                .vanillaBlock(BlockId.CRAFTER)
+                .setProperties(BlockPropertyTypes.CRAFTING, BlockPropertyTypes.ORIENTATION, BlockPropertyTypes.TRIGGERED_BIT)
+                .bindBlockEntity(BlockEntityTypes.CRAFTER)
+                .setBaseComponentSupplier(BlockCrafterBaseComponentImpl::new)
                 .build();
     }
 
@@ -586,7 +624,40 @@ public final class BlockTypeInitializer {
         BlockTypes.TUFF_STAIRS = buildStairs(BlockId.TUFF_STAIRS);
         BlockTypes.WARPED_STAIRS = buildStairs(BlockId.WARPED_STAIRS);
         BlockTypes.PALE_OAK_STAIRS = buildStairs(BlockId.PALE_OAK_STAIRS);
+        // GearsMC: 26.50 — kavak, yün ve beton merdivenler
         BlockTypes.POPLAR_STAIRS = buildStairs(BlockId.POPLAR_STAIRS);
+        BlockTypes.WHITE_CONCRETE_STAIRS = buildStairs(BlockId.WHITE_CONCRETE_STAIRS);
+        BlockTypes.ORANGE_CONCRETE_STAIRS = buildStairs(BlockId.ORANGE_CONCRETE_STAIRS);
+        BlockTypes.MAGENTA_CONCRETE_STAIRS = buildStairs(BlockId.MAGENTA_CONCRETE_STAIRS);
+        BlockTypes.LIGHT_BLUE_CONCRETE_STAIRS = buildStairs(BlockId.LIGHT_BLUE_CONCRETE_STAIRS);
+        BlockTypes.YELLOW_CONCRETE_STAIRS = buildStairs(BlockId.YELLOW_CONCRETE_STAIRS);
+        BlockTypes.LIME_CONCRETE_STAIRS = buildStairs(BlockId.LIME_CONCRETE_STAIRS);
+        BlockTypes.PINK_CONCRETE_STAIRS = buildStairs(BlockId.PINK_CONCRETE_STAIRS);
+        BlockTypes.GRAY_CONCRETE_STAIRS = buildStairs(BlockId.GRAY_CONCRETE_STAIRS);
+        BlockTypes.LIGHT_GRAY_CONCRETE_STAIRS = buildStairs(BlockId.LIGHT_GRAY_CONCRETE_STAIRS);
+        BlockTypes.CYAN_CONCRETE_STAIRS = buildStairs(BlockId.CYAN_CONCRETE_STAIRS);
+        BlockTypes.PURPLE_CONCRETE_STAIRS = buildStairs(BlockId.PURPLE_CONCRETE_STAIRS);
+        BlockTypes.BLUE_CONCRETE_STAIRS = buildStairs(BlockId.BLUE_CONCRETE_STAIRS);
+        BlockTypes.BROWN_CONCRETE_STAIRS = buildStairs(BlockId.BROWN_CONCRETE_STAIRS);
+        BlockTypes.GREEN_CONCRETE_STAIRS = buildStairs(BlockId.GREEN_CONCRETE_STAIRS);
+        BlockTypes.RED_CONCRETE_STAIRS = buildStairs(BlockId.RED_CONCRETE_STAIRS);
+        BlockTypes.BLACK_CONCRETE_STAIRS = buildStairs(BlockId.BLACK_CONCRETE_STAIRS);
+        BlockTypes.WHITE_WOOL_STAIRS = buildStairs(BlockId.WHITE_WOOL_STAIRS);
+        BlockTypes.ORANGE_WOOL_STAIRS = buildStairs(BlockId.ORANGE_WOOL_STAIRS);
+        BlockTypes.MAGENTA_WOOL_STAIRS = buildStairs(BlockId.MAGENTA_WOOL_STAIRS);
+        BlockTypes.LIGHT_BLUE_WOOL_STAIRS = buildStairs(BlockId.LIGHT_BLUE_WOOL_STAIRS);
+        BlockTypes.YELLOW_WOOL_STAIRS = buildStairs(BlockId.YELLOW_WOOL_STAIRS);
+        BlockTypes.LIME_WOOL_STAIRS = buildStairs(BlockId.LIME_WOOL_STAIRS);
+        BlockTypes.PINK_WOOL_STAIRS = buildStairs(BlockId.PINK_WOOL_STAIRS);
+        BlockTypes.GRAY_WOOL_STAIRS = buildStairs(BlockId.GRAY_WOOL_STAIRS);
+        BlockTypes.LIGHT_GRAY_WOOL_STAIRS = buildStairs(BlockId.LIGHT_GRAY_WOOL_STAIRS);
+        BlockTypes.CYAN_WOOL_STAIRS = buildStairs(BlockId.CYAN_WOOL_STAIRS);
+        BlockTypes.PURPLE_WOOL_STAIRS = buildStairs(BlockId.PURPLE_WOOL_STAIRS);
+        BlockTypes.BLUE_WOOL_STAIRS = buildStairs(BlockId.BLUE_WOOL_STAIRS);
+        BlockTypes.BROWN_WOOL_STAIRS = buildStairs(BlockId.BROWN_WOOL_STAIRS);
+        BlockTypes.GREEN_WOOL_STAIRS = buildStairs(BlockId.GREEN_WOOL_STAIRS);
+        BlockTypes.RED_WOOL_STAIRS = buildStairs(BlockId.RED_WOOL_STAIRS);
+        BlockTypes.BLACK_WOOL_STAIRS = buildStairs(BlockId.BLACK_WOOL_STAIRS);
 
         BiFunction<OxidationLevel, Boolean, BlockType<? extends BlockOxidationComponent>> cutCopperStairs = (level, waxed) -> switch (level) {
             case UNAFFECTED -> waxed ? BlockTypes.WAXED_CUT_COPPER_STAIRS : BlockTypes.CUT_COPPER_STAIRS;
@@ -623,7 +694,7 @@ public final class BlockTypeInitializer {
         return AllayBlockType
                 .builder(clazz)
                 .vanillaBlock(id)
-                .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                 .setBaseComponentSupplier(BlockStairsBaseComponentImpl::new);
     }
 
@@ -659,7 +730,40 @@ public final class BlockTypeInitializer {
         BlockTypes.NORMAL_STONE_SLAB = buildSlab(BlockId.NORMAL_STONE_SLAB, BlockId.NORMAL_STONE_DOUBLE_SLAB);
         BlockTypes.OAK_SLAB = buildSlab(BlockId.OAK_SLAB, BlockId.OAK_DOUBLE_SLAB);
         BlockTypes.PALE_OAK_SLAB = buildSlab(BlockId.PALE_OAK_SLAB, BlockId.PALE_OAK_DOUBLE_SLAB);
+        // GearsMC: 26.50 — kavak, yün ve beton yarım bloklar
         BlockTypes.POPLAR_SLAB = buildSlab(BlockId.POPLAR_SLAB, BlockId.POPLAR_DOUBLE_SLAB);
+        BlockTypes.WHITE_CONCRETE_SLAB = buildSlab(BlockId.WHITE_CONCRETE_SLAB, BlockId.WHITE_CONCRETE_DOUBLE_SLAB);
+        BlockTypes.ORANGE_CONCRETE_SLAB = buildSlab(BlockId.ORANGE_CONCRETE_SLAB, BlockId.ORANGE_CONCRETE_DOUBLE_SLAB);
+        BlockTypes.MAGENTA_CONCRETE_SLAB = buildSlab(BlockId.MAGENTA_CONCRETE_SLAB, BlockId.MAGENTA_CONCRETE_DOUBLE_SLAB);
+        BlockTypes.LIGHT_BLUE_CONCRETE_SLAB = buildSlab(BlockId.LIGHT_BLUE_CONCRETE_SLAB, BlockId.LIGHT_BLUE_CONCRETE_DOUBLE_SLAB);
+        BlockTypes.YELLOW_CONCRETE_SLAB = buildSlab(BlockId.YELLOW_CONCRETE_SLAB, BlockId.YELLOW_CONCRETE_DOUBLE_SLAB);
+        BlockTypes.LIME_CONCRETE_SLAB = buildSlab(BlockId.LIME_CONCRETE_SLAB, BlockId.LIME_CONCRETE_DOUBLE_SLAB);
+        BlockTypes.PINK_CONCRETE_SLAB = buildSlab(BlockId.PINK_CONCRETE_SLAB, BlockId.PINK_CONCRETE_DOUBLE_SLAB);
+        BlockTypes.GRAY_CONCRETE_SLAB = buildSlab(BlockId.GRAY_CONCRETE_SLAB, BlockId.GRAY_CONCRETE_DOUBLE_SLAB);
+        BlockTypes.LIGHT_GRAY_CONCRETE_SLAB = buildSlab(BlockId.LIGHT_GRAY_CONCRETE_SLAB, BlockId.LIGHT_GRAY_CONCRETE_DOUBLE_SLAB);
+        BlockTypes.CYAN_CONCRETE_SLAB = buildSlab(BlockId.CYAN_CONCRETE_SLAB, BlockId.CYAN_CONCRETE_DOUBLE_SLAB);
+        BlockTypes.PURPLE_CONCRETE_SLAB = buildSlab(BlockId.PURPLE_CONCRETE_SLAB, BlockId.PURPLE_CONCRETE_DOUBLE_SLAB);
+        BlockTypes.BLUE_CONCRETE_SLAB = buildSlab(BlockId.BLUE_CONCRETE_SLAB, BlockId.BLUE_CONCRETE_DOUBLE_SLAB);
+        BlockTypes.BROWN_CONCRETE_SLAB = buildSlab(BlockId.BROWN_CONCRETE_SLAB, BlockId.BROWN_CONCRETE_DOUBLE_SLAB);
+        BlockTypes.GREEN_CONCRETE_SLAB = buildSlab(BlockId.GREEN_CONCRETE_SLAB, BlockId.GREEN_CONCRETE_DOUBLE_SLAB);
+        BlockTypes.RED_CONCRETE_SLAB = buildSlab(BlockId.RED_CONCRETE_SLAB, BlockId.RED_CONCRETE_DOUBLE_SLAB);
+        BlockTypes.BLACK_CONCRETE_SLAB = buildSlab(BlockId.BLACK_CONCRETE_SLAB, BlockId.BLACK_CONCRETE_DOUBLE_SLAB);
+        BlockTypes.WHITE_WOOL_SLAB = buildSlab(BlockId.WHITE_WOOL_SLAB, BlockId.WHITE_WOOL_DOUBLE_SLAB);
+        BlockTypes.ORANGE_WOOL_SLAB = buildSlab(BlockId.ORANGE_WOOL_SLAB, BlockId.ORANGE_WOOL_DOUBLE_SLAB);
+        BlockTypes.MAGENTA_WOOL_SLAB = buildSlab(BlockId.MAGENTA_WOOL_SLAB, BlockId.MAGENTA_WOOL_DOUBLE_SLAB);
+        BlockTypes.LIGHT_BLUE_WOOL_SLAB = buildSlab(BlockId.LIGHT_BLUE_WOOL_SLAB, BlockId.LIGHT_BLUE_WOOL_DOUBLE_SLAB);
+        BlockTypes.YELLOW_WOOL_SLAB = buildSlab(BlockId.YELLOW_WOOL_SLAB, BlockId.YELLOW_WOOL_DOUBLE_SLAB);
+        BlockTypes.LIME_WOOL_SLAB = buildSlab(BlockId.LIME_WOOL_SLAB, BlockId.LIME_WOOL_DOUBLE_SLAB);
+        BlockTypes.PINK_WOOL_SLAB = buildSlab(BlockId.PINK_WOOL_SLAB, BlockId.PINK_WOOL_DOUBLE_SLAB);
+        BlockTypes.GRAY_WOOL_SLAB = buildSlab(BlockId.GRAY_WOOL_SLAB, BlockId.GRAY_WOOL_DOUBLE_SLAB);
+        BlockTypes.LIGHT_GRAY_WOOL_SLAB = buildSlab(BlockId.LIGHT_GRAY_WOOL_SLAB, BlockId.LIGHT_GRAY_WOOL_DOUBLE_SLAB);
+        BlockTypes.CYAN_WOOL_SLAB = buildSlab(BlockId.CYAN_WOOL_SLAB, BlockId.CYAN_WOOL_DOUBLE_SLAB);
+        BlockTypes.PURPLE_WOOL_SLAB = buildSlab(BlockId.PURPLE_WOOL_SLAB, BlockId.PURPLE_WOOL_DOUBLE_SLAB);
+        BlockTypes.BLUE_WOOL_SLAB = buildSlab(BlockId.BLUE_WOOL_SLAB, BlockId.BLUE_WOOL_DOUBLE_SLAB);
+        BlockTypes.BROWN_WOOL_SLAB = buildSlab(BlockId.BROWN_WOOL_SLAB, BlockId.BROWN_WOOL_DOUBLE_SLAB);
+        BlockTypes.GREEN_WOOL_SLAB = buildSlab(BlockId.GREEN_WOOL_SLAB, BlockId.GREEN_WOOL_DOUBLE_SLAB);
+        BlockTypes.RED_WOOL_SLAB = buildSlab(BlockId.RED_WOOL_SLAB, BlockId.RED_WOOL_DOUBLE_SLAB);
+        BlockTypes.BLACK_WOOL_SLAB = buildSlab(BlockId.BLACK_WOOL_SLAB, BlockId.BLACK_WOOL_DOUBLE_SLAB);
         BlockTypes.PETRIFIED_OAK_SLAB = buildSlab(BlockId.PETRIFIED_OAK_SLAB, BlockId.PETRIFIED_OAK_DOUBLE_SLAB);
         BlockTypes.POLISHED_ANDESITE_SLAB = buildSlab(BlockId.POLISHED_ANDESITE_SLAB, BlockId.POLISHED_ANDESITE_DOUBLE_SLAB);
         BlockTypes.POLISHED_BLACKSTONE_BRICK_SLAB = buildSlab(BlockId.POLISHED_BLACKSTONE_BRICK_SLAB, BlockId.POLISHED_BLACKSTONE_BRICK_DOUBLE_SLAB);
@@ -738,7 +842,40 @@ public final class BlockTypeInitializer {
         BlockTypes.NORMAL_STONE_DOUBLE_SLAB = buildDoubleSlab(BlockId.NORMAL_STONE_DOUBLE_SLAB, BlockId.NORMAL_STONE_SLAB);
         BlockTypes.OAK_DOUBLE_SLAB = buildDoubleSlab(BlockId.OAK_DOUBLE_SLAB, BlockId.OAK_SLAB);
         BlockTypes.PALE_OAK_DOUBLE_SLAB = buildDoubleSlab(BlockId.PALE_OAK_DOUBLE_SLAB, BlockId.PALE_OAK_SLAB);
+        // GearsMC: 26.50 — kavak, yün ve beton çift yarım bloklar
         BlockTypes.POPLAR_DOUBLE_SLAB = buildDoubleSlab(BlockId.POPLAR_DOUBLE_SLAB, BlockId.POPLAR_SLAB);
+        BlockTypes.WHITE_CONCRETE_DOUBLE_SLAB = buildDoubleSlab(BlockId.WHITE_CONCRETE_DOUBLE_SLAB, BlockId.WHITE_CONCRETE_SLAB);
+        BlockTypes.ORANGE_CONCRETE_DOUBLE_SLAB = buildDoubleSlab(BlockId.ORANGE_CONCRETE_DOUBLE_SLAB, BlockId.ORANGE_CONCRETE_SLAB);
+        BlockTypes.MAGENTA_CONCRETE_DOUBLE_SLAB = buildDoubleSlab(BlockId.MAGENTA_CONCRETE_DOUBLE_SLAB, BlockId.MAGENTA_CONCRETE_SLAB);
+        BlockTypes.LIGHT_BLUE_CONCRETE_DOUBLE_SLAB = buildDoubleSlab(BlockId.LIGHT_BLUE_CONCRETE_DOUBLE_SLAB, BlockId.LIGHT_BLUE_CONCRETE_SLAB);
+        BlockTypes.YELLOW_CONCRETE_DOUBLE_SLAB = buildDoubleSlab(BlockId.YELLOW_CONCRETE_DOUBLE_SLAB, BlockId.YELLOW_CONCRETE_SLAB);
+        BlockTypes.LIME_CONCRETE_DOUBLE_SLAB = buildDoubleSlab(BlockId.LIME_CONCRETE_DOUBLE_SLAB, BlockId.LIME_CONCRETE_SLAB);
+        BlockTypes.PINK_CONCRETE_DOUBLE_SLAB = buildDoubleSlab(BlockId.PINK_CONCRETE_DOUBLE_SLAB, BlockId.PINK_CONCRETE_SLAB);
+        BlockTypes.GRAY_CONCRETE_DOUBLE_SLAB = buildDoubleSlab(BlockId.GRAY_CONCRETE_DOUBLE_SLAB, BlockId.GRAY_CONCRETE_SLAB);
+        BlockTypes.LIGHT_GRAY_CONCRETE_DOUBLE_SLAB = buildDoubleSlab(BlockId.LIGHT_GRAY_CONCRETE_DOUBLE_SLAB, BlockId.LIGHT_GRAY_CONCRETE_SLAB);
+        BlockTypes.CYAN_CONCRETE_DOUBLE_SLAB = buildDoubleSlab(BlockId.CYAN_CONCRETE_DOUBLE_SLAB, BlockId.CYAN_CONCRETE_SLAB);
+        BlockTypes.PURPLE_CONCRETE_DOUBLE_SLAB = buildDoubleSlab(BlockId.PURPLE_CONCRETE_DOUBLE_SLAB, BlockId.PURPLE_CONCRETE_SLAB);
+        BlockTypes.BLUE_CONCRETE_DOUBLE_SLAB = buildDoubleSlab(BlockId.BLUE_CONCRETE_DOUBLE_SLAB, BlockId.BLUE_CONCRETE_SLAB);
+        BlockTypes.BROWN_CONCRETE_DOUBLE_SLAB = buildDoubleSlab(BlockId.BROWN_CONCRETE_DOUBLE_SLAB, BlockId.BROWN_CONCRETE_SLAB);
+        BlockTypes.GREEN_CONCRETE_DOUBLE_SLAB = buildDoubleSlab(BlockId.GREEN_CONCRETE_DOUBLE_SLAB, BlockId.GREEN_CONCRETE_SLAB);
+        BlockTypes.RED_CONCRETE_DOUBLE_SLAB = buildDoubleSlab(BlockId.RED_CONCRETE_DOUBLE_SLAB, BlockId.RED_CONCRETE_SLAB);
+        BlockTypes.BLACK_CONCRETE_DOUBLE_SLAB = buildDoubleSlab(BlockId.BLACK_CONCRETE_DOUBLE_SLAB, BlockId.BLACK_CONCRETE_SLAB);
+        BlockTypes.WHITE_WOOL_DOUBLE_SLAB = buildDoubleSlab(BlockId.WHITE_WOOL_DOUBLE_SLAB, BlockId.WHITE_WOOL_SLAB);
+        BlockTypes.ORANGE_WOOL_DOUBLE_SLAB = buildDoubleSlab(BlockId.ORANGE_WOOL_DOUBLE_SLAB, BlockId.ORANGE_WOOL_SLAB);
+        BlockTypes.MAGENTA_WOOL_DOUBLE_SLAB = buildDoubleSlab(BlockId.MAGENTA_WOOL_DOUBLE_SLAB, BlockId.MAGENTA_WOOL_SLAB);
+        BlockTypes.LIGHT_BLUE_WOOL_DOUBLE_SLAB = buildDoubleSlab(BlockId.LIGHT_BLUE_WOOL_DOUBLE_SLAB, BlockId.LIGHT_BLUE_WOOL_SLAB);
+        BlockTypes.YELLOW_WOOL_DOUBLE_SLAB = buildDoubleSlab(BlockId.YELLOW_WOOL_DOUBLE_SLAB, BlockId.YELLOW_WOOL_SLAB);
+        BlockTypes.LIME_WOOL_DOUBLE_SLAB = buildDoubleSlab(BlockId.LIME_WOOL_DOUBLE_SLAB, BlockId.LIME_WOOL_SLAB);
+        BlockTypes.PINK_WOOL_DOUBLE_SLAB = buildDoubleSlab(BlockId.PINK_WOOL_DOUBLE_SLAB, BlockId.PINK_WOOL_SLAB);
+        BlockTypes.GRAY_WOOL_DOUBLE_SLAB = buildDoubleSlab(BlockId.GRAY_WOOL_DOUBLE_SLAB, BlockId.GRAY_WOOL_SLAB);
+        BlockTypes.LIGHT_GRAY_WOOL_DOUBLE_SLAB = buildDoubleSlab(BlockId.LIGHT_GRAY_WOOL_DOUBLE_SLAB, BlockId.LIGHT_GRAY_WOOL_SLAB);
+        BlockTypes.CYAN_WOOL_DOUBLE_SLAB = buildDoubleSlab(BlockId.CYAN_WOOL_DOUBLE_SLAB, BlockId.CYAN_WOOL_SLAB);
+        BlockTypes.PURPLE_WOOL_DOUBLE_SLAB = buildDoubleSlab(BlockId.PURPLE_WOOL_DOUBLE_SLAB, BlockId.PURPLE_WOOL_SLAB);
+        BlockTypes.BLUE_WOOL_DOUBLE_SLAB = buildDoubleSlab(BlockId.BLUE_WOOL_DOUBLE_SLAB, BlockId.BLUE_WOOL_SLAB);
+        BlockTypes.BROWN_WOOL_DOUBLE_SLAB = buildDoubleSlab(BlockId.BROWN_WOOL_DOUBLE_SLAB, BlockId.BROWN_WOOL_SLAB);
+        BlockTypes.GREEN_WOOL_DOUBLE_SLAB = buildDoubleSlab(BlockId.GREEN_WOOL_DOUBLE_SLAB, BlockId.GREEN_WOOL_SLAB);
+        BlockTypes.RED_WOOL_DOUBLE_SLAB = buildDoubleSlab(BlockId.RED_WOOL_DOUBLE_SLAB, BlockId.RED_WOOL_SLAB);
+        BlockTypes.BLACK_WOOL_DOUBLE_SLAB = buildDoubleSlab(BlockId.BLACK_WOOL_DOUBLE_SLAB, BlockId.BLACK_WOOL_SLAB);
         BlockTypes.PETRIFIED_OAK_DOUBLE_SLAB = buildDoubleSlab(BlockId.PETRIFIED_OAK_DOUBLE_SLAB, BlockId.PETRIFIED_OAK_SLAB);
         BlockTypes.POLISHED_ANDESITE_DOUBLE_SLAB = buildDoubleSlab(BlockId.POLISHED_ANDESITE_DOUBLE_SLAB, BlockId.POLISHED_ANDESITE_SLAB);
         BlockTypes.POLISHED_BLACKSTONE_BRICK_DOUBLE_SLAB = buildDoubleSlab(BlockId.POLISHED_BLACKSTONE_BRICK_DOUBLE_SLAB, BlockId.POLISHED_BLACKSTONE_BRICK_SLAB);
@@ -1318,6 +1455,7 @@ public final class BlockTypeInitializer {
         return AllayBlockType
                 .builder(BlockGlassPaneBehaviorImpl.class)
                 .vanillaBlock(blockId)
+                .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                 .setBaseComponentSupplier(BlockGlassBaseComponentImpl::new)
                 .build();
     }
@@ -1420,49 +1558,49 @@ public final class BlockTypeInitializer {
         BlockTypes.WHEAT = AllayBlockType
                 .builder(BlockWheatBehaviorImpl.class)
                 .vanillaBlock(BlockId.WHEAT)
-                .setProperties(BlockPropertyTypes.GROWTH)
+                .setProperties(BlockPropertyTypes.GROWTH_8)
                 .setBaseComponentSupplier(BlockWheatBaseComponentImpl::new)
                 .build();
         BlockTypes.POTATOES = AllayBlockType
                 .builder(BlockPotatoesBehaviorImpl.class)
                 .vanillaBlock(BlockId.POTATOES)
-                .setProperties(BlockPropertyTypes.GROWTH)
+                .setProperties(BlockPropertyTypes.GROWTH_8)
                 .setBaseComponentSupplier(BlockPotatoesBaseComponentImpl::new)
                 .build();
         BlockTypes.CARROTS = AllayBlockType
                 .builder(BlockCarrotsBehaviorImpl.class)
                 .vanillaBlock(BlockId.CARROTS)
-                .setProperties(BlockPropertyTypes.GROWTH)
+                .setProperties(BlockPropertyTypes.GROWTH_8)
                 .setBaseComponentSupplier(BlockCarrotsBaseComponentImpl::new)
                 .build();
         BlockTypes.BEETROOT = AllayBlockType
                 .builder(BlockBeetrootBehaviorImpl.class)
                 .vanillaBlock(BlockId.BEETROOT)
-                .setProperties(BlockPropertyTypes.GROWTH)
+                .setProperties(BlockPropertyTypes.GROWTH_8)
                 .setBaseComponentSupplier(BlockBeetrootBaseComponentImpl::new)
                 .build();
         BlockTypes.MELON_STEM = AllayBlockType
                 .builder(BlockMelonStemBehaviorImpl.class)
                 .vanillaBlock(BlockId.MELON_STEM)
-                .setProperties(BlockPropertyTypes.FACING_DIRECTION, BlockPropertyTypes.GROWTH)
+                .setProperties(BlockPropertyTypes.FACING_DIRECTION, BlockPropertyTypes.GROWTH_8)
                 .setBaseComponentSupplier(blockType -> new BlockStemBaseComponentImpl(blockType, BlockId.MELON_BLOCK, ItemId.MELON_SEEDS))
                 .build();
         BlockTypes.PUMPKIN_STEM = AllayBlockType
                 .builder(BlockPumpkinBehaviorImpl.class)
                 .vanillaBlock(BlockId.PUMPKIN_STEM)
-                .setProperties(BlockPropertyTypes.FACING_DIRECTION, BlockPropertyTypes.GROWTH)
+                .setProperties(BlockPropertyTypes.FACING_DIRECTION, BlockPropertyTypes.GROWTH_8)
                 .setBaseComponentSupplier(blockType -> new BlockStemBaseComponentImpl(blockType, BlockId.PUMPKIN, ItemId.PUMPKIN_SEEDS))
                 .build();
         BlockTypes.TORCHFLOWER_CROP = AllayBlockType
                 .builder(BlockTorchflowerCropBehaviorImpl.class)
                 .vanillaBlock(BlockId.TORCHFLOWER_CROP)
-                .setProperties(BlockPropertyTypes.GROWTH)
+                .setProperties(BlockPropertyTypes.GROWTH_8)
                 .setBaseComponentSupplier(BlockTorchflowerCropBaseComponentImpl::new)
                 .build();
         BlockTypes.PITCHER_CROP = AllayBlockType
                 .builder(BlockPitcherCropBehaviorImpl.class)
                 .vanillaBlock(BlockId.PITCHER_CROP)
-                .setProperties(BlockPropertyTypes.GROWTH, BlockPropertyTypes.UPPER_BLOCK_BIT)
+                .setProperties(BlockPropertyTypes.GROWTH_8, BlockPropertyTypes.UPPER_BLOCK_BIT)
                 .setBaseComponentSupplier(BlockPitcherCropBaseComponentImpl::new)
                 .build();
     }
@@ -2009,14 +2147,6 @@ public final class BlockTypeInitializer {
                 .setBaseComponentSupplier(BlockBedBaseComponentImpl::new)
                 .addComponent(new BlockBedRespawnPointComponentImpl())
                 .build();
-        BlockTypes.STRAW_BED = AllayBlockType
-                .builder(BlockBedBehaviorImpl.class)
-                .vanillaBlock(BlockId.STRAW_BED)
-                .bindBlockEntity(BlockEntityTypes.BED)
-                .setProperties(BlockPropertyTypes.HEAD_PIECE_BIT, BlockPropertyTypes.OCCUPIED_BIT, BlockPropertyTypes.MINECRAFT_CARDINAL_DIRECTION)
-                .setBaseComponentSupplier(BlockBedBaseComponentImpl::new)
-                .addComponent(new BlockBedRespawnPointComponentImpl())
-                .build();
     }
 
     public static void initRespawnAnchor() {
@@ -2242,7 +2372,7 @@ public final class BlockTypeInitializer {
         return AllayBlockType
                 .builder(BlockPlantPileImpl.class)
                 .vanillaBlock(blockId)
-                .setProperties(BlockPropertyTypes.GROWTH, BlockPropertyTypes.MINECRAFT_CARDINAL_DIRECTION)
+                .setProperties(BlockPropertyTypes.GROWTH_8, BlockPropertyTypes.MINECRAFT_CARDINAL_DIRECTION)
                 .setBaseComponentSupplier(BlockPlantPileBaseComponentImpl::new)
                 .build();
     }
@@ -2270,6 +2400,7 @@ public final class BlockTypeInitializer {
     ) {
         return AllayBlockType.builder(BlockCopperBarsBehaviorImpl.class)
                 .vanillaBlock(id)
+                .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                 .addComponent(new BlockOxidationComponentImpl(oxidationLevel, blockTypeFunction))
                 .build();
     }
@@ -2342,7 +2473,7 @@ public final class BlockTypeInitializer {
         BlockTypes.TRIP_WIRE = AllayBlockType
                 .builder(BlockTripWireBehaviorImpl.class)
                 .vanillaBlock(BlockId.TRIP_WIRE)
-                .setProperties(BlockPropertyTypes.ATTACHED_BIT, BlockPropertyTypes.DISARMED_BIT, BlockPropertyTypes.POWERED_BIT, BlockPropertyTypes.SUSPENDED_BIT)
+                .setProperties(BlockPropertyTypes.ATTACHED_BIT, BlockPropertyTypes.DISARMED_BIT, BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST, BlockPropertyTypes.POWERED_BIT, BlockPropertyTypes.SUSPENDED_BIT)
                 .setBaseComponentSupplier(BlockTripWireBaseComponentImpl::new)
                 .build();
     }
@@ -2494,6 +2625,7 @@ public final class BlockTypeInitializer {
                 .setProperties(BlockPropertyTypes.AGE_BIT)
                 .setBaseComponentSupplier(blockType -> new BlockSaplingBaseComponentImpl(blockType, DoubleTrunkTreeFeature.PALE_OAK_IDENTIFIER, null, null))
                 .build();
+        // GearsMC: 26.50 kavak fidanı. Allay'de kavak ağacı şekli yok; fidan kurulur ama büyümez (yalnızca temel davranış).
         BlockTypes.POPLAR_SAPLING = AllayBlockType
                 .builder(BlockSaplingBehaviorImpl.class)
                 .vanillaBlock(BlockId.POPLAR_SAPLING)
@@ -2782,7 +2914,7 @@ public final class BlockTypeInitializer {
         BlockTypes.SWEET_BERRY_BUSH = AllayBlockType
                 .builder(BlockSweetBerryBushBehaviorImpl.class)
                 .vanillaBlock(BlockId.SWEET_BERRY_BUSH)
-                .setProperties(BlockPropertyTypes.GROWTH)
+                .setProperties(BlockPropertyTypes.GROWTH_8)
                 .setBaseComponentSupplier(BlockSweetBerryBushBaseComponentImpl::new)
                 .build();
     }

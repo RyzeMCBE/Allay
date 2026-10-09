@@ -73,9 +73,10 @@ public class AllayCreativeItemRegistry implements CreativeItemRegistry {
                 Objects.requireNonNull(itemType, "Unknown item type: " + itemTypeName);
 
                 var category = getCategory(Type.valueOf(item.getString("category").toUpperCase(Locale.ROOT)));
+                int damage = itemType.getBlockType() == null ? item.getShort("damage") : 0;
                 var itemStack = itemType.createItemStack(
                         ItemStackInitInfo
-                                .builder().count(1).meta(item.getShort("damage"))
+                                .builder().count(1).meta(damage)
                                 .extraTag(item.getCompound("tag", NbtMap.builder().build()))
                                 .assignUniqueId(false).build()
                 );

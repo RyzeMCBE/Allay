@@ -18,6 +18,7 @@ import org.allaymc.api.item.recipe.descriptor.ItemDescriptor;
 import org.allaymc.api.item.recipe.descriptor.ItemTypeDescriptor;
 import org.allaymc.api.math.voxelshape.VoxelShape;
 import org.allaymc.api.registry.Registries;
+import org.allaymc.api.utils.Utils;
 import org.allaymc.server.block.type.AllayBlockType;
 import org.allaymc.server.block.type.CustomBlockDefinition;
 import org.allaymc.server.block.type.CustomBlockStateDefinition;
@@ -33,6 +34,7 @@ import org.allaymc.server.utils.MolangUtils;
 import org.cloudburstmc.nbt.NbtList;
 import org.cloudburstmc.nbt.NbtMap;
 import org.cloudburstmc.nbt.NbtType;
+import org.cloudburstmc.nbt.NbtUtils;
 import org.cloudburstmc.protocol.bedrock.codec.BedrockCodec;
 import org.cloudburstmc.protocol.bedrock.data.BlockPropertyData;
 import org.cloudburstmc.protocol.bedrock.data.definitions.BlockDefinition;
@@ -48,6 +50,9 @@ import org.cloudburstmc.protocol.bedrock.definition.DefinitionRegistry;
 import org.cloudburstmc.protocol.bedrock.definition.SimpleDefinitionRegistry;
 import org.joml.Vector3fc;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.*;
 
 /**
@@ -65,6 +70,7 @@ public abstract class Protocol {
     private PacketEncoder encoder;
     private DefinitionRegistry<ItemDefinition> itemDefinitionRegistry;
     private DefinitionRegistry<BlockDefinition> blockDefinitionRegistry;
+    private BlockNetworkIdMapping blockNetworkIds;
     private volatile boolean initialized;
 
     /**
@@ -94,6 +100,7 @@ public abstract class Protocol {
         var itemDefinitions = SimpleDefinitionRegistry.<ItemDefinition>builder()
                 .addAll(encodedItemDefinitions)
                 .build();
+        this.blockNetworkIds = Objects.requireNonNull(createBlockNetworkIdMapping(), "createBlockNetworkIdMapping returned null");
         var encodedBlockDefinitions = createBlockDefinitions();
         var blockDefinitions = SimpleDefinitionRegistry.<BlockDefinition>builder()
                 .addAll(encodedBlockDefinitions)
@@ -109,7 +116,8 @@ public abstract class Protocol {
                     createCreativeGroups(),
                     createCreativeItems(),
                     createCustomBlockProperties(),
-                    createRecipeTable()
+                    createRecipeTable(),
+                    blockNetworkIds
             );
             var packetEncoder = Objects.requireNonNull(createEncoder(protocolData), "createEncoder returned null");
             if (packetEncoder.getData() != protocolData) {
@@ -122,6 +130,7 @@ public abstract class Protocol {
         } catch (RuntimeException | Error exception) {
             this.itemDefinitionRegistry = null;
             this.blockDefinitionRegistry = null;
+            this.blockNetworkIds = null;
             throw exception;
         }
     }
@@ -310,8 +319,30 @@ public abstract class Protocol {
     protected List<BlockDefinition> createBlockDefinitions() {
         return Registries.BLOCKS.getContent().values().stream()
                 .flatMap(blockType -> blockType.getAllStates().stream())
-                .map(blockState -> (BlockDefinition) blockState::blockStateHash)
+                .mapToInt(blockNetworkIds::networkId)
+                .distinct()
+                .mapToObj(networkId -> (BlockDefinition) () -> networkId)
                 .toList();
+    }
+
+    protected String getBlockPaletteResource() {
+        return null;
+    }
+
+    protected String getDataDrivenBlocksResource() {
+        return null;
+    }
+
+    protected BlockNetworkIdMapping createBlockNetworkIdMapping() {
+        var paletteResource = getBlockPaletteResource();
+        if (paletteResource == null) {
+            return BlockNetworkIdMapping.identity();
+        }
+
+        var states = Registries.BLOCKS.getContent().values().stream()
+                .flatMap(blockType -> blockType.getAllStates().stream())
+                .toList();
+        return BlockNetworkIdMapping.fromPalette(paletteResource, states);
     }
 
     /**
@@ -356,6 +387,16 @@ public abstract class Protocol {
      */
     protected List<BlockPropertyData> createCustomBlockProperties() {
         var properties = new ArrayList<BlockPropertyData>();
+        var dataDrivenBlocks = getDataDrivenBlocksResource();
+        if (dataDrivenBlocks != null) {
+            try (var reader = NbtUtils.createGZIPReader(new BufferedInputStream(Utils.getResource(dataDrivenBlocks)))) {
+                var definitions = (NbtMap) reader.readTag();
+                new TreeMap<>(definitions).forEach((name, definition) ->
+                        properties.add(new BlockPropertyData(name, (NbtMap) definition)));
+            } catch (IOException exception) {
+                throw new UncheckedIOException("Unable to read data-driven block definitions: " + dataDrivenBlocks, exception);
+            }
+        }
         var blockTypes = Registries.BLOCKS.getContent().values().stream()
                 .map(blockType -> (AllayBlockType<?>) blockType)
                 .filter(blockType -> blockType.getCustomBlockDefinition() != null)
@@ -873,7 +914,7 @@ public abstract class Protocol {
      * @return the network item data
      */
     protected final ItemData encodeItemStack(ItemStack itemStack) {
-        return NetworkHelper.toNetwork(itemStack, itemDefinitionRegistry, blockDefinitionRegistry);
+        return NetworkHelper.toNetwork(itemStack, itemDefinitionRegistry, blockDefinitionRegistry, blockNetworkIds::networkId);
     }
 
     /**

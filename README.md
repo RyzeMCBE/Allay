@@ -44,6 +44,10 @@ La presencia de un componente en el código no garantiza que todas sus mecánica
 
 🔗 **Dependencias locales del fork:** [RyzeMCBE/Protocol](https://github.com/RyzeMCBE/Protocol) (`protocol-local`) y [RyzeMCBE/StateUpdater](https://github.com/RyzeMCBE/StateUpdater) (`stateupdater-local`). Ambos repositorios están enlazados mediante submódulos Git y builds compuestos de Gradle.
 
+## Compatibilidad de esta rama
+
+Esta rama integra Minecraft Bedrock **1.26.50–1.26.52 (protocolo 2193)**, con paletas de bloques específicas por protocolo para conservar las versiones anteriores registradas. Incluye los datos de juego 1.26.50 y mantiene las dependencias locales de RyzeMCBE. Los JAR publicados antes de esta integración conservan su compatibilidad original.
+
 ## 🆕 Novedades documentadas
 
 El archivo [CHANGELOG.md](CHANGELOG.md) identifica la línea **Allay 0.14.1 / API 0.30.0** como *no publicada* y enumera, entre otros cambios:

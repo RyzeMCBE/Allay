@@ -1,9 +1,8 @@
 package org.allaymc.api.block.data;
 
-import org.allaymc.api.annotation.MinecraftVersionSensitive;
-
 import java.util.HashMap;
 import java.util.Map;
+import org.allaymc.api.annotation.MinecraftVersionSensitive;
 
 @MinecraftVersionSensitive
 public interface BlockTags {
@@ -30,6 +29,8 @@ public interface BlockTags {
     BlockTag PUMPKIN = create("minecraft:pumpkin");
 
     BlockTag SPRUCE = create("minecraft:spruce");
+
+    BlockTag CORNERABLE_STAIRS = create("minecraft:cornerable_stairs");
 
     BlockTag SOUL_FIRE_CONVERTER = create("minecraft:soul_fire_converter");
 
@@ -120,8 +121,6 @@ public interface BlockTags {
     BlockTag MOSS_REPLACEABLE = create("minecraft:moss_replaceable");
 
     BlockTag LEAVES = create("minecraft:leaves");
-
-    BlockTag CORNERABLE_STAIRS = create("minecraft:cornerable_stairs");
 
     static BlockTag create(String name) {
         var tag = new BlockTag(name);

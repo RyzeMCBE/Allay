@@ -2,6 +2,7 @@ package org.allaymc.server.network;
 
 import com.google.gson.annotations.SerializedName;
 import lombok.experimental.UtilityClass;
+import org.allaymc.api.block.type.BlockState;
 import org.allaymc.api.dialog.Button;
 import org.allaymc.api.dialog.ModelSettings;
 import org.allaymc.api.entity.Entity;
@@ -45,6 +46,7 @@ import org.joml.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 
 /**
@@ -202,6 +204,15 @@ public final class NetworkHelper {
             DefinitionRegistry<ItemDefinition> itemDefinitions,
             DefinitionRegistry<BlockDefinition> blockDefinitions
     ) {
+        return toNetwork(itemStack, itemDefinitions, blockDefinitions, BlockState::blockStateHash);
+    }
+
+    public static ItemData toNetwork(
+            ItemStack itemStack,
+            DefinitionRegistry<ItemDefinition> itemDefinitions,
+            DefinitionRegistry<BlockDefinition> blockDefinitions,
+            ToIntFunction<BlockState> blockNetworkId
+    ) {
         var itemType = itemStack.getItemType();
         if (itemType == ItemTypes.AIR) {
             return ItemData.AIR.toBuilder()
@@ -210,9 +221,10 @@ public final class NetworkHelper {
         }
 
         var blockState = itemStack.toBlockState();
-        var blockDefinition = blockState == null ? null : blockDefinitions.getDefinition(blockState.blockStateHash());
+        var networkId = blockState == null ? 0 : blockNetworkId.applyAsInt(blockState);
+        var blockDefinition = blockState == null ? null : blockDefinitions.getDefinition(networkId);
         if (blockState != null && blockDefinition == null) {
-            throw new IllegalStateException("Missing block definition for state " + blockState.blockStateHash());
+            throw new IllegalStateException("Missing block definition " + networkId + " for state " + blockState.blockStateHash());
         }
         return ItemData
                 .builder()
@@ -240,7 +252,16 @@ public final class NetworkHelper {
             DefinitionRegistry<ItemDefinition> itemDefinitions,
             DefinitionRegistry<BlockDefinition> blockDefinitions
     ) {
-        return items.stream().map(item -> toNetwork(item, itemDefinitions, blockDefinitions)).toList();
+        return toNetwork(items, itemDefinitions, blockDefinitions, BlockState::blockStateHash);
+    }
+
+    public static List<ItemData> toNetwork(
+            List<ItemStack> items,
+            DefinitionRegistry<ItemDefinition> itemDefinitions,
+            DefinitionRegistry<BlockDefinition> blockDefinitions,
+            ToIntFunction<BlockState> blockNetworkId
+    ) {
+        return items.stream().map(item -> toNetwork(item, itemDefinitions, blockDefinitions, blockNetworkId)).toList();
     }
 
     private static ItemDefinition getItemDefinition(

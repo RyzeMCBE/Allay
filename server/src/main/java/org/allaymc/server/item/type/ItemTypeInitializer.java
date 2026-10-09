@@ -748,7 +748,8 @@ public final class ItemTypeInitializer {
         ItemTypes.POWDER_SNOW_BUCKET = buildBucket(ItemId.POWDER_SNOW_BUCKET, BlockId.POWDER_SNOW, null);
         ItemTypes.PUFFERFISH_BUCKET = buildBucket(ItemId.PUFFERFISH_BUCKET, BlockId.WATER, EntityId.PUFFERFISH);
         ItemTypes.SALMON_BUCKET = buildBucket(ItemId.SALMON_BUCKET, BlockId.WATER, EntityId.SALMON);
-        ItemTypes.SULFUR_CUBE_BUCKET = buildBucket(ItemId.SULFUR_CUBE_BUCKET, BlockId.WATER, EntityId.SULFUR_CUBE);
+        // Sivi yok: sulfur kupu balik degil, kovadan cikarken yanina su dokulmemeli.
+        ItemTypes.SULFUR_CUBE_BUCKET = buildBucket(ItemId.SULFUR_CUBE_BUCKET, BlockId.AIR, EntityId.SULFUR_CUBE);
         ItemTypes.TADPOLE_BUCKET = buildBucket(ItemId.TADPOLE_BUCKET, BlockId.WATER, EntityId.TADPOLE);
         ItemTypes.TROPICAL_FISH_BUCKET = buildBucket(ItemId.TROPICAL_FISH_BUCKET, BlockId.WATER, EntityId.TROPICALFISH);
         ItemTypes.WATER_BUCKET = buildBucket(ItemId.WATER_BUCKET, BlockId.WATER, null);
@@ -986,11 +987,6 @@ public final class ItemTypeInitializer {
                 .addComponent(ItemBedBaseComponentImpl::new, ItemBedBaseComponentImpl.class)
                 .vanillaItem(ItemId.BED)
                 .build();
-        ItemTypes.STRAW_BED = AllayItemType
-                .builder(ItemBedStackImpl.class)
-                .addComponent(ItemBedBaseComponentImpl::new, ItemBedBaseComponentImpl.class)
-                .vanillaItem(ItemId.STRAW_BED)
-                .build();
     }
 
     public static void initPainting() {
@@ -1064,11 +1060,13 @@ public final class ItemTypeInitializer {
         ItemTypes.WOODEN_SPEAR = buildSpear(ItemId.WOODEN_SPEAR, ItemId.PLANKS);
     }
 
-    // TODO: implement spear
+    // Both spear attacks are resolved server-side; see SpearJab. Still missing: the
+    // Lunge enchantment, which should launch the player forward on use.
     private static ItemType<ItemSpearStack> buildSpear(ItemId itemId, ItemId repairItemId) {
         return AllayItemType
                 .builder(ItemSpearStackImpl.class)
                 .vanillaItem(itemId)
+                .addComponent(ItemToolComponentImpl::new, ItemToolComponentImpl.class)
                 .addComponent(() -> new ItemRepairableComponentImpl(repairItemId), ItemRepairableComponentImpl.class)
                 .build();
     }

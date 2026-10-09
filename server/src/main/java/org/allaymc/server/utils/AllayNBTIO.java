@@ -30,21 +30,18 @@ import java.util.Objects;
 public class AllayNBTIO implements NBTIO {
     @Override
     public BlockState fromBlockStateNBT(NbtMap nbt) {
-        // Always update the nbt if we can't find the version field
+        // Older states must be migrated. Newer states are still worth resolving:
+        // if their name/properties are already known, preserving compatibility is safe.
         var version = nbt.getInt("version", 0);
-        if (version > ProtocolInfo.BLOCK_STATE_VERSION_NUM) {
-            log.warn("Block state version is too new: {}", nbt);
-            return BlockTypes.UNKNOWN.getDefaultState();
-        }
-
         if (version < ProtocolInfo.BLOCK_STATE_VERSION_NUM) {
             nbt = BlockStateUpdaters.updateBlockState(nbt, ProtocolInfo.BLOCK_STATE_UPDATER.getVersion());
         }
 
-        // Get the block type
-        var blockType = Registries.BLOCKS.get(new Identifier(nbt.getString("name")));
+        // Get the block type. Malformed or future identifiers are treated like unknown blocks.
+        var name = nbt.getString("name");
+        final var blockType = getBlockType(name);
         if (blockType == null) {
-            log.warn("Unknown block type {}", nbt.getString("name"));
+            log.warn("Unknown block type {}", name);
             return BlockTypes.UNKNOWN.getDefaultState();
         }
 
@@ -63,11 +60,33 @@ public class AllayNBTIO implements NBTIO {
         // Create the block property value list
         var blockPropertyValues = new ArrayList<BlockPropertyType.BlockPropertyValue<?, ?, ?>>();
         for (var entry : states.entrySet()) {
-            blockPropertyValues.add(blockType.getProperties().get(entry.getKey()).tryCreateValue(entry.getValue()));
+            var property = blockType.getProperties().get(entry.getKey());
+            if (property == null) {
+                log.warn("Unknown property {} for block {}", entry.getKey(), name);
+                return BlockTypes.UNKNOWN.getDefaultState();
+            }
+
+            try {
+                var value = property.tryCreateValue(entry.getValue());
+                if (value == null) {
+                    log.warn("Invalid value {} for block property {} on {}", entry.getValue(), entry.getKey(), name);
+                    return BlockTypes.UNKNOWN.getDefaultState();
+                }
+                blockPropertyValues.add(value);
+            } catch (IllegalArgumentException | ClassCastException exception) {
+                log.warn("Invalid value {} for block property {} on {}", entry.getValue(), entry.getKey(), name);
+                return BlockTypes.UNKNOWN.getDefaultState();
+            }
         }
 
         // Get the block state
-        var blockState = blockType.ofState(blockPropertyValues);
+        final BlockState blockState;
+        try {
+            blockState = blockType.ofState(blockPropertyValues);
+        } catch (IllegalArgumentException exception) {
+            log.warn("Invalid block state {}", nbt);
+            return BlockTypes.UNKNOWN.getDefaultState();
+        }
         if (blockState == null) {
             log.warn("Invalid block state {}", nbt);
             return BlockTypes.UNKNOWN.getDefaultState();
@@ -100,7 +119,14 @@ public class AllayNBTIO implements NBTIO {
 
     @Override
     public Entity fromEntityNBT(Dimension dimension, NbtMap nbt) {
-        var identifier = new Identifier(nbt.getString("identifier"));
+        final Identifier identifier;
+        try {
+            identifier = new Identifier(nbt.getString("identifier"));
+        } catch (RuntimeException exception) {
+            log.warn("Malformed entity identifier {}", nbt.getString("identifier"));
+            return null;
+        }
+
         var entityType = Registries.ENTITIES.get(identifier);
         if (entityType == null) {
             log.warn("Unknown entity type {}", identifier);
@@ -108,6 +134,14 @@ public class AllayNBTIO implements NBTIO {
         }
 
         return entityType.createEntity(EntityInitInfo.builder().dimension(dimension).nbt(nbt).build());
+    }
+
+    private org.allaymc.api.block.type.BlockType<?> getBlockType(String name) {
+        try {
+            return Registries.BLOCKS.get(new Identifier(name));
+        } catch (RuntimeException exception) {
+            return null;
+        }
     }
 
     @Override

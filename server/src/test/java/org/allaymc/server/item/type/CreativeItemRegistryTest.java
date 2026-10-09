@@ -20,4 +20,14 @@ public class CreativeItemRegistryTest {
             assertEquals(1, entry.itemStack().getCount());
         }
     }
+    @Test
+    void creativeBlockItemsUseZeroMeta() {
+        for (var entry : Registries.CREATIVE_ITEMS.getEntries()) {
+            var item = entry.itemStack();
+            if (item.getItemType().getBlockType() != null) {
+                assertEquals(0, item.getMeta(), () -> item.getItemType().getIdentifier().toString());
+            }
+        }
+    }
+
 }

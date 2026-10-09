@@ -39,12 +39,18 @@ class ProtocolRegistryInitializationTest {
         var data = protocol.getData();
 
         assertEquals(Registries.ITEMS.getContent().size(), data.itemDefinitions().size());
-        assertEquals(
-                Registries.BLOCKS.getContent().values().stream()
-                        .mapToInt(blockType -> blockType.getAllStates().size())
-                        .sum(),
-                data.blockDefinitions().size()
-        );
+        var networkIds = Registries.BLOCKS.getContent().values().stream()
+                .flatMap(blockType -> blockType.getAllStates().stream())
+                .mapToInt(protocol.getEncoder()::networkBlockId)
+                .distinct()
+                .toArray();
+        assertEquals(networkIds.length, data.blockDefinitions().size());
+        var definedIds = data.blockDefinitions().stream()
+                .map(definition -> definition.runtimeId())
+                .collect(java.util.stream.Collectors.toSet());
+        for (int networkId : networkIds) {
+            assertTrue(definedIds.contains(networkId), () -> "Missing network block definition " + networkId);
+        }
         assertEquals(Registries.CREATIVE_ITEMS.getGroups().size(), data.creativeGroups().size());
         assertEquals(Registries.CREATIVE_ITEMS.getEntries().size(), data.creativeItems().size());
         assertFalse(data.recipeTable().recipesByNetworkId().isEmpty());

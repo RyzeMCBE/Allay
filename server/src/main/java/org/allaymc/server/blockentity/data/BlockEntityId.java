@@ -33,6 +33,8 @@ public interface BlockEntityId {
 
     String COMPARATOR = "Comparator";
 
+    String CRAFTER = "Crafter";
+
     String CONDUIT = "Conduit";
 
     String DAYLIGHT_DETECTOR = "DaylightDetector";

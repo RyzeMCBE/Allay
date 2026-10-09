@@ -3,7 +3,369 @@ package org.allaymc.server.block.type;
 import org.allaymc.api.block.property.type.BlockPropertyTypes;
 import org.allaymc.api.block.type.BlockTypes;
 import org.allaymc.server.block.data.BlockId;
-import org.allaymc.server.block.impl.*;
+import org.allaymc.server.block.impl.BlockActivatorRailBehaviorImpl;
+import org.allaymc.server.block.impl.BlockAirBehaviorImpl;
+import org.allaymc.server.block.impl.BlockAllowBehaviorImpl;
+import org.allaymc.server.block.impl.BlockAmethystBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockAmethystClusterBehaviorImpl;
+import org.allaymc.server.block.impl.BlockAncientDebrisBehaviorImpl;
+import org.allaymc.server.block.impl.BlockAndesiteBehaviorImpl;
+import org.allaymc.server.block.impl.BlockAnvilBehaviorImpl;
+import org.allaymc.server.block.impl.BlockAzaleaBehaviorImpl;
+import org.allaymc.server.block.impl.BlockBambooBehaviorImpl;
+import org.allaymc.server.block.impl.BlockBambooMosaicBehaviorImpl;
+import org.allaymc.server.block.impl.BlockBarrelBehaviorImpl;
+import org.allaymc.server.block.impl.BlockBarrierBehaviorImpl;
+import org.allaymc.server.block.impl.BlockBasaltBehaviorImpl;
+import org.allaymc.server.block.impl.BlockBeaconBehaviorImpl;
+import org.allaymc.server.block.impl.BlockBedBehaviorImpl;
+import org.allaymc.server.block.impl.BlockBedrockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockBeeNestBehaviorImpl;
+import org.allaymc.server.block.impl.BlockBeehiveBehaviorImpl;
+import org.allaymc.server.block.impl.BlockBeetrootBehaviorImpl;
+import org.allaymc.server.block.impl.BlockBellBehaviorImpl;
+import org.allaymc.server.block.impl.BlockBigDripleafBehaviorImpl;
+import org.allaymc.server.block.impl.BlockBigFlowerImpl;
+import org.allaymc.server.block.impl.BlockBlackstoneBehaviorImpl;
+import org.allaymc.server.block.impl.BlockBlastFurnaceBehaviorImpl;
+import org.allaymc.server.block.impl.BlockBoneBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockBookshelfBehaviorImpl;
+import org.allaymc.server.block.impl.BlockBorderBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockBrewingStandBehaviorImpl;
+import org.allaymc.server.block.impl.BlockBrickBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockBricksBehaviorImpl;
+import org.allaymc.server.block.impl.BlockBrownMushroomBehaviorImpl;
+import org.allaymc.server.block.impl.BlockBrownMushroomBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockBubbleColumnBehaviorImpl;
+import org.allaymc.server.block.impl.BlockBuddingAmethystBehaviorImpl;
+import org.allaymc.server.block.impl.BlockBushBehaviorImpl;
+import org.allaymc.server.block.impl.BlockButtonBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCactusBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCactusFlowerBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCakeBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCalciteBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCalibratedSculkSensorBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCameraBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCampfireBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCandleBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCandleCakeBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCarpetBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCarrotsBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCartographyTableBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCarvedPumpkinBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCauldronBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCaveVinesBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCaveVinesBodyWithBerriesBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCaveVinesHeadWithBerriesBehaviorImpl;
+import org.allaymc.server.block.impl.BlockChainCommandBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockChalkboardBehaviorImpl;
+import org.allaymc.server.block.impl.BlockChemicalHeatBehaviorImpl;
+import org.allaymc.server.block.impl.BlockChestBehaviorImpl;
+import org.allaymc.server.block.impl.BlockChiseledBookshelfBehaviorImpl;
+import org.allaymc.server.block.impl.BlockChiseledCinnabarBehaviorImpl;
+import org.allaymc.server.block.impl.BlockChiseledDeepslateBehaviorImpl;
+import org.allaymc.server.block.impl.BlockChiseledPolishedBlackstoneBehaviorImpl;
+import org.allaymc.server.block.impl.BlockChiseledQuartzBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockChiseledSulfurBehaviorImpl;
+import org.allaymc.server.block.impl.BlockChiseledTuffBehaviorImpl;
+import org.allaymc.server.block.impl.BlockChorusFlowerBehaviorImpl;
+import org.allaymc.server.block.impl.BlockChorusPlantBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCinnabarBehaviorImpl;
+import org.allaymc.server.block.impl.BlockClayBehaviorImpl;
+import org.allaymc.server.block.impl.BlockClientRequestPlaceholderBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCoalBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCoarseDirtBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCobbledDeepslateBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCobblestoneBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCocoaBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCommandBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockComparatorBehaviorImpl;
+import org.allaymc.server.block.impl.BlockComposterBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCompoundCreatorBehaviorImpl;
+import org.allaymc.server.block.impl.BlockConcreteBehaviorImpl;
+import org.allaymc.server.block.impl.BlockConcretePowderBehaviorImpl;
+import org.allaymc.server.block.impl.BlockConduitBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCopperBarsBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCopperBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCopperBulbBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCopperChainBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCopperChestBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCopperDoorBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCopperGolemStatueBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCopperGrateBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCopperLanternBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCopperSlabBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCopperStairsBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCopperTrapdoorBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCoralBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCoralBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCoralFanBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCoralWallFanBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCrackedDeepslateTilesBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCrafterBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCraftingTableBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCreakingHeartBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCrimsonFungusBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCrimsonNyliumBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCrimsonRootsBehaviorImpl;
+import org.allaymc.server.block.impl.BlockCryingObsidianBehaviorImpl;
+import org.allaymc.server.block.impl.BlockDarkPrismarineBehaviorImpl;
+import org.allaymc.server.block.impl.BlockDaylightDetectorBehaviorImpl;
+import org.allaymc.server.block.impl.BlockDeadbushBehaviorImpl;
+import org.allaymc.server.block.impl.BlockDecoratedPotBehaviorImpl;
+import org.allaymc.server.block.impl.BlockDeepslateBehaviorImpl;
+import org.allaymc.server.block.impl.BlockDeepslateTilesBehaviorImpl;
+import org.allaymc.server.block.impl.BlockDenyBehaviorImpl;
+import org.allaymc.server.block.impl.BlockDeprecatedAnvilBehaviorImpl;
+import org.allaymc.server.block.impl.BlockDeprecatedPurpurBlock1BehaviorImpl;
+import org.allaymc.server.block.impl.BlockDeprecatedPurpurBlock2BehaviorImpl;
+import org.allaymc.server.block.impl.BlockDetectorRailBehaviorImpl;
+import org.allaymc.server.block.impl.BlockDiamondBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockDioriteBehaviorImpl;
+import org.allaymc.server.block.impl.BlockDirtBehaviorImpl;
+import org.allaymc.server.block.impl.BlockDirtWithRootsBehaviorImpl;
+import org.allaymc.server.block.impl.BlockDispenserBehaviorImpl;
+import org.allaymc.server.block.impl.BlockDoorBehaviorImpl;
+import org.allaymc.server.block.impl.BlockDoubleCopperSlabBehaviorImpl;
+import org.allaymc.server.block.impl.BlockDoubleSlabBehaviorImpl;
+import org.allaymc.server.block.impl.BlockDragonEggBehaviorImpl;
+import org.allaymc.server.block.impl.BlockDriedGhastBehaviorImpl;
+import org.allaymc.server.block.impl.BlockDriedKelpBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockDripstoneBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockDropperBehaviorImpl;
+import org.allaymc.server.block.impl.BlockElementBehaviorImpl;
+import org.allaymc.server.block.impl.BlockEmeraldBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockEnchantingTableBehaviorImpl;
+import org.allaymc.server.block.impl.BlockEndGatewayBehaviorImpl;
+import org.allaymc.server.block.impl.BlockEndPortalBehaviorImpl;
+import org.allaymc.server.block.impl.BlockEndPortalFrameBehaviorImpl;
+import org.allaymc.server.block.impl.BlockEndRodBehaviorImpl;
+import org.allaymc.server.block.impl.BlockEndStoneBehaviorImpl;
+import org.allaymc.server.block.impl.BlockEnderChestBehaviorImpl;
+import org.allaymc.server.block.impl.BlockFarmlandBehaviorImpl;
+import org.allaymc.server.block.impl.BlockFenceBehaviorImpl;
+import org.allaymc.server.block.impl.BlockFenceGateBehaviorImpl;
+import org.allaymc.server.block.impl.BlockFernBehaviorImpl;
+import org.allaymc.server.block.impl.BlockFireBehaviorImpl;
+import org.allaymc.server.block.impl.BlockFireflyBushBehaviorImpl;
+import org.allaymc.server.block.impl.BlockFletchingTableBehaviorImpl;
+import org.allaymc.server.block.impl.BlockFlowerPotBehaviorImpl;
+import org.allaymc.server.block.impl.BlockFloweringAzaleaBehaviorImpl;
+import org.allaymc.server.block.impl.BlockFrameBehaviorImpl;
+import org.allaymc.server.block.impl.BlockFrogSpawnBehaviorImpl;
+import org.allaymc.server.block.impl.BlockFurnaceBehaviorImpl;
+import org.allaymc.server.block.impl.BlockGildedBlackstoneBehaviorImpl;
+import org.allaymc.server.block.impl.BlockGlassBehaviorImpl;
+import org.allaymc.server.block.impl.BlockGlassPaneBehaviorImpl;
+import org.allaymc.server.block.impl.BlockGlazedTerracottaBehaviorImpl;
+import org.allaymc.server.block.impl.BlockGlowFrameBehaviorImpl;
+import org.allaymc.server.block.impl.BlockGlowLichenBehaviorImpl;
+import org.allaymc.server.block.impl.BlockGlowingobsidianBehaviorImpl;
+import org.allaymc.server.block.impl.BlockGlowstoneBehaviorImpl;
+import org.allaymc.server.block.impl.BlockGoldBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockGoldenRailBehaviorImpl;
+import org.allaymc.server.block.impl.BlockGraniteBehaviorImpl;
+import org.allaymc.server.block.impl.BlockGrassBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockGrassPathBehaviorImpl;
+import org.allaymc.server.block.impl.BlockGravelBehaviorImpl;
+import org.allaymc.server.block.impl.BlockGrindstoneBehaviorImpl;
+import org.allaymc.server.block.impl.BlockHangingRootsBehaviorImpl;
+import org.allaymc.server.block.impl.BlockHangingSignBehaviorImpl;
+import org.allaymc.server.block.impl.BlockHardenedClayBehaviorImpl;
+import org.allaymc.server.block.impl.BlockHayBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockHeadBehaviorImpl;
+import org.allaymc.server.block.impl.BlockHeavyCoreBehaviorImpl;
+import org.allaymc.server.block.impl.BlockHoneyBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockHoneycombBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockHopperBehaviorImpl;
+import org.allaymc.server.block.impl.BlockIceBehaviorImpl;
+import org.allaymc.server.block.impl.BlockInfestedBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockInfoUpdate2BehaviorImpl;
+import org.allaymc.server.block.impl.BlockInfoUpdateBehaviorImpl;
+import org.allaymc.server.block.impl.BlockInvisibleBedrockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockIronBarsBehaviorImpl;
+import org.allaymc.server.block.impl.BlockIronBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockIronChainBehaviorImpl;
+import org.allaymc.server.block.impl.BlockIronDoorBehaviorImpl;
+import org.allaymc.server.block.impl.BlockIronTrapdoorBehaviorImpl;
+import org.allaymc.server.block.impl.BlockJigsawBehaviorImpl;
+import org.allaymc.server.block.impl.BlockJukeboxBehaviorImpl;
+import org.allaymc.server.block.impl.BlockKelpBehaviorImpl;
+import org.allaymc.server.block.impl.BlockLabTableBehaviorImpl;
+import org.allaymc.server.block.impl.BlockLadderBehaviorImpl;
+import org.allaymc.server.block.impl.BlockLanternBehaviorImpl;
+import org.allaymc.server.block.impl.BlockLapisBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockLargeFernBehaviorImpl;
+import org.allaymc.server.block.impl.BlockLeavesBehaviorImpl;
+import org.allaymc.server.block.impl.BlockLecternBehaviorImpl;
+import org.allaymc.server.block.impl.BlockLeverBehaviorImpl;
+import org.allaymc.server.block.impl.BlockLightBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockLightningRodBehaviorImpl;
+import org.allaymc.server.block.impl.BlockLiquidBehaviorImpl;
+import org.allaymc.server.block.impl.BlockLitPumpkinBehaviorImpl;
+import org.allaymc.server.block.impl.BlockLodestoneBehaviorImpl;
+import org.allaymc.server.block.impl.BlockLoomBehaviorImpl;
+import org.allaymc.server.block.impl.BlockMagmaBehaviorImpl;
+import org.allaymc.server.block.impl.BlockMangrovePropaguleBehaviorImpl;
+import org.allaymc.server.block.impl.BlockMangroveRootsBehaviorImpl;
+import org.allaymc.server.block.impl.BlockMaterialReducerBehaviorImpl;
+import org.allaymc.server.block.impl.BlockMelonBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockMelonStemBehaviorImpl;
+import org.allaymc.server.block.impl.BlockMobSpawnerBehaviorImpl;
+import org.allaymc.server.block.impl.BlockMossBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockMossyCobblestoneBehaviorImpl;
+import org.allaymc.server.block.impl.BlockMovingBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockMudBehaviorImpl;
+import org.allaymc.server.block.impl.BlockMuddyMangroveRootsBehaviorImpl;
+import org.allaymc.server.block.impl.BlockMushroomStemBehaviorImpl;
+import org.allaymc.server.block.impl.BlockMyceliumBehaviorImpl;
+import org.allaymc.server.block.impl.BlockNetherBrickBehaviorImpl;
+import org.allaymc.server.block.impl.BlockNetherSproutsBehaviorImpl;
+import org.allaymc.server.block.impl.BlockNetherWartBehaviorImpl;
+import org.allaymc.server.block.impl.BlockNetherWartBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockNetheriteBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockNetherrackBehaviorImpl;
+import org.allaymc.server.block.impl.BlockNetherreactorBehaviorImpl;
+import org.allaymc.server.block.impl.BlockNoteblockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockObserverBehaviorImpl;
+import org.allaymc.server.block.impl.BlockObsidianBehaviorImpl;
+import org.allaymc.server.block.impl.BlockOchreFroglightBehaviorImpl;
+import org.allaymc.server.block.impl.BlockOreBehaviorImpl;
+import org.allaymc.server.block.impl.BlockPackedMudBehaviorImpl;
+import org.allaymc.server.block.impl.BlockPaleHangingMossBehaviorImpl;
+import org.allaymc.server.block.impl.BlockPaleMossBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockPearlescentFroglightBehaviorImpl;
+import org.allaymc.server.block.impl.BlockPistonArmCollisionBehaviorImpl;
+import org.allaymc.server.block.impl.BlockPistonBehaviorImpl;
+import org.allaymc.server.block.impl.BlockPitcherCropBehaviorImpl;
+import org.allaymc.server.block.impl.BlockPlanksBehaviorImpl;
+import org.allaymc.server.block.impl.BlockPlantPileImpl;
+import org.allaymc.server.block.impl.BlockPodzolBehaviorImpl;
+import org.allaymc.server.block.impl.BlockPointedDripstoneBehaviorImpl;
+import org.allaymc.server.block.impl.BlockPolishedAndesiteBehaviorImpl;
+import org.allaymc.server.block.impl.BlockPolishedBasaltBehaviorImpl;
+import org.allaymc.server.block.impl.BlockPolishedBlackstoneBehaviorImpl;
+import org.allaymc.server.block.impl.BlockPolishedCinnabarBehaviorImpl;
+import org.allaymc.server.block.impl.BlockPolishedDeepslateBehaviorImpl;
+import org.allaymc.server.block.impl.BlockPolishedDioriteBehaviorImpl;
+import org.allaymc.server.block.impl.BlockPolishedGraniteBehaviorImpl;
+import org.allaymc.server.block.impl.BlockPolishedSulfurBehaviorImpl;
+import org.allaymc.server.block.impl.BlockPolishedTuffBehaviorImpl;
+import org.allaymc.server.block.impl.BlockPortalBehaviorImpl;
+import org.allaymc.server.block.impl.BlockPotatoesBehaviorImpl;
+import org.allaymc.server.block.impl.BlockPotentSulfurBehaviorImpl;
+import org.allaymc.server.block.impl.BlockPowderSnowBehaviorImpl;
+import org.allaymc.server.block.impl.BlockPressurePlateBehaviorImpl;
+import org.allaymc.server.block.impl.BlockPrismarineBehaviorImpl;
+import org.allaymc.server.block.impl.BlockPumpkinBehaviorImpl;
+import org.allaymc.server.block.impl.BlockPumpkinStemBehaviorImpl;
+import org.allaymc.server.block.impl.BlockPurpurBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockPurpurPillarBehaviorImpl;
+import org.allaymc.server.block.impl.BlockQuartzBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockQuartzPillarBehaviorImpl;
+import org.allaymc.server.block.impl.BlockRailBehaviorImpl;
+import org.allaymc.server.block.impl.BlockRawCopperBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockRawGoldBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockRawIronBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockRedMushroomBehaviorImpl;
+import org.allaymc.server.block.impl.BlockRedMushroomBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockRedNetherBrickBehaviorImpl;
+import org.allaymc.server.block.impl.BlockRedSandBehaviorImpl;
+import org.allaymc.server.block.impl.BlockRedShrubBehaviorImpl;
+import org.allaymc.server.block.impl.BlockRedstoneBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockRedstoneLampBehaviorImpl;
+import org.allaymc.server.block.impl.BlockRedstoneWireBehaviorImpl;
+import org.allaymc.server.block.impl.BlockReedsBehaviorImpl;
+import org.allaymc.server.block.impl.BlockReinforcedDeepslateBehaviorImpl;
+import org.allaymc.server.block.impl.BlockRepeaterBehaviorImpl;
+import org.allaymc.server.block.impl.BlockRepeatingCommandBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockReserved6BehaviorImpl;
+import org.allaymc.server.block.impl.BlockResinBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockResinClumpBehaviorImpl;
+import org.allaymc.server.block.impl.BlockRespawnAnchorBehaviorImpl;
+import org.allaymc.server.block.impl.BlockSandBehaviorImpl;
+import org.allaymc.server.block.impl.BlockSandstoneBehaviorImpl;
+import org.allaymc.server.block.impl.BlockSaplingBehaviorImpl;
+import org.allaymc.server.block.impl.BlockScaffoldingBehaviorImpl;
+import org.allaymc.server.block.impl.BlockSculkBehaviorImpl;
+import org.allaymc.server.block.impl.BlockSculkCatalystBehaviorImpl;
+import org.allaymc.server.block.impl.BlockSculkSensorBehaviorImpl;
+import org.allaymc.server.block.impl.BlockSculkShriekerBehaviorImpl;
+import org.allaymc.server.block.impl.BlockSculkVeinBehaviorImpl;
+import org.allaymc.server.block.impl.BlockSeaLanternBehaviorImpl;
+import org.allaymc.server.block.impl.BlockSeaPickleBehaviorImpl;
+import org.allaymc.server.block.impl.BlockSeagrassBehaviorImpl;
+import org.allaymc.server.block.impl.BlockShelfBehaviorImpl;
+import org.allaymc.server.block.impl.BlockShelfMushroomBehaviorImpl;
+import org.allaymc.server.block.impl.BlockShortDryGrassBehaviorImpl;
+import org.allaymc.server.block.impl.BlockShortGrassBehaviorImpl;
+import org.allaymc.server.block.impl.BlockShroomlightBehaviorImpl;
+import org.allaymc.server.block.impl.BlockShulkerBoxBehaviorImpl;
+import org.allaymc.server.block.impl.BlockSignBehaviorImpl;
+import org.allaymc.server.block.impl.BlockSlabBehaviorImpl;
+import org.allaymc.server.block.impl.BlockSlimeBehaviorImpl;
+import org.allaymc.server.block.impl.BlockSmallDripleafBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockSmallFlowerImpl;
+import org.allaymc.server.block.impl.BlockSmithingTableBehaviorImpl;
+import org.allaymc.server.block.impl.BlockSmokerBehaviorImpl;
+import org.allaymc.server.block.impl.BlockSmoothBasaltBehaviorImpl;
+import org.allaymc.server.block.impl.BlockSmoothQuartzBehaviorImpl;
+import org.allaymc.server.block.impl.BlockSmoothStoneBehaviorImpl;
+import org.allaymc.server.block.impl.BlockSnifferEggBehaviorImpl;
+import org.allaymc.server.block.impl.BlockSnowBehaviorImpl;
+import org.allaymc.server.block.impl.BlockSnowLayerBehaviorImpl;
+import org.allaymc.server.block.impl.BlockSoulSandBehaviorImpl;
+import org.allaymc.server.block.impl.BlockSoulSoilBehaviorImpl;
+import org.allaymc.server.block.impl.BlockSpongeBehaviorImpl;
+import org.allaymc.server.block.impl.BlockSporeBlossomBehaviorImpl;
+import org.allaymc.server.block.impl.BlockStairsBehaviorImpl;
+import org.allaymc.server.block.impl.BlockStandingBannerBehaviorImpl;
+import org.allaymc.server.block.impl.BlockStickyPistonArmCollisionBehaviorImpl;
+import org.allaymc.server.block.impl.BlockStickyPistonBehaviorImpl;
+import org.allaymc.server.block.impl.BlockStoneBehaviorImpl;
+import org.allaymc.server.block.impl.BlockStonecutterBehaviorImpl;
+import org.allaymc.server.block.impl.BlockStonecutterBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockStrawBedBehaviorImpl;
+import org.allaymc.server.block.impl.BlockStructureBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockStructureVoidBehaviorImpl;
+import org.allaymc.server.block.impl.BlockSulfurBehaviorImpl;
+import org.allaymc.server.block.impl.BlockSulfurSpikeBehaviorImpl;
+import org.allaymc.server.block.impl.BlockSuspiciousGravelBehaviorImpl;
+import org.allaymc.server.block.impl.BlockSuspiciousSandBehaviorImpl;
+import org.allaymc.server.block.impl.BlockSweetBerryBushBehaviorImpl;
+import org.allaymc.server.block.impl.BlockTallDryGrassBehaviorImpl;
+import org.allaymc.server.block.impl.BlockTallGrassBehaviorImpl;
+import org.allaymc.server.block.impl.BlockTargetBehaviorImpl;
+import org.allaymc.server.block.impl.BlockTerracottaBehaviorImpl;
+import org.allaymc.server.block.impl.BlockTntBehaviorImpl;
+import org.allaymc.server.block.impl.BlockTorchBehaviorImpl;
+import org.allaymc.server.block.impl.BlockTorchflowerCropBehaviorImpl;
+import org.allaymc.server.block.impl.BlockTrapdoorBehaviorImpl;
+import org.allaymc.server.block.impl.BlockTrappedChestBehaviorImpl;
+import org.allaymc.server.block.impl.BlockTrialSpawnerBehaviorImpl;
+import org.allaymc.server.block.impl.BlockTripWireBehaviorImpl;
+import org.allaymc.server.block.impl.BlockTripwireHookBehaviorImpl;
+import org.allaymc.server.block.impl.BlockTuffBehaviorImpl;
+import org.allaymc.server.block.impl.BlockTurtleEggBehaviorImpl;
+import org.allaymc.server.block.impl.BlockTwistingVinesBehaviorImpl;
+import org.allaymc.server.block.impl.BlockUnderwaterTntBehaviorImpl;
+import org.allaymc.server.block.impl.BlockUnknownBehaviorImpl;
+import org.allaymc.server.block.impl.BlockVaultBehaviorImpl;
+import org.allaymc.server.block.impl.BlockVerdantFroglightBehaviorImpl;
+import org.allaymc.server.block.impl.BlockVineBehaviorImpl;
+import org.allaymc.server.block.impl.BlockWallBannerBehaviorImpl;
+import org.allaymc.server.block.impl.BlockWallBehaviorImpl;
+import org.allaymc.server.block.impl.BlockWarpedFungusBehaviorImpl;
+import org.allaymc.server.block.impl.BlockWarpedNyliumBehaviorImpl;
+import org.allaymc.server.block.impl.BlockWarpedRootsBehaviorImpl;
+import org.allaymc.server.block.impl.BlockWarpedWartBlockBehaviorImpl;
+import org.allaymc.server.block.impl.BlockWaterlilyBehaviorImpl;
+import org.allaymc.server.block.impl.BlockWebBehaviorImpl;
+import org.allaymc.server.block.impl.BlockWeepingVinesBehaviorImpl;
+import org.allaymc.server.block.impl.BlockWetSpongeBehaviorImpl;
+import org.allaymc.server.block.impl.BlockWheatBehaviorImpl;
+import org.allaymc.server.block.impl.BlockWoodBehaviorImpl;
+import org.allaymc.server.block.impl.BlockWoolBehaviorImpl;
 
 public final class BlockTypeDefaultInitializer {
     public static void init() {
@@ -32,6 +394,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.ACACIA_FENCE = AllayBlockType
                             .builder(BlockFenceBehaviorImpl.class)
                             .vanillaBlock(BlockId.ACACIA_FENCE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.ACACIA_FENCE_GATE == null) {
@@ -100,7 +463,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.ACACIA_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.ACACIA_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.ACACIA_STANDING_SIGN == null) {
@@ -199,7 +562,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.ANDESITE_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.ANDESITE_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.ANDESITE_WALL == null) {
@@ -281,6 +644,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.BAMBOO_FENCE = AllayBlockType
                             .builder(BlockFenceBehaviorImpl.class)
                             .vanillaBlock(BlockId.BAMBOO_FENCE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.BAMBOO_FENCE_GATE == null) {
@@ -321,7 +685,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.BAMBOO_MOSAIC_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.BAMBOO_MOSAIC_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.BAMBOO_PLANKS == null) {
@@ -362,7 +726,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.BAMBOO_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.BAMBOO_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.BAMBOO_STANDING_SIGN == null) {
@@ -426,6 +790,13 @@ public final class BlockTypeDefaultInitializer {
                             .setProperties(BlockPropertyTypes.INFINIBURN_BIT)
                             .build();
         }
+        if (BlockTypes.BEE_NEST == null) {
+            BlockTypes.BEE_NEST = AllayBlockType
+                            .builder(BlockBeeNestBehaviorImpl.class)
+                            .vanillaBlock(BlockId.BEE_NEST)
+                            .setProperties(BlockPropertyTypes.DIRECTION_4, BlockPropertyTypes.HONEY_LEVEL)
+                            .build();
+        }
         if (BlockTypes.BEEHIVE == null) {
             BlockTypes.BEEHIVE = AllayBlockType
                             .builder(BlockBeehiveBehaviorImpl.class)
@@ -437,14 +808,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.BEETROOT = AllayBlockType
                             .builder(BlockBeetrootBehaviorImpl.class)
                             .vanillaBlock(BlockId.BEETROOT)
-                            .setProperties(BlockPropertyTypes.GROWTH)
-                            .build();
-        }
-        if (BlockTypes.BEE_NEST == null) {
-            BlockTypes.BEE_NEST = AllayBlockType
-                            .builder(BlockBeeNestBehaviorImpl.class)
-                            .vanillaBlock(BlockId.BEE_NEST)
-                            .setProperties(BlockPropertyTypes.DIRECTION_4, BlockPropertyTypes.HONEY_LEVEL)
+                            .setProperties(BlockPropertyTypes.GROWTH_8)
                             .build();
         }
         if (BlockTypes.BELL == null) {
@@ -486,6 +850,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.BIRCH_FENCE = AllayBlockType
                             .builder(BlockFenceBehaviorImpl.class)
                             .vanillaBlock(BlockId.BIRCH_FENCE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.BIRCH_FENCE_GATE == null) {
@@ -554,7 +919,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.BIRCH_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.BIRCH_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.BIRCH_STANDING_SIGN == null) {
@@ -585,40 +950,6 @@ public final class BlockTypeDefaultInitializer {
                             .setProperties(BlockPropertyTypes.PILLAR_AXIS)
                             .build();
         }
-        if (BlockTypes.BLACKSTONE == null) {
-            BlockTypes.BLACKSTONE = AllayBlockType
-                            .builder(BlockBlackstoneBehaviorImpl.class)
-                            .vanillaBlock(BlockId.BLACKSTONE)
-                            .build();
-        }
-        if (BlockTypes.BLACKSTONE_DOUBLE_SLAB == null) {
-            BlockTypes.BLACKSTONE_DOUBLE_SLAB = AllayBlockType
-                            .builder(BlockDoubleSlabBehaviorImpl.class)
-                            .vanillaBlock(BlockId.BLACKSTONE_DOUBLE_SLAB)
-                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
-                            .build();
-        }
-        if (BlockTypes.BLACKSTONE_SLAB == null) {
-            BlockTypes.BLACKSTONE_SLAB = AllayBlockType
-                            .builder(BlockSlabBehaviorImpl.class)
-                            .vanillaBlock(BlockId.BLACKSTONE_SLAB)
-                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
-                            .build();
-        }
-        if (BlockTypes.BLACKSTONE_STAIRS == null) {
-            BlockTypes.BLACKSTONE_STAIRS = AllayBlockType
-                            .builder(BlockStairsBehaviorImpl.class)
-                            .vanillaBlock(BlockId.BLACKSTONE_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
-                            .build();
-        }
-        if (BlockTypes.BLACKSTONE_WALL == null) {
-            BlockTypes.BLACKSTONE_WALL = AllayBlockType
-                            .builder(BlockWallBehaviorImpl.class)
-                            .vanillaBlock(BlockId.BLACKSTONE_WALL)
-                            .setProperties(BlockPropertyTypes.WALL_CONNECTION_TYPE_EAST, BlockPropertyTypes.WALL_CONNECTION_TYPE_NORTH, BlockPropertyTypes.WALL_CONNECTION_TYPE_SOUTH, BlockPropertyTypes.WALL_CONNECTION_TYPE_WEST, BlockPropertyTypes.WALL_POST_BIT)
-                            .build();
-        }
         if (BlockTypes.BLACK_CANDLE == null) {
             BlockTypes.BLACK_CANDLE = AllayBlockType
                             .builder(BlockCandleBehaviorImpl.class)
@@ -645,10 +976,31 @@ public final class BlockTypeDefaultInitializer {
                             .vanillaBlock(BlockId.BLACK_CONCRETE)
                             .build();
         }
+        if (BlockTypes.BLACK_CONCRETE_DOUBLE_SLAB == null) {
+            BlockTypes.BLACK_CONCRETE_DOUBLE_SLAB = AllayBlockType
+                            .builder(BlockDoubleSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.BLACK_CONCRETE_DOUBLE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
         if (BlockTypes.BLACK_CONCRETE_POWDER == null) {
             BlockTypes.BLACK_CONCRETE_POWDER = AllayBlockType
                             .builder(BlockConcretePowderBehaviorImpl.class)
                             .vanillaBlock(BlockId.BLACK_CONCRETE_POWDER)
+                            .build();
+        }
+        if (BlockTypes.BLACK_CONCRETE_SLAB == null) {
+            BlockTypes.BLACK_CONCRETE_SLAB = AllayBlockType
+                            .builder(BlockSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.BLACK_CONCRETE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.BLACK_CONCRETE_STAIRS == null) {
+            BlockTypes.BLACK_CONCRETE_STAIRS = AllayBlockType
+                            .builder(BlockStairsBehaviorImpl.class)
+                            .vanillaBlock(BlockId.BLACK_CONCRETE_STAIRS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.BLACK_GLAZED_TERRACOTTA == null) {
@@ -674,6 +1026,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.BLACK_STAINED_GLASS_PANE = AllayBlockType
                             .builder(BlockGlassPaneBehaviorImpl.class)
                             .vanillaBlock(BlockId.BLACK_STAINED_GLASS_PANE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.BLACK_TERRACOTTA == null) {
@@ -686,6 +1039,61 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.BLACK_WOOL = AllayBlockType
                             .builder(BlockWoolBehaviorImpl.class)
                             .vanillaBlock(BlockId.BLACK_WOOL)
+                            .build();
+        }
+        if (BlockTypes.BLACK_WOOL_DOUBLE_SLAB == null) {
+            BlockTypes.BLACK_WOOL_DOUBLE_SLAB = AllayBlockType
+                            .builder(BlockDoubleSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.BLACK_WOOL_DOUBLE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.BLACK_WOOL_SLAB == null) {
+            BlockTypes.BLACK_WOOL_SLAB = AllayBlockType
+                            .builder(BlockSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.BLACK_WOOL_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.BLACK_WOOL_STAIRS == null) {
+            BlockTypes.BLACK_WOOL_STAIRS = AllayBlockType
+                            .builder(BlockStairsBehaviorImpl.class)
+                            .vanillaBlock(BlockId.BLACK_WOOL_STAIRS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .build();
+        }
+        if (BlockTypes.BLACKSTONE == null) {
+            BlockTypes.BLACKSTONE = AllayBlockType
+                            .builder(BlockBlackstoneBehaviorImpl.class)
+                            .vanillaBlock(BlockId.BLACKSTONE)
+                            .build();
+        }
+        if (BlockTypes.BLACKSTONE_DOUBLE_SLAB == null) {
+            BlockTypes.BLACKSTONE_DOUBLE_SLAB = AllayBlockType
+                            .builder(BlockDoubleSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.BLACKSTONE_DOUBLE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.BLACKSTONE_SLAB == null) {
+            BlockTypes.BLACKSTONE_SLAB = AllayBlockType
+                            .builder(BlockSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.BLACKSTONE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.BLACKSTONE_STAIRS == null) {
+            BlockTypes.BLACKSTONE_STAIRS = AllayBlockType
+                            .builder(BlockStairsBehaviorImpl.class)
+                            .vanillaBlock(BlockId.BLACKSTONE_STAIRS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .build();
+        }
+        if (BlockTypes.BLACKSTONE_WALL == null) {
+            BlockTypes.BLACKSTONE_WALL = AllayBlockType
+                            .builder(BlockWallBehaviorImpl.class)
+                            .vanillaBlock(BlockId.BLACKSTONE_WALL)
+                            .setProperties(BlockPropertyTypes.WALL_CONNECTION_TYPE_EAST, BlockPropertyTypes.WALL_CONNECTION_TYPE_NORTH, BlockPropertyTypes.WALL_CONNECTION_TYPE_SOUTH, BlockPropertyTypes.WALL_CONNECTION_TYPE_WEST, BlockPropertyTypes.WALL_POST_BIT)
                             .build();
         }
         if (BlockTypes.BLAST_FURNACE == null) {
@@ -721,10 +1129,31 @@ public final class BlockTypeDefaultInitializer {
                             .vanillaBlock(BlockId.BLUE_CONCRETE)
                             .build();
         }
+        if (BlockTypes.BLUE_CONCRETE_DOUBLE_SLAB == null) {
+            BlockTypes.BLUE_CONCRETE_DOUBLE_SLAB = AllayBlockType
+                            .builder(BlockDoubleSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.BLUE_CONCRETE_DOUBLE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
         if (BlockTypes.BLUE_CONCRETE_POWDER == null) {
             BlockTypes.BLUE_CONCRETE_POWDER = AllayBlockType
                             .builder(BlockConcretePowderBehaviorImpl.class)
                             .vanillaBlock(BlockId.BLUE_CONCRETE_POWDER)
+                            .build();
+        }
+        if (BlockTypes.BLUE_CONCRETE_SLAB == null) {
+            BlockTypes.BLUE_CONCRETE_SLAB = AllayBlockType
+                            .builder(BlockSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.BLUE_CONCRETE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.BLUE_CONCRETE_STAIRS == null) {
+            BlockTypes.BLUE_CONCRETE_STAIRS = AllayBlockType
+                            .builder(BlockStairsBehaviorImpl.class)
+                            .vanillaBlock(BlockId.BLUE_CONCRETE_STAIRS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.BLUE_GLAZED_TERRACOTTA == null) {
@@ -762,6 +1191,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.BLUE_STAINED_GLASS_PANE = AllayBlockType
                             .builder(BlockGlassPaneBehaviorImpl.class)
                             .vanillaBlock(BlockId.BLUE_STAINED_GLASS_PANE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.BLUE_TERRACOTTA == null) {
@@ -774,6 +1204,27 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.BLUE_WOOL = AllayBlockType
                             .builder(BlockWoolBehaviorImpl.class)
                             .vanillaBlock(BlockId.BLUE_WOOL)
+                            .build();
+        }
+        if (BlockTypes.BLUE_WOOL_DOUBLE_SLAB == null) {
+            BlockTypes.BLUE_WOOL_DOUBLE_SLAB = AllayBlockType
+                            .builder(BlockDoubleSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.BLUE_WOOL_DOUBLE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.BLUE_WOOL_SLAB == null) {
+            BlockTypes.BLUE_WOOL_SLAB = AllayBlockType
+                            .builder(BlockSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.BLUE_WOOL_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.BLUE_WOOL_STAIRS == null) {
+            BlockTypes.BLUE_WOOL_STAIRS = AllayBlockType
+                            .builder(BlockStairsBehaviorImpl.class)
+                            .vanillaBlock(BlockId.BLUE_WOOL_STAIRS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.BONE_BLOCK == null) {
@@ -853,7 +1304,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.BRICK_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.BRICK_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.BRICK_WALL == null) {
@@ -889,10 +1340,31 @@ public final class BlockTypeDefaultInitializer {
                             .vanillaBlock(BlockId.BROWN_CONCRETE)
                             .build();
         }
+        if (BlockTypes.BROWN_CONCRETE_DOUBLE_SLAB == null) {
+            BlockTypes.BROWN_CONCRETE_DOUBLE_SLAB = AllayBlockType
+                            .builder(BlockDoubleSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.BROWN_CONCRETE_DOUBLE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
         if (BlockTypes.BROWN_CONCRETE_POWDER == null) {
             BlockTypes.BROWN_CONCRETE_POWDER = AllayBlockType
                             .builder(BlockConcretePowderBehaviorImpl.class)
                             .vanillaBlock(BlockId.BROWN_CONCRETE_POWDER)
+                            .build();
+        }
+        if (BlockTypes.BROWN_CONCRETE_SLAB == null) {
+            BlockTypes.BROWN_CONCRETE_SLAB = AllayBlockType
+                            .builder(BlockSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.BROWN_CONCRETE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.BROWN_CONCRETE_STAIRS == null) {
+            BlockTypes.BROWN_CONCRETE_STAIRS = AllayBlockType
+                            .builder(BlockStairsBehaviorImpl.class)
+                            .vanillaBlock(BlockId.BROWN_CONCRETE_STAIRS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.BROWN_GLAZED_TERRACOTTA == null) {
@@ -931,6 +1403,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.BROWN_STAINED_GLASS_PANE = AllayBlockType
                             .builder(BlockGlassPaneBehaviorImpl.class)
                             .vanillaBlock(BlockId.BROWN_STAINED_GLASS_PANE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.BROWN_TERRACOTTA == null) {
@@ -943,6 +1416,27 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.BROWN_WOOL = AllayBlockType
                             .builder(BlockWoolBehaviorImpl.class)
                             .vanillaBlock(BlockId.BROWN_WOOL)
+                            .build();
+        }
+        if (BlockTypes.BROWN_WOOL_DOUBLE_SLAB == null) {
+            BlockTypes.BROWN_WOOL_DOUBLE_SLAB = AllayBlockType
+                            .builder(BlockDoubleSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.BROWN_WOOL_DOUBLE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.BROWN_WOOL_SLAB == null) {
+            BlockTypes.BROWN_WOOL_SLAB = AllayBlockType
+                            .builder(BlockSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.BROWN_WOOL_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.BROWN_WOOL_STAIRS == null) {
+            BlockTypes.BROWN_WOOL_STAIRS = AllayBlockType
+                            .builder(BlockStairsBehaviorImpl.class)
+                            .vanillaBlock(BlockId.BROWN_WOOL_STAIRS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.BUBBLE_COLUMN == null) {
@@ -1054,7 +1548,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.CARROTS = AllayBlockType
                             .builder(BlockCarrotsBehaviorImpl.class)
                             .vanillaBlock(BlockId.CARROTS)
-                            .setProperties(BlockPropertyTypes.GROWTH)
+                            .setProperties(BlockPropertyTypes.GROWTH_8)
                             .build();
         }
         if (BlockTypes.CARTOGRAPHY_TABLE == null) {
@@ -1143,6 +1637,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.CHERRY_FENCE = AllayBlockType
                             .builder(BlockFenceBehaviorImpl.class)
                             .vanillaBlock(BlockId.CHERRY_FENCE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.CHERRY_FENCE_GATE == null) {
@@ -1211,7 +1706,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.CHERRY_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.CHERRY_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.CHERRY_STANDING_SIGN == null) {
@@ -1361,12 +1856,6 @@ public final class BlockTypeDefaultInitializer {
                             .vanillaBlock(BlockId.CINNABAR)
                             .build();
         }
-        if (BlockTypes.CINNABAR_BRICKS == null) {
-            BlockTypes.CINNABAR_BRICKS = AllayBlockType
-                            .builder(BlockBricksBehaviorImpl.class)
-                            .vanillaBlock(BlockId.CINNABAR_BRICKS)
-                            .build();
-        }
         if (BlockTypes.CINNABAR_BRICK_DOUBLE_SLAB == null) {
             BlockTypes.CINNABAR_BRICK_DOUBLE_SLAB = AllayBlockType
                             .builder(BlockDoubleSlabBehaviorImpl.class)
@@ -1385,7 +1874,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.CINNABAR_BRICK_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.CINNABAR_BRICK_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.CINNABAR_BRICK_WALL == null) {
@@ -1393,6 +1882,12 @@ public final class BlockTypeDefaultInitializer {
                             .builder(BlockWallBehaviorImpl.class)
                             .vanillaBlock(BlockId.CINNABAR_BRICK_WALL)
                             .setProperties(BlockPropertyTypes.WALL_CONNECTION_TYPE_EAST, BlockPropertyTypes.WALL_CONNECTION_TYPE_NORTH, BlockPropertyTypes.WALL_CONNECTION_TYPE_SOUTH, BlockPropertyTypes.WALL_CONNECTION_TYPE_WEST, BlockPropertyTypes.WALL_POST_BIT)
+                            .build();
+        }
+        if (BlockTypes.CINNABAR_BRICKS == null) {
+            BlockTypes.CINNABAR_BRICKS = AllayBlockType
+                            .builder(BlockBricksBehaviorImpl.class)
+                            .vanillaBlock(BlockId.CINNABAR_BRICKS)
                             .build();
         }
         if (BlockTypes.CINNABAR_DOUBLE_SLAB == null) {
@@ -1413,7 +1908,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.CINNABAR_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.CINNABAR_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.CINNABAR_WALL == null) {
@@ -1483,7 +1978,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.COBBLED_DEEPSLATE_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.COBBLED_DEEPSLATE_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.COBBLED_DEEPSLATE_WALL == null) {
@@ -1586,6 +2081,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.COPPER_BARS = AllayBlockType
                             .builder(BlockCopperBarsBehaviorImpl.class)
                             .vanillaBlock(BlockId.COPPER_BARS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.COPPER_BLOCK == null) {
@@ -1750,6 +2246,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.CRIMSON_FENCE = AllayBlockType
                             .builder(BlockFenceBehaviorImpl.class)
                             .vanillaBlock(BlockId.CRIMSON_FENCE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.CRIMSON_FENCE_GATE == null) {
@@ -1822,7 +2319,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.CRIMSON_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.CRIMSON_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.CRIMSON_STANDING_SIGN == null) {
@@ -1876,7 +2373,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.CUT_COPPER_STAIRS = AllayBlockType
                             .builder(BlockCopperStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.CUT_COPPER_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.CUT_RED_SANDSTONE == null) {
@@ -1945,10 +2442,31 @@ public final class BlockTypeDefaultInitializer {
                             .vanillaBlock(BlockId.CYAN_CONCRETE)
                             .build();
         }
+        if (BlockTypes.CYAN_CONCRETE_DOUBLE_SLAB == null) {
+            BlockTypes.CYAN_CONCRETE_DOUBLE_SLAB = AllayBlockType
+                            .builder(BlockDoubleSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.CYAN_CONCRETE_DOUBLE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
         if (BlockTypes.CYAN_CONCRETE_POWDER == null) {
             BlockTypes.CYAN_CONCRETE_POWDER = AllayBlockType
                             .builder(BlockConcretePowderBehaviorImpl.class)
                             .vanillaBlock(BlockId.CYAN_CONCRETE_POWDER)
+                            .build();
+        }
+        if (BlockTypes.CYAN_CONCRETE_SLAB == null) {
+            BlockTypes.CYAN_CONCRETE_SLAB = AllayBlockType
+                            .builder(BlockSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.CYAN_CONCRETE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.CYAN_CONCRETE_STAIRS == null) {
+            BlockTypes.CYAN_CONCRETE_STAIRS = AllayBlockType
+                            .builder(BlockStairsBehaviorImpl.class)
+                            .vanillaBlock(BlockId.CYAN_CONCRETE_STAIRS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.CYAN_GLAZED_TERRACOTTA == null) {
@@ -1974,6 +2492,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.CYAN_STAINED_GLASS_PANE = AllayBlockType
                             .builder(BlockGlassPaneBehaviorImpl.class)
                             .vanillaBlock(BlockId.CYAN_STAINED_GLASS_PANE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.CYAN_TERRACOTTA == null) {
@@ -1988,6 +2507,27 @@ public final class BlockTypeDefaultInitializer {
                             .vanillaBlock(BlockId.CYAN_WOOL)
                             .build();
         }
+        if (BlockTypes.CYAN_WOOL_DOUBLE_SLAB == null) {
+            BlockTypes.CYAN_WOOL_DOUBLE_SLAB = AllayBlockType
+                            .builder(BlockDoubleSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.CYAN_WOOL_DOUBLE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.CYAN_WOOL_SLAB == null) {
+            BlockTypes.CYAN_WOOL_SLAB = AllayBlockType
+                            .builder(BlockSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.CYAN_WOOL_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.CYAN_WOOL_STAIRS == null) {
+            BlockTypes.CYAN_WOOL_STAIRS = AllayBlockType
+                            .builder(BlockStairsBehaviorImpl.class)
+                            .vanillaBlock(BlockId.CYAN_WOOL_STAIRS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .build();
+        }
         if (BlockTypes.DAMAGED_ANVIL == null) {
             BlockTypes.DAMAGED_ANVIL = AllayBlockType
                             .builder(BlockAnvilBehaviorImpl.class)
@@ -1999,20 +2539,6 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.DANDELION = AllayBlockType
                             .builder(BlockSmallFlowerImpl.class)
                             .vanillaBlock(BlockId.DANDELION)
-                            .build();
-        }
-        if (BlockTypes.DARKOAK_STANDING_SIGN == null) {
-            BlockTypes.DARKOAK_STANDING_SIGN = AllayBlockType
-                            .builder(BlockSignBehaviorImpl.class)
-                            .vanillaBlock(BlockId.DARKOAK_STANDING_SIGN)
-                            .setProperties(BlockPropertyTypes.GROUND_SIGN_DIRECTION)
-                            .build();
-        }
-        if (BlockTypes.DARKOAK_WALL_SIGN == null) {
-            BlockTypes.DARKOAK_WALL_SIGN = AllayBlockType
-                            .builder(BlockSignBehaviorImpl.class)
-                            .vanillaBlock(BlockId.DARKOAK_WALL_SIGN)
-                            .setProperties(BlockPropertyTypes.FACING_DIRECTION)
                             .build();
         }
         if (BlockTypes.DARK_OAK_BUTTON == null) {
@@ -2040,6 +2566,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.DARK_OAK_FENCE = AllayBlockType
                             .builder(BlockFenceBehaviorImpl.class)
                             .vanillaBlock(BlockId.DARK_OAK_FENCE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.DARK_OAK_FENCE_GATE == null) {
@@ -2108,7 +2635,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.DARK_OAK_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.DARK_OAK_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.DARK_OAK_TRAPDOOR == null) {
@@ -2149,7 +2676,21 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.DARK_PRISMARINE_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.DARK_PRISMARINE_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .build();
+        }
+        if (BlockTypes.DARKOAK_STANDING_SIGN == null) {
+            BlockTypes.DARKOAK_STANDING_SIGN = AllayBlockType
+                            .builder(BlockSignBehaviorImpl.class)
+                            .vanillaBlock(BlockId.DARKOAK_STANDING_SIGN)
+                            .setProperties(BlockPropertyTypes.GROUND_SIGN_DIRECTION)
+                            .build();
+        }
+        if (BlockTypes.DARKOAK_WALL_SIGN == null) {
+            BlockTypes.DARKOAK_WALL_SIGN = AllayBlockType
+                            .builder(BlockSignBehaviorImpl.class)
+                            .vanillaBlock(BlockId.DARKOAK_WALL_SIGN)
+                            .setProperties(BlockPropertyTypes.FACING_DIRECTION)
                             .build();
         }
         if (BlockTypes.DAYLIGHT_DETECTOR == null) {
@@ -2164,12 +2705,6 @@ public final class BlockTypeDefaultInitializer {
                             .builder(BlockDaylightDetectorBehaviorImpl.class)
                             .vanillaBlock(BlockId.DAYLIGHT_DETECTOR_INVERTED)
                             .setProperties(BlockPropertyTypes.REDSTONE_SIGNAL)
-                            .build();
-        }
-        if (BlockTypes.DEADBUSH == null) {
-            BlockTypes.DEADBUSH = AllayBlockType
-                            .builder(BlockDeadbushBehaviorImpl.class)
-                            .vanillaBlock(BlockId.DEADBUSH)
                             .build();
         }
         if (BlockTypes.DEAD_BRAIN_CORAL == null) {
@@ -2302,6 +2837,12 @@ public final class BlockTypeDefaultInitializer {
                             .setProperties(BlockPropertyTypes.CORAL_DIRECTION)
                             .build();
         }
+        if (BlockTypes.DEADBUSH == null) {
+            BlockTypes.DEADBUSH = AllayBlockType
+                            .builder(BlockDeadbushBehaviorImpl.class)
+                            .vanillaBlock(BlockId.DEADBUSH)
+                            .build();
+        }
         if (BlockTypes.DECORATED_POT == null) {
             BlockTypes.DECORATED_POT = AllayBlockType
                             .builder(BlockDecoratedPotBehaviorImpl.class)
@@ -2314,12 +2855,6 @@ public final class BlockTypeDefaultInitializer {
                             .builder(BlockDeepslateBehaviorImpl.class)
                             .vanillaBlock(BlockId.DEEPSLATE)
                             .setProperties(BlockPropertyTypes.PILLAR_AXIS)
-                            .build();
-        }
-        if (BlockTypes.DEEPSLATE_BRICKS == null) {
-            BlockTypes.DEEPSLATE_BRICKS = AllayBlockType
-                            .builder(BlockBricksBehaviorImpl.class)
-                            .vanillaBlock(BlockId.DEEPSLATE_BRICKS)
                             .build();
         }
         if (BlockTypes.DEEPSLATE_BRICK_DOUBLE_SLAB == null) {
@@ -2340,7 +2875,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.DEEPSLATE_BRICK_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.DEEPSLATE_BRICK_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.DEEPSLATE_BRICK_WALL == null) {
@@ -2348,6 +2883,12 @@ public final class BlockTypeDefaultInitializer {
                             .builder(BlockWallBehaviorImpl.class)
                             .vanillaBlock(BlockId.DEEPSLATE_BRICK_WALL)
                             .setProperties(BlockPropertyTypes.WALL_CONNECTION_TYPE_EAST, BlockPropertyTypes.WALL_CONNECTION_TYPE_NORTH, BlockPropertyTypes.WALL_CONNECTION_TYPE_SOUTH, BlockPropertyTypes.WALL_CONNECTION_TYPE_WEST, BlockPropertyTypes.WALL_POST_BIT)
+                            .build();
+        }
+        if (BlockTypes.DEEPSLATE_BRICKS == null) {
+            BlockTypes.DEEPSLATE_BRICKS = AllayBlockType
+                            .builder(BlockBricksBehaviorImpl.class)
+                            .vanillaBlock(BlockId.DEEPSLATE_BRICKS)
                             .build();
         }
         if (BlockTypes.DEEPSLATE_COAL_ORE == null) {
@@ -2398,12 +2939,6 @@ public final class BlockTypeDefaultInitializer {
                             .vanillaBlock(BlockId.DEEPSLATE_REDSTONE_ORE)
                             .build();
         }
-        if (BlockTypes.DEEPSLATE_TILES == null) {
-            BlockTypes.DEEPSLATE_TILES = AllayBlockType
-                            .builder(BlockDeepslateTilesBehaviorImpl.class)
-                            .vanillaBlock(BlockId.DEEPSLATE_TILES)
-                            .build();
-        }
         if (BlockTypes.DEEPSLATE_TILE_DOUBLE_SLAB == null) {
             BlockTypes.DEEPSLATE_TILE_DOUBLE_SLAB = AllayBlockType
                             .builder(BlockDoubleSlabBehaviorImpl.class)
@@ -2422,7 +2957,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.DEEPSLATE_TILE_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.DEEPSLATE_TILE_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.DEEPSLATE_TILE_WALL == null) {
@@ -2430,6 +2965,12 @@ public final class BlockTypeDefaultInitializer {
                             .builder(BlockWallBehaviorImpl.class)
                             .vanillaBlock(BlockId.DEEPSLATE_TILE_WALL)
                             .setProperties(BlockPropertyTypes.WALL_CONNECTION_TYPE_EAST, BlockPropertyTypes.WALL_CONNECTION_TYPE_NORTH, BlockPropertyTypes.WALL_CONNECTION_TYPE_SOUTH, BlockPropertyTypes.WALL_CONNECTION_TYPE_WEST, BlockPropertyTypes.WALL_POST_BIT)
+                            .build();
+        }
+        if (BlockTypes.DEEPSLATE_TILES == null) {
+            BlockTypes.DEEPSLATE_TILES = AllayBlockType
+                            .builder(BlockDeepslateTilesBehaviorImpl.class)
+                            .vanillaBlock(BlockId.DEEPSLATE_TILES)
                             .build();
         }
         if (BlockTypes.DENY == null) {
@@ -2502,7 +3043,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.DIORITE_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.DIORITE_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.DIORITE_WALL == null) {
@@ -3316,24 +3857,17 @@ public final class BlockTypeDefaultInitializer {
                             .vanillaBlock(BlockId.ENCHANTING_TABLE)
                             .build();
         }
-        if (BlockTypes.ENDER_CHEST == null) {
-            BlockTypes.ENDER_CHEST = AllayBlockType
-                            .builder(BlockEnderChestBehaviorImpl.class)
-                            .vanillaBlock(BlockId.ENDER_CHEST)
-                            .setProperties(BlockPropertyTypes.MINECRAFT_CARDINAL_DIRECTION)
+        if (BlockTypes.END_BRICK_STAIRS == null) {
+            BlockTypes.END_BRICK_STAIRS = AllayBlockType
+                            .builder(BlockStairsBehaviorImpl.class)
+                            .vanillaBlock(BlockId.END_BRICK_STAIRS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.END_BRICKS == null) {
             BlockTypes.END_BRICKS = AllayBlockType
                             .builder(BlockBricksBehaviorImpl.class)
                             .vanillaBlock(BlockId.END_BRICKS)
-                            .build();
-        }
-        if (BlockTypes.END_BRICK_STAIRS == null) {
-            BlockTypes.END_BRICK_STAIRS = AllayBlockType
-                            .builder(BlockStairsBehaviorImpl.class)
-                            .vanillaBlock(BlockId.END_BRICK_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.END_GATEWAY == null) {
@@ -3389,6 +3923,13 @@ public final class BlockTypeDefaultInitializer {
                             .setProperties(BlockPropertyTypes.WALL_CONNECTION_TYPE_EAST, BlockPropertyTypes.WALL_CONNECTION_TYPE_NORTH, BlockPropertyTypes.WALL_CONNECTION_TYPE_SOUTH, BlockPropertyTypes.WALL_CONNECTION_TYPE_WEST, BlockPropertyTypes.WALL_POST_BIT)
                             .build();
         }
+        if (BlockTypes.ENDER_CHEST == null) {
+            BlockTypes.ENDER_CHEST = AllayBlockType
+                            .builder(BlockEnderChestBehaviorImpl.class)
+                            .vanillaBlock(BlockId.ENDER_CHEST)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CARDINAL_DIRECTION)
+                            .build();
+        }
         if (BlockTypes.EXPOSED_CHISELED_COPPER == null) {
             BlockTypes.EXPOSED_CHISELED_COPPER = AllayBlockType
                             .builder(BlockCopperBehaviorImpl.class)
@@ -3405,6 +3946,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.EXPOSED_COPPER_BARS = AllayBlockType
                             .builder(BlockCopperBarsBehaviorImpl.class)
                             .vanillaBlock(BlockId.EXPOSED_COPPER_BARS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.EXPOSED_COPPER_BULB == null) {
@@ -3423,7 +3965,7 @@ public final class BlockTypeDefaultInitializer {
         }
         if (BlockTypes.EXPOSED_COPPER_CHEST == null) {
             BlockTypes.EXPOSED_COPPER_CHEST = AllayBlockType
-                            .builder(BlockExposedCopperChestBehaviorImpl.class)
+                            .builder(BlockCopperChestBehaviorImpl.class)
                             .vanillaBlock(BlockId.EXPOSED_COPPER_CHEST)
                             .setProperties(BlockPropertyTypes.MINECRAFT_CARDINAL_DIRECTION)
                             .build();
@@ -3479,7 +4021,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.EXPOSED_CUT_COPPER_STAIRS = AllayBlockType
                             .builder(BlockCopperStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.EXPOSED_CUT_COPPER_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.EXPOSED_DOUBLE_CUT_COPPER_SLAB == null) {
@@ -3523,12 +4065,6 @@ public final class BlockTypeDefaultInitializer {
                             .setProperties(BlockPropertyTypes.AGE_16)
                             .build();
         }
-        if (BlockTypes.FIREFLY_BUSH == null) {
-            BlockTypes.FIREFLY_BUSH = AllayBlockType
-                            .builder(BlockFireflyBushBehaviorImpl.class)
-                            .vanillaBlock(BlockId.FIREFLY_BUSH)
-                            .build();
-        }
         if (BlockTypes.FIRE_CORAL == null) {
             BlockTypes.FIRE_CORAL = AllayBlockType
                             .builder(BlockCoralBehaviorImpl.class)
@@ -3555,16 +4091,16 @@ public final class BlockTypeDefaultInitializer {
                             .setProperties(BlockPropertyTypes.CORAL_DIRECTION)
                             .build();
         }
+        if (BlockTypes.FIREFLY_BUSH == null) {
+            BlockTypes.FIREFLY_BUSH = AllayBlockType
+                            .builder(BlockFireflyBushBehaviorImpl.class)
+                            .vanillaBlock(BlockId.FIREFLY_BUSH)
+                            .build();
+        }
         if (BlockTypes.FLETCHING_TABLE == null) {
             BlockTypes.FLETCHING_TABLE = AllayBlockType
                             .builder(BlockFletchingTableBehaviorImpl.class)
                             .vanillaBlock(BlockId.FLETCHING_TABLE)
-                            .build();
-        }
-        if (BlockTypes.FLOWERING_AZALEA == null) {
-            BlockTypes.FLOWERING_AZALEA = AllayBlockType
-                            .builder(BlockFloweringAzaleaBehaviorImpl.class)
-                            .vanillaBlock(BlockId.FLOWERING_AZALEA)
                             .build();
         }
         if (BlockTypes.FLOWER_POT == null) {
@@ -3572,6 +4108,12 @@ public final class BlockTypeDefaultInitializer {
                             .builder(BlockFlowerPotBehaviorImpl.class)
                             .vanillaBlock(BlockId.FLOWER_POT)
                             .setProperties(BlockPropertyTypes.UPDATE_BIT)
+                            .build();
+        }
+        if (BlockTypes.FLOWERING_AZALEA == null) {
+            BlockTypes.FLOWERING_AZALEA = AllayBlockType
+                            .builder(BlockFloweringAzaleaBehaviorImpl.class)
+                            .vanillaBlock(BlockId.FLOWERING_AZALEA)
                             .build();
         }
         if (BlockTypes.FLOWING_LAVA == null) {
@@ -3631,18 +4173,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.GLASS_PANE = AllayBlockType
                             .builder(BlockGlassPaneBehaviorImpl.class)
                             .vanillaBlock(BlockId.GLASS_PANE)
-                            .build();
-        }
-        if (BlockTypes.GLOWINGOBSIDIAN == null) {
-            BlockTypes.GLOWINGOBSIDIAN = AllayBlockType
-                            .builder(BlockGlowingobsidianBehaviorImpl.class)
-                            .vanillaBlock(BlockId.GLOWINGOBSIDIAN)
-                            .build();
-        }
-        if (BlockTypes.GLOWSTONE == null) {
-            BlockTypes.GLOWSTONE = AllayBlockType
-                            .builder(BlockGlowstoneBehaviorImpl.class)
-                            .vanillaBlock(BlockId.GLOWSTONE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.GLOW_FRAME == null) {
@@ -3659,17 +4190,16 @@ public final class BlockTypeDefaultInitializer {
                             .setProperties(BlockPropertyTypes.MULTI_FACE_DIRECTION_BITS)
                             .build();
         }
-        if (BlockTypes.GOLDEN_DANDELION == null) {
-            BlockTypes.GOLDEN_DANDELION = AllayBlockType
-                            .builder(BlockSmallFlowerImpl.class)
-                            .vanillaBlock(BlockId.GOLDEN_DANDELION)
+        if (BlockTypes.GLOWINGOBSIDIAN == null) {
+            BlockTypes.GLOWINGOBSIDIAN = AllayBlockType
+                            .builder(BlockGlowingobsidianBehaviorImpl.class)
+                            .vanillaBlock(BlockId.GLOWINGOBSIDIAN)
                             .build();
         }
-        if (BlockTypes.GOLDEN_RAIL == null) {
-            BlockTypes.GOLDEN_RAIL = AllayBlockType
-                            .builder(BlockGoldenRailBehaviorImpl.class)
-                            .vanillaBlock(BlockId.GOLDEN_RAIL)
-                            .setProperties(BlockPropertyTypes.RAIL_DATA_BIT, BlockPropertyTypes.RAIL_DIRECTION_6)
+        if (BlockTypes.GLOWSTONE == null) {
+            BlockTypes.GLOWSTONE = AllayBlockType
+                            .builder(BlockGlowstoneBehaviorImpl.class)
+                            .vanillaBlock(BlockId.GLOWSTONE)
                             .build();
         }
         if (BlockTypes.GOLD_BLOCK == null) {
@@ -3682,6 +4212,19 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.GOLD_ORE = AllayBlockType
                             .builder(BlockOreBehaviorImpl.class)
                             .vanillaBlock(BlockId.GOLD_ORE)
+                            .build();
+        }
+        if (BlockTypes.GOLDEN_DANDELION == null) {
+            BlockTypes.GOLDEN_DANDELION = AllayBlockType
+                            .builder(BlockSmallFlowerImpl.class)
+                            .vanillaBlock(BlockId.GOLDEN_DANDELION)
+                            .build();
+        }
+        if (BlockTypes.GOLDEN_RAIL == null) {
+            BlockTypes.GOLDEN_RAIL = AllayBlockType
+                            .builder(BlockGoldenRailBehaviorImpl.class)
+                            .vanillaBlock(BlockId.GOLDEN_RAIL)
+                            .setProperties(BlockPropertyTypes.RAIL_DATA_BIT, BlockPropertyTypes.RAIL_DIRECTION_6)
                             .build();
         }
         if (BlockTypes.GRANITE == null) {
@@ -3708,7 +4251,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.GRANITE_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.GRANITE_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.GRANITE_WALL == null) {
@@ -3762,10 +4305,31 @@ public final class BlockTypeDefaultInitializer {
                             .vanillaBlock(BlockId.GRAY_CONCRETE)
                             .build();
         }
+        if (BlockTypes.GRAY_CONCRETE_DOUBLE_SLAB == null) {
+            BlockTypes.GRAY_CONCRETE_DOUBLE_SLAB = AllayBlockType
+                            .builder(BlockDoubleSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.GRAY_CONCRETE_DOUBLE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
         if (BlockTypes.GRAY_CONCRETE_POWDER == null) {
             BlockTypes.GRAY_CONCRETE_POWDER = AllayBlockType
                             .builder(BlockConcretePowderBehaviorImpl.class)
                             .vanillaBlock(BlockId.GRAY_CONCRETE_POWDER)
+                            .build();
+        }
+        if (BlockTypes.GRAY_CONCRETE_SLAB == null) {
+            BlockTypes.GRAY_CONCRETE_SLAB = AllayBlockType
+                            .builder(BlockSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.GRAY_CONCRETE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.GRAY_CONCRETE_STAIRS == null) {
+            BlockTypes.GRAY_CONCRETE_STAIRS = AllayBlockType
+                            .builder(BlockStairsBehaviorImpl.class)
+                            .vanillaBlock(BlockId.GRAY_CONCRETE_STAIRS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.GRAY_GLAZED_TERRACOTTA == null) {
@@ -3791,6 +4355,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.GRAY_STAINED_GLASS_PANE = AllayBlockType
                             .builder(BlockGlassPaneBehaviorImpl.class)
                             .vanillaBlock(BlockId.GRAY_STAINED_GLASS_PANE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.GRAY_TERRACOTTA == null) {
@@ -3803,6 +4368,27 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.GRAY_WOOL = AllayBlockType
                             .builder(BlockWoolBehaviorImpl.class)
                             .vanillaBlock(BlockId.GRAY_WOOL)
+                            .build();
+        }
+        if (BlockTypes.GRAY_WOOL_DOUBLE_SLAB == null) {
+            BlockTypes.GRAY_WOOL_DOUBLE_SLAB = AllayBlockType
+                            .builder(BlockDoubleSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.GRAY_WOOL_DOUBLE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.GRAY_WOOL_SLAB == null) {
+            BlockTypes.GRAY_WOOL_SLAB = AllayBlockType
+                            .builder(BlockSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.GRAY_WOOL_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.GRAY_WOOL_STAIRS == null) {
+            BlockTypes.GRAY_WOOL_STAIRS = AllayBlockType
+                            .builder(BlockStairsBehaviorImpl.class)
+                            .vanillaBlock(BlockId.GRAY_WOOL_STAIRS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.GREEN_CANDLE == null) {
@@ -3831,10 +4417,31 @@ public final class BlockTypeDefaultInitializer {
                             .vanillaBlock(BlockId.GREEN_CONCRETE)
                             .build();
         }
+        if (BlockTypes.GREEN_CONCRETE_DOUBLE_SLAB == null) {
+            BlockTypes.GREEN_CONCRETE_DOUBLE_SLAB = AllayBlockType
+                            .builder(BlockDoubleSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.GREEN_CONCRETE_DOUBLE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
         if (BlockTypes.GREEN_CONCRETE_POWDER == null) {
             BlockTypes.GREEN_CONCRETE_POWDER = AllayBlockType
                             .builder(BlockConcretePowderBehaviorImpl.class)
                             .vanillaBlock(BlockId.GREEN_CONCRETE_POWDER)
+                            .build();
+        }
+        if (BlockTypes.GREEN_CONCRETE_SLAB == null) {
+            BlockTypes.GREEN_CONCRETE_SLAB = AllayBlockType
+                            .builder(BlockSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.GREEN_CONCRETE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.GREEN_CONCRETE_STAIRS == null) {
+            BlockTypes.GREEN_CONCRETE_STAIRS = AllayBlockType
+                            .builder(BlockStairsBehaviorImpl.class)
+                            .vanillaBlock(BlockId.GREEN_CONCRETE_STAIRS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.GREEN_GLAZED_TERRACOTTA == null) {
@@ -3860,6 +4467,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.GREEN_STAINED_GLASS_PANE = AllayBlockType
                             .builder(BlockGlassPaneBehaviorImpl.class)
                             .vanillaBlock(BlockId.GREEN_STAINED_GLASS_PANE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.GREEN_TERRACOTTA == null) {
@@ -3872,6 +4480,27 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.GREEN_WOOL = AllayBlockType
                             .builder(BlockWoolBehaviorImpl.class)
                             .vanillaBlock(BlockId.GREEN_WOOL)
+                            .build();
+        }
+        if (BlockTypes.GREEN_WOOL_DOUBLE_SLAB == null) {
+            BlockTypes.GREEN_WOOL_DOUBLE_SLAB = AllayBlockType
+                            .builder(BlockDoubleSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.GREEN_WOOL_DOUBLE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.GREEN_WOOL_SLAB == null) {
+            BlockTypes.GREEN_WOOL_SLAB = AllayBlockType
+                            .builder(BlockSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.GREEN_WOOL_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.GREEN_WOOL_STAIRS == null) {
+            BlockTypes.GREEN_WOOL_STAIRS = AllayBlockType
+                            .builder(BlockStairsBehaviorImpl.class)
+                            .vanillaBlock(BlockId.GREEN_WOOL_STAIRS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.GRINDSTONE == null) {
@@ -3887,12 +4516,6 @@ public final class BlockTypeDefaultInitializer {
                             .vanillaBlock(BlockId.HANGING_ROOTS)
                             .build();
         }
-        if (BlockTypes.HARDENED_CLAY == null) {
-            BlockTypes.HARDENED_CLAY = AllayBlockType
-                            .builder(BlockHardenedClayBehaviorImpl.class)
-                            .vanillaBlock(BlockId.HARDENED_CLAY)
-                            .build();
-        }
         if (BlockTypes.HARD_BLACK_STAINED_GLASS == null) {
             BlockTypes.HARD_BLACK_STAINED_GLASS = AllayBlockType
                             .builder(BlockGlassBehaviorImpl.class)
@@ -3903,6 +4526,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.HARD_BLACK_STAINED_GLASS_PANE = AllayBlockType
                             .builder(BlockGlassPaneBehaviorImpl.class)
                             .vanillaBlock(BlockId.HARD_BLACK_STAINED_GLASS_PANE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.HARD_BLUE_STAINED_GLASS == null) {
@@ -3915,6 +4539,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.HARD_BLUE_STAINED_GLASS_PANE = AllayBlockType
                             .builder(BlockGlassPaneBehaviorImpl.class)
                             .vanillaBlock(BlockId.HARD_BLUE_STAINED_GLASS_PANE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.HARD_BROWN_STAINED_GLASS == null) {
@@ -3927,6 +4552,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.HARD_BROWN_STAINED_GLASS_PANE = AllayBlockType
                             .builder(BlockGlassPaneBehaviorImpl.class)
                             .vanillaBlock(BlockId.HARD_BROWN_STAINED_GLASS_PANE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.HARD_CYAN_STAINED_GLASS == null) {
@@ -3939,6 +4565,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.HARD_CYAN_STAINED_GLASS_PANE = AllayBlockType
                             .builder(BlockGlassPaneBehaviorImpl.class)
                             .vanillaBlock(BlockId.HARD_CYAN_STAINED_GLASS_PANE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.HARD_GLASS == null) {
@@ -3951,6 +4578,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.HARD_GLASS_PANE = AllayBlockType
                             .builder(BlockGlassPaneBehaviorImpl.class)
                             .vanillaBlock(BlockId.HARD_GLASS_PANE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.HARD_GRAY_STAINED_GLASS == null) {
@@ -3963,6 +4591,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.HARD_GRAY_STAINED_GLASS_PANE = AllayBlockType
                             .builder(BlockGlassPaneBehaviorImpl.class)
                             .vanillaBlock(BlockId.HARD_GRAY_STAINED_GLASS_PANE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.HARD_GREEN_STAINED_GLASS == null) {
@@ -3975,6 +4604,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.HARD_GREEN_STAINED_GLASS_PANE = AllayBlockType
                             .builder(BlockGlassPaneBehaviorImpl.class)
                             .vanillaBlock(BlockId.HARD_GREEN_STAINED_GLASS_PANE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.HARD_LIGHT_BLUE_STAINED_GLASS == null) {
@@ -3987,6 +4617,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.HARD_LIGHT_BLUE_STAINED_GLASS_PANE = AllayBlockType
                             .builder(BlockGlassPaneBehaviorImpl.class)
                             .vanillaBlock(BlockId.HARD_LIGHT_BLUE_STAINED_GLASS_PANE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.HARD_LIGHT_GRAY_STAINED_GLASS == null) {
@@ -3999,6 +4630,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.HARD_LIGHT_GRAY_STAINED_GLASS_PANE = AllayBlockType
                             .builder(BlockGlassPaneBehaviorImpl.class)
                             .vanillaBlock(BlockId.HARD_LIGHT_GRAY_STAINED_GLASS_PANE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.HARD_LIME_STAINED_GLASS == null) {
@@ -4011,6 +4643,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.HARD_LIME_STAINED_GLASS_PANE = AllayBlockType
                             .builder(BlockGlassPaneBehaviorImpl.class)
                             .vanillaBlock(BlockId.HARD_LIME_STAINED_GLASS_PANE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.HARD_MAGENTA_STAINED_GLASS == null) {
@@ -4023,6 +4656,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.HARD_MAGENTA_STAINED_GLASS_PANE = AllayBlockType
                             .builder(BlockGlassPaneBehaviorImpl.class)
                             .vanillaBlock(BlockId.HARD_MAGENTA_STAINED_GLASS_PANE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.HARD_ORANGE_STAINED_GLASS == null) {
@@ -4035,6 +4669,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.HARD_ORANGE_STAINED_GLASS_PANE = AllayBlockType
                             .builder(BlockGlassPaneBehaviorImpl.class)
                             .vanillaBlock(BlockId.HARD_ORANGE_STAINED_GLASS_PANE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.HARD_PINK_STAINED_GLASS == null) {
@@ -4047,6 +4682,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.HARD_PINK_STAINED_GLASS_PANE = AllayBlockType
                             .builder(BlockGlassPaneBehaviorImpl.class)
                             .vanillaBlock(BlockId.HARD_PINK_STAINED_GLASS_PANE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.HARD_PURPLE_STAINED_GLASS == null) {
@@ -4059,6 +4695,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.HARD_PURPLE_STAINED_GLASS_PANE = AllayBlockType
                             .builder(BlockGlassPaneBehaviorImpl.class)
                             .vanillaBlock(BlockId.HARD_PURPLE_STAINED_GLASS_PANE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.HARD_RED_STAINED_GLASS == null) {
@@ -4071,6 +4708,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.HARD_RED_STAINED_GLASS_PANE = AllayBlockType
                             .builder(BlockGlassPaneBehaviorImpl.class)
                             .vanillaBlock(BlockId.HARD_RED_STAINED_GLASS_PANE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.HARD_WHITE_STAINED_GLASS == null) {
@@ -4083,6 +4721,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.HARD_WHITE_STAINED_GLASS_PANE = AllayBlockType
                             .builder(BlockGlassPaneBehaviorImpl.class)
                             .vanillaBlock(BlockId.HARD_WHITE_STAINED_GLASS_PANE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.HARD_YELLOW_STAINED_GLASS == null) {
@@ -4095,6 +4734,13 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.HARD_YELLOW_STAINED_GLASS_PANE = AllayBlockType
                             .builder(BlockGlassPaneBehaviorImpl.class)
                             .vanillaBlock(BlockId.HARD_YELLOW_STAINED_GLASS_PANE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
+                            .build();
+        }
+        if (BlockTypes.HARDENED_CLAY == null) {
+            BlockTypes.HARDENED_CLAY = AllayBlockType
+                            .builder(BlockHardenedClayBehaviorImpl.class)
+                            .vanillaBlock(BlockId.HARDENED_CLAY)
                             .build();
         }
         if (BlockTypes.HAY_BLOCK == null) {
@@ -4117,16 +4763,16 @@ public final class BlockTypeDefaultInitializer {
                             .setProperties(BlockPropertyTypes.REDSTONE_SIGNAL)
                             .build();
         }
-        if (BlockTypes.HONEYCOMB_BLOCK == null) {
-            BlockTypes.HONEYCOMB_BLOCK = AllayBlockType
-                            .builder(BlockHoneycombBlockBehaviorImpl.class)
-                            .vanillaBlock(BlockId.HONEYCOMB_BLOCK)
-                            .build();
-        }
         if (BlockTypes.HONEY_BLOCK == null) {
             BlockTypes.HONEY_BLOCK = AllayBlockType
                             .builder(BlockHoneyBlockBehaviorImpl.class)
                             .vanillaBlock(BlockId.HONEY_BLOCK)
+                            .build();
+        }
+        if (BlockTypes.HONEYCOMB_BLOCK == null) {
+            BlockTypes.HONEYCOMB_BLOCK = AllayBlockType
+                            .builder(BlockHoneycombBlockBehaviorImpl.class)
+                            .vanillaBlock(BlockId.HONEYCOMB_BLOCK)
                             .build();
         }
         if (BlockTypes.HOPPER == null) {
@@ -4233,6 +4879,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.IRON_BARS = AllayBlockType
                             .builder(BlockIronBarsBehaviorImpl.class)
                             .vanillaBlock(BlockId.IRON_BARS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.IRON_BLOCK == null) {
@@ -4306,6 +4953,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.JUNGLE_FENCE = AllayBlockType
                             .builder(BlockFenceBehaviorImpl.class)
                             .vanillaBlock(BlockId.JUNGLE_FENCE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.JUNGLE_FENCE_GATE == null) {
@@ -4374,7 +5022,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.JUNGLE_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.JUNGLE_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.JUNGLE_STANDING_SIGN == null) {
@@ -4470,7 +5118,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.LEAF_LITTER = AllayBlockType
                             .builder(BlockPlantPileImpl.class)
                             .vanillaBlock(BlockId.LEAF_LITTER)
-                            .setProperties(BlockPropertyTypes.GROWTH, BlockPropertyTypes.MINECRAFT_CARDINAL_DIRECTION)
+                            .setProperties(BlockPropertyTypes.GROWTH_8, BlockPropertyTypes.MINECRAFT_CARDINAL_DIRECTION)
                             .build();
         }
         if (BlockTypes.LECTERN == null) {
@@ -4485,13 +5133,6 @@ public final class BlockTypeDefaultInitializer {
                             .builder(BlockLeverBehaviorImpl.class)
                             .vanillaBlock(BlockId.LEVER)
                             .setProperties(BlockPropertyTypes.LEVER_DIRECTION, BlockPropertyTypes.OPEN_BIT)
-                            .build();
-        }
-        if (BlockTypes.LIGHTNING_ROD == null) {
-            BlockTypes.LIGHTNING_ROD = AllayBlockType
-                            .builder(BlockLightningRodBehaviorImpl.class)
-                            .vanillaBlock(BlockId.LIGHTNING_ROD)
-                            .setProperties(BlockPropertyTypes.FACING_DIRECTION, BlockPropertyTypes.POWERED_BIT)
                             .build();
         }
         if (BlockTypes.LIGHT_BLOCK_0 == null) {
@@ -4616,10 +5257,31 @@ public final class BlockTypeDefaultInitializer {
                             .vanillaBlock(BlockId.LIGHT_BLUE_CONCRETE)
                             .build();
         }
+        if (BlockTypes.LIGHT_BLUE_CONCRETE_DOUBLE_SLAB == null) {
+            BlockTypes.LIGHT_BLUE_CONCRETE_DOUBLE_SLAB = AllayBlockType
+                            .builder(BlockDoubleSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.LIGHT_BLUE_CONCRETE_DOUBLE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
         if (BlockTypes.LIGHT_BLUE_CONCRETE_POWDER == null) {
             BlockTypes.LIGHT_BLUE_CONCRETE_POWDER = AllayBlockType
                             .builder(BlockConcretePowderBehaviorImpl.class)
                             .vanillaBlock(BlockId.LIGHT_BLUE_CONCRETE_POWDER)
+                            .build();
+        }
+        if (BlockTypes.LIGHT_BLUE_CONCRETE_SLAB == null) {
+            BlockTypes.LIGHT_BLUE_CONCRETE_SLAB = AllayBlockType
+                            .builder(BlockSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.LIGHT_BLUE_CONCRETE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.LIGHT_BLUE_CONCRETE_STAIRS == null) {
+            BlockTypes.LIGHT_BLUE_CONCRETE_STAIRS = AllayBlockType
+                            .builder(BlockStairsBehaviorImpl.class)
+                            .vanillaBlock(BlockId.LIGHT_BLUE_CONCRETE_STAIRS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.LIGHT_BLUE_GLAZED_TERRACOTTA == null) {
@@ -4645,6 +5307,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.LIGHT_BLUE_STAINED_GLASS_PANE = AllayBlockType
                             .builder(BlockGlassPaneBehaviorImpl.class)
                             .vanillaBlock(BlockId.LIGHT_BLUE_STAINED_GLASS_PANE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.LIGHT_BLUE_TERRACOTTA == null) {
@@ -4657,6 +5320,27 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.LIGHT_BLUE_WOOL = AllayBlockType
                             .builder(BlockWoolBehaviorImpl.class)
                             .vanillaBlock(BlockId.LIGHT_BLUE_WOOL)
+                            .build();
+        }
+        if (BlockTypes.LIGHT_BLUE_WOOL_DOUBLE_SLAB == null) {
+            BlockTypes.LIGHT_BLUE_WOOL_DOUBLE_SLAB = AllayBlockType
+                            .builder(BlockDoubleSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.LIGHT_BLUE_WOOL_DOUBLE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.LIGHT_BLUE_WOOL_SLAB == null) {
+            BlockTypes.LIGHT_BLUE_WOOL_SLAB = AllayBlockType
+                            .builder(BlockSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.LIGHT_BLUE_WOOL_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.LIGHT_BLUE_WOOL_STAIRS == null) {
+            BlockTypes.LIGHT_BLUE_WOOL_STAIRS = AllayBlockType
+                            .builder(BlockStairsBehaviorImpl.class)
+                            .vanillaBlock(BlockId.LIGHT_BLUE_WOOL_STAIRS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.LIGHT_GRAY_CANDLE == null) {
@@ -4685,10 +5369,31 @@ public final class BlockTypeDefaultInitializer {
                             .vanillaBlock(BlockId.LIGHT_GRAY_CONCRETE)
                             .build();
         }
+        if (BlockTypes.LIGHT_GRAY_CONCRETE_DOUBLE_SLAB == null) {
+            BlockTypes.LIGHT_GRAY_CONCRETE_DOUBLE_SLAB = AllayBlockType
+                            .builder(BlockDoubleSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.LIGHT_GRAY_CONCRETE_DOUBLE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
         if (BlockTypes.LIGHT_GRAY_CONCRETE_POWDER == null) {
             BlockTypes.LIGHT_GRAY_CONCRETE_POWDER = AllayBlockType
                             .builder(BlockConcretePowderBehaviorImpl.class)
                             .vanillaBlock(BlockId.LIGHT_GRAY_CONCRETE_POWDER)
+                            .build();
+        }
+        if (BlockTypes.LIGHT_GRAY_CONCRETE_SLAB == null) {
+            BlockTypes.LIGHT_GRAY_CONCRETE_SLAB = AllayBlockType
+                            .builder(BlockSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.LIGHT_GRAY_CONCRETE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.LIGHT_GRAY_CONCRETE_STAIRS == null) {
+            BlockTypes.LIGHT_GRAY_CONCRETE_STAIRS = AllayBlockType
+                            .builder(BlockStairsBehaviorImpl.class)
+                            .vanillaBlock(BlockId.LIGHT_GRAY_CONCRETE_STAIRS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.LIGHT_GRAY_SHULKER_BOX == null) {
@@ -4707,6 +5412,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.LIGHT_GRAY_STAINED_GLASS_PANE = AllayBlockType
                             .builder(BlockGlassPaneBehaviorImpl.class)
                             .vanillaBlock(BlockId.LIGHT_GRAY_STAINED_GLASS_PANE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.LIGHT_GRAY_TERRACOTTA == null) {
@@ -4721,11 +5427,39 @@ public final class BlockTypeDefaultInitializer {
                             .vanillaBlock(BlockId.LIGHT_GRAY_WOOL)
                             .build();
         }
+        if (BlockTypes.LIGHT_GRAY_WOOL_DOUBLE_SLAB == null) {
+            BlockTypes.LIGHT_GRAY_WOOL_DOUBLE_SLAB = AllayBlockType
+                            .builder(BlockDoubleSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.LIGHT_GRAY_WOOL_DOUBLE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.LIGHT_GRAY_WOOL_SLAB == null) {
+            BlockTypes.LIGHT_GRAY_WOOL_SLAB = AllayBlockType
+                            .builder(BlockSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.LIGHT_GRAY_WOOL_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.LIGHT_GRAY_WOOL_STAIRS == null) {
+            BlockTypes.LIGHT_GRAY_WOOL_STAIRS = AllayBlockType
+                            .builder(BlockStairsBehaviorImpl.class)
+                            .vanillaBlock(BlockId.LIGHT_GRAY_WOOL_STAIRS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .build();
+        }
         if (BlockTypes.LIGHT_WEIGHTED_PRESSURE_PLATE == null) {
             BlockTypes.LIGHT_WEIGHTED_PRESSURE_PLATE = AllayBlockType
                             .builder(BlockPressurePlateBehaviorImpl.class)
                             .vanillaBlock(BlockId.LIGHT_WEIGHTED_PRESSURE_PLATE)
                             .setProperties(BlockPropertyTypes.REDSTONE_SIGNAL)
+                            .build();
+        }
+        if (BlockTypes.LIGHTNING_ROD == null) {
+            BlockTypes.LIGHTNING_ROD = AllayBlockType
+                            .builder(BlockLightningRodBehaviorImpl.class)
+                            .vanillaBlock(BlockId.LIGHTNING_ROD)
+                            .setProperties(BlockPropertyTypes.FACING_DIRECTION, BlockPropertyTypes.POWERED_BIT)
                             .build();
         }
         if (BlockTypes.LILAC == null) {
@@ -4767,10 +5501,31 @@ public final class BlockTypeDefaultInitializer {
                             .vanillaBlock(BlockId.LIME_CONCRETE)
                             .build();
         }
+        if (BlockTypes.LIME_CONCRETE_DOUBLE_SLAB == null) {
+            BlockTypes.LIME_CONCRETE_DOUBLE_SLAB = AllayBlockType
+                            .builder(BlockDoubleSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.LIME_CONCRETE_DOUBLE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
         if (BlockTypes.LIME_CONCRETE_POWDER == null) {
             BlockTypes.LIME_CONCRETE_POWDER = AllayBlockType
                             .builder(BlockConcretePowderBehaviorImpl.class)
                             .vanillaBlock(BlockId.LIME_CONCRETE_POWDER)
+                            .build();
+        }
+        if (BlockTypes.LIME_CONCRETE_SLAB == null) {
+            BlockTypes.LIME_CONCRETE_SLAB = AllayBlockType
+                            .builder(BlockSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.LIME_CONCRETE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.LIME_CONCRETE_STAIRS == null) {
+            BlockTypes.LIME_CONCRETE_STAIRS = AllayBlockType
+                            .builder(BlockStairsBehaviorImpl.class)
+                            .vanillaBlock(BlockId.LIME_CONCRETE_STAIRS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.LIME_GLAZED_TERRACOTTA == null) {
@@ -4796,6 +5551,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.LIME_STAINED_GLASS_PANE = AllayBlockType
                             .builder(BlockGlassPaneBehaviorImpl.class)
                             .vanillaBlock(BlockId.LIME_STAINED_GLASS_PANE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.LIME_TERRACOTTA == null) {
@@ -4808,6 +5564,27 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.LIME_WOOL = AllayBlockType
                             .builder(BlockWoolBehaviorImpl.class)
                             .vanillaBlock(BlockId.LIME_WOOL)
+                            .build();
+        }
+        if (BlockTypes.LIME_WOOL_DOUBLE_SLAB == null) {
+            BlockTypes.LIME_WOOL_DOUBLE_SLAB = AllayBlockType
+                            .builder(BlockDoubleSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.LIME_WOOL_DOUBLE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.LIME_WOOL_SLAB == null) {
+            BlockTypes.LIME_WOOL_SLAB = AllayBlockType
+                            .builder(BlockSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.LIME_WOOL_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.LIME_WOOL_STAIRS == null) {
+            BlockTypes.LIME_WOOL_STAIRS = AllayBlockType
+                            .builder(BlockStairsBehaviorImpl.class)
+                            .vanillaBlock(BlockId.LIME_WOOL_STAIRS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.LIT_BLAST_FURNACE == null) {
@@ -4895,10 +5672,31 @@ public final class BlockTypeDefaultInitializer {
                             .vanillaBlock(BlockId.MAGENTA_CONCRETE)
                             .build();
         }
+        if (BlockTypes.MAGENTA_CONCRETE_DOUBLE_SLAB == null) {
+            BlockTypes.MAGENTA_CONCRETE_DOUBLE_SLAB = AllayBlockType
+                            .builder(BlockDoubleSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.MAGENTA_CONCRETE_DOUBLE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
         if (BlockTypes.MAGENTA_CONCRETE_POWDER == null) {
             BlockTypes.MAGENTA_CONCRETE_POWDER = AllayBlockType
                             .builder(BlockConcretePowderBehaviorImpl.class)
                             .vanillaBlock(BlockId.MAGENTA_CONCRETE_POWDER)
+                            .build();
+        }
+        if (BlockTypes.MAGENTA_CONCRETE_SLAB == null) {
+            BlockTypes.MAGENTA_CONCRETE_SLAB = AllayBlockType
+                            .builder(BlockSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.MAGENTA_CONCRETE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.MAGENTA_CONCRETE_STAIRS == null) {
+            BlockTypes.MAGENTA_CONCRETE_STAIRS = AllayBlockType
+                            .builder(BlockStairsBehaviorImpl.class)
+                            .vanillaBlock(BlockId.MAGENTA_CONCRETE_STAIRS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.MAGENTA_GLAZED_TERRACOTTA == null) {
@@ -4924,6 +5722,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.MAGENTA_STAINED_GLASS_PANE = AllayBlockType
                             .builder(BlockGlassPaneBehaviorImpl.class)
                             .vanillaBlock(BlockId.MAGENTA_STAINED_GLASS_PANE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.MAGENTA_TERRACOTTA == null) {
@@ -4936,6 +5735,27 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.MAGENTA_WOOL = AllayBlockType
                             .builder(BlockWoolBehaviorImpl.class)
                             .vanillaBlock(BlockId.MAGENTA_WOOL)
+                            .build();
+        }
+        if (BlockTypes.MAGENTA_WOOL_DOUBLE_SLAB == null) {
+            BlockTypes.MAGENTA_WOOL_DOUBLE_SLAB = AllayBlockType
+                            .builder(BlockDoubleSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.MAGENTA_WOOL_DOUBLE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.MAGENTA_WOOL_SLAB == null) {
+            BlockTypes.MAGENTA_WOOL_SLAB = AllayBlockType
+                            .builder(BlockSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.MAGENTA_WOOL_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.MAGENTA_WOOL_STAIRS == null) {
+            BlockTypes.MAGENTA_WOOL_STAIRS = AllayBlockType
+                            .builder(BlockStairsBehaviorImpl.class)
+                            .vanillaBlock(BlockId.MAGENTA_WOOL_STAIRS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.MAGMA == null) {
@@ -4969,6 +5789,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.MANGROVE_FENCE = AllayBlockType
                             .builder(BlockFenceBehaviorImpl.class)
                             .vanillaBlock(BlockId.MANGROVE_FENCE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.MANGROVE_FENCE_GATE == null) {
@@ -5043,7 +5864,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.MANGROVE_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.MANGROVE_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.MANGROVE_STANDING_SIGN == null) {
@@ -5098,13 +5919,25 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.MELON_STEM = AllayBlockType
                             .builder(BlockMelonStemBehaviorImpl.class)
                             .vanillaBlock(BlockId.MELON_STEM)
-                            .setProperties(BlockPropertyTypes.FACING_DIRECTION, BlockPropertyTypes.GROWTH)
+                            .setProperties(BlockPropertyTypes.FACING_DIRECTION, BlockPropertyTypes.GROWTH_8)
                             .build();
         }
         if (BlockTypes.MOB_SPAWNER == null) {
             BlockTypes.MOB_SPAWNER = AllayBlockType
                             .builder(BlockMobSpawnerBehaviorImpl.class)
                             .vanillaBlock(BlockId.MOB_SPAWNER)
+                            .build();
+        }
+        if (BlockTypes.MOSS_BLOCK == null) {
+            BlockTypes.MOSS_BLOCK = AllayBlockType
+                            .builder(BlockMossBlockBehaviorImpl.class)
+                            .vanillaBlock(BlockId.MOSS_BLOCK)
+                            .build();
+        }
+        if (BlockTypes.MOSS_CARPET == null) {
+            BlockTypes.MOSS_CARPET = AllayBlockType
+                            .builder(BlockCarpetBehaviorImpl.class)
+                            .vanillaBlock(BlockId.MOSS_CARPET)
                             .build();
         }
         if (BlockTypes.MOSSY_COBBLESTONE == null) {
@@ -5131,7 +5964,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.MOSSY_COBBLESTONE_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.MOSSY_COBBLESTONE_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.MOSSY_COBBLESTONE_WALL == null) {
@@ -5139,12 +5972,6 @@ public final class BlockTypeDefaultInitializer {
                             .builder(BlockWallBehaviorImpl.class)
                             .vanillaBlock(BlockId.MOSSY_COBBLESTONE_WALL)
                             .setProperties(BlockPropertyTypes.WALL_CONNECTION_TYPE_EAST, BlockPropertyTypes.WALL_CONNECTION_TYPE_NORTH, BlockPropertyTypes.WALL_CONNECTION_TYPE_SOUTH, BlockPropertyTypes.WALL_CONNECTION_TYPE_WEST, BlockPropertyTypes.WALL_POST_BIT)
-                            .build();
-        }
-        if (BlockTypes.MOSSY_STONE_BRICKS == null) {
-            BlockTypes.MOSSY_STONE_BRICKS = AllayBlockType
-                            .builder(BlockBricksBehaviorImpl.class)
-                            .vanillaBlock(BlockId.MOSSY_STONE_BRICKS)
                             .build();
         }
         if (BlockTypes.MOSSY_STONE_BRICK_DOUBLE_SLAB == null) {
@@ -5165,7 +5992,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.MOSSY_STONE_BRICK_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.MOSSY_STONE_BRICK_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.MOSSY_STONE_BRICK_WALL == null) {
@@ -5175,16 +6002,10 @@ public final class BlockTypeDefaultInitializer {
                             .setProperties(BlockPropertyTypes.WALL_CONNECTION_TYPE_EAST, BlockPropertyTypes.WALL_CONNECTION_TYPE_NORTH, BlockPropertyTypes.WALL_CONNECTION_TYPE_SOUTH, BlockPropertyTypes.WALL_CONNECTION_TYPE_WEST, BlockPropertyTypes.WALL_POST_BIT)
                             .build();
         }
-        if (BlockTypes.MOSS_BLOCK == null) {
-            BlockTypes.MOSS_BLOCK = AllayBlockType
-                            .builder(BlockMossBlockBehaviorImpl.class)
-                            .vanillaBlock(BlockId.MOSS_BLOCK)
-                            .build();
-        }
-        if (BlockTypes.MOSS_CARPET == null) {
-            BlockTypes.MOSS_CARPET = AllayBlockType
-                            .builder(BlockCarpetBehaviorImpl.class)
-                            .vanillaBlock(BlockId.MOSS_CARPET)
+        if (BlockTypes.MOSSY_STONE_BRICKS == null) {
+            BlockTypes.MOSSY_STONE_BRICKS = AllayBlockType
+                            .builder(BlockBricksBehaviorImpl.class)
+                            .vanillaBlock(BlockId.MOSSY_STONE_BRICKS)
                             .build();
         }
         if (BlockTypes.MOVING_BLOCK == null) {
@@ -5197,19 +6018,6 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.MUD = AllayBlockType
                             .builder(BlockMudBehaviorImpl.class)
                             .vanillaBlock(BlockId.MUD)
-                            .build();
-        }
-        if (BlockTypes.MUDDY_MANGROVE_ROOTS == null) {
-            BlockTypes.MUDDY_MANGROVE_ROOTS = AllayBlockType
-                            .builder(BlockMuddyMangroveRootsBehaviorImpl.class)
-                            .vanillaBlock(BlockId.MUDDY_MANGROVE_ROOTS)
-                            .setProperties(BlockPropertyTypes.PILLAR_AXIS)
-                            .build();
-        }
-        if (BlockTypes.MUD_BRICKS == null) {
-            BlockTypes.MUD_BRICKS = AllayBlockType
-                            .builder(BlockBricksBehaviorImpl.class)
-                            .vanillaBlock(BlockId.MUD_BRICKS)
                             .build();
         }
         if (BlockTypes.MUD_BRICK_DOUBLE_SLAB == null) {
@@ -5230,7 +6038,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.MUD_BRICK_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.MUD_BRICK_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.MUD_BRICK_WALL == null) {
@@ -5238,6 +6046,19 @@ public final class BlockTypeDefaultInitializer {
                             .builder(BlockWallBehaviorImpl.class)
                             .vanillaBlock(BlockId.MUD_BRICK_WALL)
                             .setProperties(BlockPropertyTypes.WALL_CONNECTION_TYPE_EAST, BlockPropertyTypes.WALL_CONNECTION_TYPE_NORTH, BlockPropertyTypes.WALL_CONNECTION_TYPE_SOUTH, BlockPropertyTypes.WALL_CONNECTION_TYPE_WEST, BlockPropertyTypes.WALL_POST_BIT)
+                            .build();
+        }
+        if (BlockTypes.MUD_BRICKS == null) {
+            BlockTypes.MUD_BRICKS = AllayBlockType
+                            .builder(BlockBricksBehaviorImpl.class)
+                            .vanillaBlock(BlockId.MUD_BRICKS)
+                            .build();
+        }
+        if (BlockTypes.MUDDY_MANGROVE_ROOTS == null) {
+            BlockTypes.MUDDY_MANGROVE_ROOTS = AllayBlockType
+                            .builder(BlockMuddyMangroveRootsBehaviorImpl.class)
+                            .vanillaBlock(BlockId.MUDDY_MANGROVE_ROOTS)
+                            .setProperties(BlockPropertyTypes.PILLAR_AXIS)
                             .build();
         }
         if (BlockTypes.MUSHROOM_STEM == null) {
@@ -5251,24 +6072,6 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.MYCELIUM = AllayBlockType
                             .builder(BlockMyceliumBehaviorImpl.class)
                             .vanillaBlock(BlockId.MYCELIUM)
-                            .build();
-        }
-        if (BlockTypes.NETHERITE_BLOCK == null) {
-            BlockTypes.NETHERITE_BLOCK = AllayBlockType
-                            .builder(BlockNetheriteBlockBehaviorImpl.class)
-                            .vanillaBlock(BlockId.NETHERITE_BLOCK)
-                            .build();
-        }
-        if (BlockTypes.NETHERRACK == null) {
-            BlockTypes.NETHERRACK = AllayBlockType
-                            .builder(BlockNetherrackBehaviorImpl.class)
-                            .vanillaBlock(BlockId.NETHERRACK)
-                            .build();
-        }
-        if (BlockTypes.NETHERREACTOR == null) {
-            BlockTypes.NETHERREACTOR = AllayBlockType
-                            .builder(BlockNetherreactorBehaviorImpl.class)
-                            .vanillaBlock(BlockId.NETHERREACTOR)
                             .build();
         }
         if (BlockTypes.NETHER_BRICK == null) {
@@ -5288,6 +6091,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.NETHER_BRICK_FENCE = AllayBlockType
                             .builder(BlockFenceBehaviorImpl.class)
                             .vanillaBlock(BlockId.NETHER_BRICK_FENCE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.NETHER_BRICK_SLAB == null) {
@@ -5301,7 +6105,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.NETHER_BRICK_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.NETHER_BRICK_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.NETHER_BRICK_WALL == null) {
@@ -5336,6 +6140,24 @@ public final class BlockTypeDefaultInitializer {
                             .vanillaBlock(BlockId.NETHER_WART_BLOCK)
                             .build();
         }
+        if (BlockTypes.NETHERITE_BLOCK == null) {
+            BlockTypes.NETHERITE_BLOCK = AllayBlockType
+                            .builder(BlockNetheriteBlockBehaviorImpl.class)
+                            .vanillaBlock(BlockId.NETHERITE_BLOCK)
+                            .build();
+        }
+        if (BlockTypes.NETHERRACK == null) {
+            BlockTypes.NETHERRACK = AllayBlockType
+                            .builder(BlockNetherrackBehaviorImpl.class)
+                            .vanillaBlock(BlockId.NETHERRACK)
+                            .build();
+        }
+        if (BlockTypes.NETHERREACTOR == null) {
+            BlockTypes.NETHERREACTOR = AllayBlockType
+                            .builder(BlockNetherreactorBehaviorImpl.class)
+                            .vanillaBlock(BlockId.NETHERREACTOR)
+                            .build();
+        }
         if (BlockTypes.NORMAL_STONE_DOUBLE_SLAB == null) {
             BlockTypes.NORMAL_STONE_DOUBLE_SLAB = AllayBlockType
                             .builder(BlockDoubleSlabBehaviorImpl.class)
@@ -5354,7 +6176,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.NORMAL_STONE_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.NORMAL_STONE_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.NOTEBLOCK == null) {
@@ -5374,6 +6196,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.OAK_FENCE = AllayBlockType
                             .builder(BlockFenceBehaviorImpl.class)
                             .vanillaBlock(BlockId.OAK_FENCE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.OAK_HANGING_SIGN == null) {
@@ -5428,7 +6251,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.OAK_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.OAK_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.OAK_WOOD == null) {
@@ -5490,10 +6313,31 @@ public final class BlockTypeDefaultInitializer {
                             .vanillaBlock(BlockId.ORANGE_CONCRETE)
                             .build();
         }
+        if (BlockTypes.ORANGE_CONCRETE_DOUBLE_SLAB == null) {
+            BlockTypes.ORANGE_CONCRETE_DOUBLE_SLAB = AllayBlockType
+                            .builder(BlockDoubleSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.ORANGE_CONCRETE_DOUBLE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
         if (BlockTypes.ORANGE_CONCRETE_POWDER == null) {
             BlockTypes.ORANGE_CONCRETE_POWDER = AllayBlockType
                             .builder(BlockConcretePowderBehaviorImpl.class)
                             .vanillaBlock(BlockId.ORANGE_CONCRETE_POWDER)
+                            .build();
+        }
+        if (BlockTypes.ORANGE_CONCRETE_SLAB == null) {
+            BlockTypes.ORANGE_CONCRETE_SLAB = AllayBlockType
+                            .builder(BlockSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.ORANGE_CONCRETE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.ORANGE_CONCRETE_STAIRS == null) {
+            BlockTypes.ORANGE_CONCRETE_STAIRS = AllayBlockType
+                            .builder(BlockStairsBehaviorImpl.class)
+                            .vanillaBlock(BlockId.ORANGE_CONCRETE_STAIRS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.ORANGE_GLAZED_TERRACOTTA == null) {
@@ -5526,6 +6370,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.ORANGE_STAINED_GLASS_PANE = AllayBlockType
                             .builder(BlockGlassPaneBehaviorImpl.class)
                             .vanillaBlock(BlockId.ORANGE_STAINED_GLASS_PANE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.ORANGE_TERRACOTTA == null) {
@@ -5544,6 +6389,27 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.ORANGE_WOOL = AllayBlockType
                             .builder(BlockWoolBehaviorImpl.class)
                             .vanillaBlock(BlockId.ORANGE_WOOL)
+                            .build();
+        }
+        if (BlockTypes.ORANGE_WOOL_DOUBLE_SLAB == null) {
+            BlockTypes.ORANGE_WOOL_DOUBLE_SLAB = AllayBlockType
+                            .builder(BlockDoubleSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.ORANGE_WOOL_DOUBLE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.ORANGE_WOOL_SLAB == null) {
+            BlockTypes.ORANGE_WOOL_SLAB = AllayBlockType
+                            .builder(BlockSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.ORANGE_WOOL_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.ORANGE_WOOL_STAIRS == null) {
+            BlockTypes.ORANGE_WOOL_STAIRS = AllayBlockType
+                            .builder(BlockStairsBehaviorImpl.class)
+                            .vanillaBlock(BlockId.ORANGE_WOOL_STAIRS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.OXEYE_DAISY == null) {
@@ -5568,6 +6434,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.OXIDIZED_COPPER_BARS = AllayBlockType
                             .builder(BlockCopperBarsBehaviorImpl.class)
                             .vanillaBlock(BlockId.OXIDIZED_COPPER_BARS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.OXIDIZED_COPPER_BULB == null) {
@@ -5586,7 +6453,7 @@ public final class BlockTypeDefaultInitializer {
         }
         if (BlockTypes.OXIDIZED_COPPER_CHEST == null) {
             BlockTypes.OXIDIZED_COPPER_CHEST = AllayBlockType
-                            .builder(BlockOxidizedCopperChestBehaviorImpl.class)
+                            .builder(BlockCopperChestBehaviorImpl.class)
                             .vanillaBlock(BlockId.OXIDIZED_COPPER_CHEST)
                             .setProperties(BlockPropertyTypes.MINECRAFT_CARDINAL_DIRECTION)
                             .build();
@@ -5642,7 +6509,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.OXIDIZED_CUT_COPPER_STAIRS = AllayBlockType
                             .builder(BlockCopperStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.OXIDIZED_CUT_COPPER_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.OXIDIZED_DOUBLE_CUT_COPPER_SLAB == null) {
@@ -5716,6 +6583,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.PALE_OAK_FENCE = AllayBlockType
                             .builder(BlockFenceBehaviorImpl.class)
                             .vanillaBlock(BlockId.PALE_OAK_FENCE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.PALE_OAK_FENCE_GATE == null) {
@@ -5784,7 +6652,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.PALE_OAK_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.PALE_OAK_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.PALE_OAK_STANDING_SIGN == null) {
@@ -5876,10 +6744,31 @@ public final class BlockTypeDefaultInitializer {
                             .vanillaBlock(BlockId.PINK_CONCRETE)
                             .build();
         }
+        if (BlockTypes.PINK_CONCRETE_DOUBLE_SLAB == null) {
+            BlockTypes.PINK_CONCRETE_DOUBLE_SLAB = AllayBlockType
+                            .builder(BlockDoubleSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.PINK_CONCRETE_DOUBLE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
         if (BlockTypes.PINK_CONCRETE_POWDER == null) {
             BlockTypes.PINK_CONCRETE_POWDER = AllayBlockType
                             .builder(BlockConcretePowderBehaviorImpl.class)
                             .vanillaBlock(BlockId.PINK_CONCRETE_POWDER)
+                            .build();
+        }
+        if (BlockTypes.PINK_CONCRETE_SLAB == null) {
+            BlockTypes.PINK_CONCRETE_SLAB = AllayBlockType
+                            .builder(BlockSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.PINK_CONCRETE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.PINK_CONCRETE_STAIRS == null) {
+            BlockTypes.PINK_CONCRETE_STAIRS = AllayBlockType
+                            .builder(BlockStairsBehaviorImpl.class)
+                            .vanillaBlock(BlockId.PINK_CONCRETE_STAIRS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.PINK_GLAZED_TERRACOTTA == null) {
@@ -5893,7 +6782,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.PINK_PETALS = AllayBlockType
                             .builder(BlockPlantPileImpl.class)
                             .vanillaBlock(BlockId.PINK_PETALS)
-                            .setProperties(BlockPropertyTypes.GROWTH, BlockPropertyTypes.MINECRAFT_CARDINAL_DIRECTION)
+                            .setProperties(BlockPropertyTypes.GROWTH_8, BlockPropertyTypes.MINECRAFT_CARDINAL_DIRECTION)
                             .build();
         }
         if (BlockTypes.PINK_SHULKER_BOX == null) {
@@ -5912,6 +6801,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.PINK_STAINED_GLASS_PANE = AllayBlockType
                             .builder(BlockGlassPaneBehaviorImpl.class)
                             .vanillaBlock(BlockId.PINK_STAINED_GLASS_PANE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.PINK_TERRACOTTA == null) {
@@ -5932,6 +6822,27 @@ public final class BlockTypeDefaultInitializer {
                             .vanillaBlock(BlockId.PINK_WOOL)
                             .build();
         }
+        if (BlockTypes.PINK_WOOL_DOUBLE_SLAB == null) {
+            BlockTypes.PINK_WOOL_DOUBLE_SLAB = AllayBlockType
+                            .builder(BlockDoubleSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.PINK_WOOL_DOUBLE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.PINK_WOOL_SLAB == null) {
+            BlockTypes.PINK_WOOL_SLAB = AllayBlockType
+                            .builder(BlockSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.PINK_WOOL_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.PINK_WOOL_STAIRS == null) {
+            BlockTypes.PINK_WOOL_STAIRS = AllayBlockType
+                            .builder(BlockStairsBehaviorImpl.class)
+                            .vanillaBlock(BlockId.PINK_WOOL_STAIRS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .build();
+        }
         if (BlockTypes.PISTON == null) {
             BlockTypes.PISTON = AllayBlockType
                             .builder(BlockPistonBehaviorImpl.class)
@@ -5950,7 +6861,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.PITCHER_CROP = AllayBlockType
                             .builder(BlockPitcherCropBehaviorImpl.class)
                             .vanillaBlock(BlockId.PITCHER_CROP)
-                            .setProperties(BlockPropertyTypes.GROWTH, BlockPropertyTypes.UPPER_BLOCK_BIT)
+                            .setProperties(BlockPropertyTypes.GROWTH_8, BlockPropertyTypes.UPPER_BLOCK_BIT)
                             .build();
         }
         if (BlockTypes.PITCHER_PLANT == null) {
@@ -6004,7 +6915,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.POLISHED_ANDESITE_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.POLISHED_ANDESITE_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.POLISHED_BASALT == null) {
@@ -6018,12 +6929,6 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.POLISHED_BLACKSTONE = AllayBlockType
                             .builder(BlockPolishedBlackstoneBehaviorImpl.class)
                             .vanillaBlock(BlockId.POLISHED_BLACKSTONE)
-                            .build();
-        }
-        if (BlockTypes.POLISHED_BLACKSTONE_BRICKS == null) {
-            BlockTypes.POLISHED_BLACKSTONE_BRICKS = AllayBlockType
-                            .builder(BlockBricksBehaviorImpl.class)
-                            .vanillaBlock(BlockId.POLISHED_BLACKSTONE_BRICKS)
                             .build();
         }
         if (BlockTypes.POLISHED_BLACKSTONE_BRICK_DOUBLE_SLAB == null) {
@@ -6044,7 +6949,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.POLISHED_BLACKSTONE_BRICK_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.POLISHED_BLACKSTONE_BRICK_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.POLISHED_BLACKSTONE_BRICK_WALL == null) {
@@ -6052,6 +6957,12 @@ public final class BlockTypeDefaultInitializer {
                             .builder(BlockWallBehaviorImpl.class)
                             .vanillaBlock(BlockId.POLISHED_BLACKSTONE_BRICK_WALL)
                             .setProperties(BlockPropertyTypes.WALL_CONNECTION_TYPE_EAST, BlockPropertyTypes.WALL_CONNECTION_TYPE_NORTH, BlockPropertyTypes.WALL_CONNECTION_TYPE_SOUTH, BlockPropertyTypes.WALL_CONNECTION_TYPE_WEST, BlockPropertyTypes.WALL_POST_BIT)
+                            .build();
+        }
+        if (BlockTypes.POLISHED_BLACKSTONE_BRICKS == null) {
+            BlockTypes.POLISHED_BLACKSTONE_BRICKS = AllayBlockType
+                            .builder(BlockBricksBehaviorImpl.class)
+                            .vanillaBlock(BlockId.POLISHED_BLACKSTONE_BRICKS)
                             .build();
         }
         if (BlockTypes.POLISHED_BLACKSTONE_BUTTON == null) {
@@ -6086,7 +6997,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.POLISHED_BLACKSTONE_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.POLISHED_BLACKSTONE_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.POLISHED_BLACKSTONE_WALL == null) {
@@ -6120,7 +7031,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.POLISHED_CINNABAR_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.POLISHED_CINNABAR_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.POLISHED_CINNABAR_WALL == null) {
@@ -6154,7 +7065,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.POLISHED_DEEPSLATE_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.POLISHED_DEEPSLATE_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.POLISHED_DEEPSLATE_WALL == null) {
@@ -6188,7 +7099,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.POLISHED_DIORITE_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.POLISHED_DIORITE_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.POLISHED_GRANITE == null) {
@@ -6215,7 +7126,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.POLISHED_GRANITE_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.POLISHED_GRANITE_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.POLISHED_SULFUR == null) {
@@ -6242,7 +7153,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.POLISHED_SULFUR_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.POLISHED_SULFUR_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.POLISHED_SULFUR_WALL == null) {
@@ -6276,7 +7187,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.POLISHED_TUFF_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.POLISHED_TUFF_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.POLISHED_TUFF_WALL == null) {
@@ -6311,6 +7222,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.POPLAR_FENCE = AllayBlockType
                             .builder(BlockFenceBehaviorImpl.class)
                             .vanillaBlock(BlockId.POPLAR_FENCE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.POPLAR_FENCE_GATE == null) {
@@ -6372,7 +7284,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.POPLAR_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.POPLAR_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.POPLAR_STANDING_SIGN == null) {
@@ -6420,7 +7332,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.POTATOES = AllayBlockType
                             .builder(BlockPotatoesBehaviorImpl.class)
                             .vanillaBlock(BlockId.POTATOES)
-                            .setProperties(BlockPropertyTypes.GROWTH)
+                            .setProperties(BlockPropertyTypes.GROWTH_8)
                             .build();
         }
         if (BlockTypes.POTENT_SULFUR == null) {
@@ -6456,19 +7368,6 @@ public final class BlockTypeDefaultInitializer {
                             .vanillaBlock(BlockId.PRISMARINE)
                             .build();
         }
-        if (BlockTypes.PRISMARINE_BRICKS == null) {
-            BlockTypes.PRISMARINE_BRICKS = AllayBlockType
-                            .builder(BlockBricksBehaviorImpl.class)
-                            .vanillaBlock(BlockId.PRISMARINE_BRICKS)
-                            .build();
-        }
-        if (BlockTypes.PRISMARINE_BRICKS_STAIRS == null) {
-            BlockTypes.PRISMARINE_BRICKS_STAIRS = AllayBlockType
-                            .builder(BlockStairsBehaviorImpl.class)
-                            .vanillaBlock(BlockId.PRISMARINE_BRICKS_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
-                            .build();
-        }
         if (BlockTypes.PRISMARINE_BRICK_DOUBLE_SLAB == null) {
             BlockTypes.PRISMARINE_BRICK_DOUBLE_SLAB = AllayBlockType
                             .builder(BlockDoubleSlabBehaviorImpl.class)
@@ -6481,6 +7380,19 @@ public final class BlockTypeDefaultInitializer {
                             .builder(BlockSlabBehaviorImpl.class)
                             .vanillaBlock(BlockId.PRISMARINE_BRICK_SLAB)
                             .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.PRISMARINE_BRICKS == null) {
+            BlockTypes.PRISMARINE_BRICKS = AllayBlockType
+                            .builder(BlockBricksBehaviorImpl.class)
+                            .vanillaBlock(BlockId.PRISMARINE_BRICKS)
+                            .build();
+        }
+        if (BlockTypes.PRISMARINE_BRICKS_STAIRS == null) {
+            BlockTypes.PRISMARINE_BRICKS_STAIRS = AllayBlockType
+                            .builder(BlockStairsBehaviorImpl.class)
+                            .vanillaBlock(BlockId.PRISMARINE_BRICKS_STAIRS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.PRISMARINE_DOUBLE_SLAB == null) {
@@ -6501,7 +7413,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.PRISMARINE_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.PRISMARINE_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.PRISMARINE_WALL == null) {
@@ -6522,7 +7434,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.PUMPKIN_STEM = AllayBlockType
                             .builder(BlockPumpkinStemBehaviorImpl.class)
                             .vanillaBlock(BlockId.PUMPKIN_STEM)
-                            .setProperties(BlockPropertyTypes.FACING_DIRECTION, BlockPropertyTypes.GROWTH)
+                            .setProperties(BlockPropertyTypes.FACING_DIRECTION, BlockPropertyTypes.GROWTH_8)
                             .build();
         }
         if (BlockTypes.PURPLE_CANDLE == null) {
@@ -6551,10 +7463,31 @@ public final class BlockTypeDefaultInitializer {
                             .vanillaBlock(BlockId.PURPLE_CONCRETE)
                             .build();
         }
+        if (BlockTypes.PURPLE_CONCRETE_DOUBLE_SLAB == null) {
+            BlockTypes.PURPLE_CONCRETE_DOUBLE_SLAB = AllayBlockType
+                            .builder(BlockDoubleSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.PURPLE_CONCRETE_DOUBLE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
         if (BlockTypes.PURPLE_CONCRETE_POWDER == null) {
             BlockTypes.PURPLE_CONCRETE_POWDER = AllayBlockType
                             .builder(BlockConcretePowderBehaviorImpl.class)
                             .vanillaBlock(BlockId.PURPLE_CONCRETE_POWDER)
+                            .build();
+        }
+        if (BlockTypes.PURPLE_CONCRETE_SLAB == null) {
+            BlockTypes.PURPLE_CONCRETE_SLAB = AllayBlockType
+                            .builder(BlockSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.PURPLE_CONCRETE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.PURPLE_CONCRETE_STAIRS == null) {
+            BlockTypes.PURPLE_CONCRETE_STAIRS = AllayBlockType
+                            .builder(BlockStairsBehaviorImpl.class)
+                            .vanillaBlock(BlockId.PURPLE_CONCRETE_STAIRS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.PURPLE_GLAZED_TERRACOTTA == null) {
@@ -6580,6 +7513,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.PURPLE_STAINED_GLASS_PANE = AllayBlockType
                             .builder(BlockGlassPaneBehaviorImpl.class)
                             .vanillaBlock(BlockId.PURPLE_STAINED_GLASS_PANE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.PURPLE_TERRACOTTA == null) {
@@ -6592,6 +7526,27 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.PURPLE_WOOL = AllayBlockType
                             .builder(BlockWoolBehaviorImpl.class)
                             .vanillaBlock(BlockId.PURPLE_WOOL)
+                            .build();
+        }
+        if (BlockTypes.PURPLE_WOOL_DOUBLE_SLAB == null) {
+            BlockTypes.PURPLE_WOOL_DOUBLE_SLAB = AllayBlockType
+                            .builder(BlockDoubleSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.PURPLE_WOOL_DOUBLE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.PURPLE_WOOL_SLAB == null) {
+            BlockTypes.PURPLE_WOOL_SLAB = AllayBlockType
+                            .builder(BlockSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.PURPLE_WOOL_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.PURPLE_WOOL_STAIRS == null) {
+            BlockTypes.PURPLE_WOOL_STAIRS = AllayBlockType
+                            .builder(BlockStairsBehaviorImpl.class)
+                            .vanillaBlock(BlockId.PURPLE_WOOL_STAIRS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.PURPUR_BLOCK == null) {
@@ -6626,7 +7581,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.PURPUR_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.PURPUR_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.QUARTZ_BLOCK == null) {
@@ -6673,7 +7628,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.QUARTZ_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.QUARTZ_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.RAIL == null) {
@@ -6699,38 +7654,6 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.RAW_IRON_BLOCK = AllayBlockType
                             .builder(BlockRawIronBlockBehaviorImpl.class)
                             .vanillaBlock(BlockId.RAW_IRON_BLOCK)
-                            .build();
-        }
-        if (BlockTypes.REDSTONE_BLOCK == null) {
-            BlockTypes.REDSTONE_BLOCK = AllayBlockType
-                            .builder(BlockRedstoneBlockBehaviorImpl.class)
-                            .vanillaBlock(BlockId.REDSTONE_BLOCK)
-                            .build();
-        }
-        if (BlockTypes.REDSTONE_LAMP == null) {
-            BlockTypes.REDSTONE_LAMP = AllayBlockType
-                            .builder(BlockRedstoneLampBehaviorImpl.class)
-                            .vanillaBlock(BlockId.REDSTONE_LAMP)
-                            .build();
-        }
-        if (BlockTypes.REDSTONE_ORE == null) {
-            BlockTypes.REDSTONE_ORE = AllayBlockType
-                            .builder(BlockOreBehaviorImpl.class)
-                            .vanillaBlock(BlockId.REDSTONE_ORE)
-                            .build();
-        }
-        if (BlockTypes.REDSTONE_TORCH == null) {
-            BlockTypes.REDSTONE_TORCH = AllayBlockType
-                            .builder(BlockTorchBehaviorImpl.class)
-                            .vanillaBlock(BlockId.REDSTONE_TORCH)
-                            .setProperties(BlockPropertyTypes.TORCH_FACING_DIRECTION)
-                            .build();
-        }
-        if (BlockTypes.REDSTONE_WIRE == null) {
-            BlockTypes.REDSTONE_WIRE = AllayBlockType
-                            .builder(BlockRedstoneWireBehaviorImpl.class)
-                            .vanillaBlock(BlockId.REDSTONE_WIRE)
-                            .setProperties(BlockPropertyTypes.REDSTONE_SIGNAL)
                             .build();
         }
         if (BlockTypes.RED_CANDLE == null) {
@@ -6759,10 +7682,31 @@ public final class BlockTypeDefaultInitializer {
                             .vanillaBlock(BlockId.RED_CONCRETE)
                             .build();
         }
+        if (BlockTypes.RED_CONCRETE_DOUBLE_SLAB == null) {
+            BlockTypes.RED_CONCRETE_DOUBLE_SLAB = AllayBlockType
+                            .builder(BlockDoubleSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.RED_CONCRETE_DOUBLE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
         if (BlockTypes.RED_CONCRETE_POWDER == null) {
             BlockTypes.RED_CONCRETE_POWDER = AllayBlockType
                             .builder(BlockConcretePowderBehaviorImpl.class)
                             .vanillaBlock(BlockId.RED_CONCRETE_POWDER)
+                            .build();
+        }
+        if (BlockTypes.RED_CONCRETE_SLAB == null) {
+            BlockTypes.RED_CONCRETE_SLAB = AllayBlockType
+                            .builder(BlockSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.RED_CONCRETE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.RED_CONCRETE_STAIRS == null) {
+            BlockTypes.RED_CONCRETE_STAIRS = AllayBlockType
+                            .builder(BlockStairsBehaviorImpl.class)
+                            .vanillaBlock(BlockId.RED_CONCRETE_STAIRS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.RED_GLAZED_TERRACOTTA == null) {
@@ -6809,7 +7753,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.RED_NETHER_BRICK_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.RED_NETHER_BRICK_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.RED_NETHER_BRICK_WALL == null) {
@@ -6856,7 +7800,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.RED_SANDSTONE_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.RED_SANDSTONE_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.RED_SANDSTONE_WALL == null) {
@@ -6864,6 +7808,12 @@ public final class BlockTypeDefaultInitializer {
                             .builder(BlockWallBehaviorImpl.class)
                             .vanillaBlock(BlockId.RED_SANDSTONE_WALL)
                             .setProperties(BlockPropertyTypes.WALL_CONNECTION_TYPE_EAST, BlockPropertyTypes.WALL_CONNECTION_TYPE_NORTH, BlockPropertyTypes.WALL_CONNECTION_TYPE_SOUTH, BlockPropertyTypes.WALL_CONNECTION_TYPE_WEST, BlockPropertyTypes.WALL_POST_BIT)
+                            .build();
+        }
+        if (BlockTypes.RED_SHRUB == null) {
+            BlockTypes.RED_SHRUB = AllayBlockType
+                            .builder(BlockRedShrubBehaviorImpl.class)
+                            .vanillaBlock(BlockId.RED_SHRUB)
                             .build();
         }
         if (BlockTypes.RED_SHULKER_BOX == null) {
@@ -6882,6 +7832,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.RED_STAINED_GLASS_PANE = AllayBlockType
                             .builder(BlockGlassPaneBehaviorImpl.class)
                             .vanillaBlock(BlockId.RED_STAINED_GLASS_PANE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.RED_TERRACOTTA == null) {
@@ -6900,6 +7851,59 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.RED_WOOL = AllayBlockType
                             .builder(BlockWoolBehaviorImpl.class)
                             .vanillaBlock(BlockId.RED_WOOL)
+                            .build();
+        }
+        if (BlockTypes.RED_WOOL_DOUBLE_SLAB == null) {
+            BlockTypes.RED_WOOL_DOUBLE_SLAB = AllayBlockType
+                            .builder(BlockDoubleSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.RED_WOOL_DOUBLE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.RED_WOOL_SLAB == null) {
+            BlockTypes.RED_WOOL_SLAB = AllayBlockType
+                            .builder(BlockSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.RED_WOOL_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.RED_WOOL_STAIRS == null) {
+            BlockTypes.RED_WOOL_STAIRS = AllayBlockType
+                            .builder(BlockStairsBehaviorImpl.class)
+                            .vanillaBlock(BlockId.RED_WOOL_STAIRS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .build();
+        }
+        if (BlockTypes.REDSTONE_BLOCK == null) {
+            BlockTypes.REDSTONE_BLOCK = AllayBlockType
+                            .builder(BlockRedstoneBlockBehaviorImpl.class)
+                            .vanillaBlock(BlockId.REDSTONE_BLOCK)
+                            .build();
+        }
+        if (BlockTypes.REDSTONE_LAMP == null) {
+            BlockTypes.REDSTONE_LAMP = AllayBlockType
+                            .builder(BlockRedstoneLampBehaviorImpl.class)
+                            .vanillaBlock(BlockId.REDSTONE_LAMP)
+                            .build();
+        }
+        if (BlockTypes.REDSTONE_ORE == null) {
+            BlockTypes.REDSTONE_ORE = AllayBlockType
+                            .builder(BlockOreBehaviorImpl.class)
+                            .vanillaBlock(BlockId.REDSTONE_ORE)
+                            .build();
+        }
+        if (BlockTypes.REDSTONE_TORCH == null) {
+            BlockTypes.REDSTONE_TORCH = AllayBlockType
+                            .builder(BlockTorchBehaviorImpl.class)
+                            .vanillaBlock(BlockId.REDSTONE_TORCH)
+                            .setProperties(BlockPropertyTypes.TORCH_FACING_DIRECTION)
+                            .build();
+        }
+        if (BlockTypes.REDSTONE_WIRE == null) {
+            BlockTypes.REDSTONE_WIRE = AllayBlockType
+                            .builder(BlockRedstoneWireBehaviorImpl.class)
+                            .vanillaBlock(BlockId.REDSTONE_WIRE)
+                            .setProperties(BlockPropertyTypes.REDSTONE_SIGNAL)
                             .build();
         }
         if (BlockTypes.REEDS == null) {
@@ -6934,12 +7938,6 @@ public final class BlockTypeDefaultInitializer {
                             .vanillaBlock(BlockId.RESIN_BLOCK)
                             .build();
         }
-        if (BlockTypes.RESIN_BRICKS == null) {
-            BlockTypes.RESIN_BRICKS = AllayBlockType
-                            .builder(BlockBricksBehaviorImpl.class)
-                            .vanillaBlock(BlockId.RESIN_BRICKS)
-                            .build();
-        }
         if (BlockTypes.RESIN_BRICK_DOUBLE_SLAB == null) {
             BlockTypes.RESIN_BRICK_DOUBLE_SLAB = AllayBlockType
                             .builder(BlockDoubleSlabBehaviorImpl.class)
@@ -6958,7 +7956,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.RESIN_BRICK_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.RESIN_BRICK_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.RESIN_BRICK_WALL == null) {
@@ -6966,6 +7964,12 @@ public final class BlockTypeDefaultInitializer {
                             .builder(BlockWallBehaviorImpl.class)
                             .vanillaBlock(BlockId.RESIN_BRICK_WALL)
                             .setProperties(BlockPropertyTypes.WALL_CONNECTION_TYPE_EAST, BlockPropertyTypes.WALL_CONNECTION_TYPE_NORTH, BlockPropertyTypes.WALL_CONNECTION_TYPE_SOUTH, BlockPropertyTypes.WALL_CONNECTION_TYPE_WEST, BlockPropertyTypes.WALL_POST_BIT)
+                            .build();
+        }
+        if (BlockTypes.RESIN_BRICKS == null) {
+            BlockTypes.RESIN_BRICKS = AllayBlockType
+                            .builder(BlockBricksBehaviorImpl.class)
+                            .vanillaBlock(BlockId.RESIN_BRICKS)
                             .build();
         }
         if (BlockTypes.RESIN_CLUMP == null) {
@@ -7019,7 +8023,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.SANDSTONE_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.SANDSTONE_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.SANDSTONE_WALL == null) {
@@ -7070,13 +8074,6 @@ public final class BlockTypeDefaultInitializer {
                             .setProperties(BlockPropertyTypes.MULTI_FACE_DIRECTION_BITS)
                             .build();
         }
-        if (BlockTypes.SEAGRASS == null) {
-            BlockTypes.SEAGRASS = AllayBlockType
-                            .builder(BlockSeagrassBehaviorImpl.class)
-                            .vanillaBlock(BlockId.SEAGRASS)
-                            .setProperties(BlockPropertyTypes.SEA_GRASS_TYPE)
-                            .build();
-        }
         if (BlockTypes.SEA_LANTERN == null) {
             BlockTypes.SEA_LANTERN = AllayBlockType
                             .builder(BlockSeaLanternBehaviorImpl.class)
@@ -7088,6 +8085,20 @@ public final class BlockTypeDefaultInitializer {
                             .builder(BlockSeaPickleBehaviorImpl.class)
                             .vanillaBlock(BlockId.SEA_PICKLE)
                             .setProperties(BlockPropertyTypes.CLUSTER_COUNT, BlockPropertyTypes.DEAD_BIT)
+                            .build();
+        }
+        if (BlockTypes.SEAGRASS == null) {
+            BlockTypes.SEAGRASS = AllayBlockType
+                            .builder(BlockSeagrassBehaviorImpl.class)
+                            .vanillaBlock(BlockId.SEAGRASS)
+                            .setProperties(BlockPropertyTypes.SEA_GRASS_TYPE)
+                            .build();
+        }
+        if (BlockTypes.SHELF_MUSHROOM == null) {
+            BlockTypes.SHELF_MUSHROOM = AllayBlockType
+                            .builder(BlockShelfMushroomBehaviorImpl.class)
+                            .vanillaBlock(BlockId.SHELF_MUSHROOM)
+                            .setProperties(BlockPropertyTypes.GROWTH_2, BlockPropertyTypes.MINECRAFT_CARDINAL_DIRECTION)
                             .build();
         }
         if (BlockTypes.SHORT_DRY_GRASS == null) {
@@ -7186,7 +8197,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.SMOOTH_QUARTZ_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.SMOOTH_QUARTZ_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.SMOOTH_RED_SANDSTONE == null) {
@@ -7213,7 +8224,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.SMOOTH_RED_SANDSTONE_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.SMOOTH_RED_SANDSTONE_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.SMOOTH_SANDSTONE == null) {
@@ -7240,7 +8251,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.SMOOTH_SANDSTONE_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.SMOOTH_SANDSTONE_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.SMOOTH_STONE == null) {
@@ -7360,6 +8371,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.SPRUCE_FENCE = AllayBlockType
                             .builder(BlockFenceBehaviorImpl.class)
                             .vanillaBlock(BlockId.SPRUCE_FENCE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.SPRUCE_FENCE_GATE == null) {
@@ -7428,7 +8440,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.SPRUCE_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.SPRUCE_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.SPRUCE_STANDING_SIGN == null) {
@@ -7493,25 +8505,6 @@ public final class BlockTypeDefaultInitializer {
                             .vanillaBlock(BlockId.STONE)
                             .build();
         }
-        if (BlockTypes.STONECUTTER == null) {
-            BlockTypes.STONECUTTER = AllayBlockType
-                            .builder(BlockStonecutterBehaviorImpl.class)
-                            .vanillaBlock(BlockId.STONECUTTER)
-                            .build();
-        }
-        if (BlockTypes.STONECUTTER_BLOCK == null) {
-            BlockTypes.STONECUTTER_BLOCK = AllayBlockType
-                            .builder(BlockStonecutterBlockBehaviorImpl.class)
-                            .vanillaBlock(BlockId.STONECUTTER_BLOCK)
-                            .setProperties(BlockPropertyTypes.MINECRAFT_CARDINAL_DIRECTION)
-                            .build();
-        }
-        if (BlockTypes.STONE_BRICKS == null) {
-            BlockTypes.STONE_BRICKS = AllayBlockType
-                            .builder(BlockBricksBehaviorImpl.class)
-                            .vanillaBlock(BlockId.STONE_BRICKS)
-                            .build();
-        }
         if (BlockTypes.STONE_BRICK_DOUBLE_SLAB == null) {
             BlockTypes.STONE_BRICK_DOUBLE_SLAB = AllayBlockType
                             .builder(BlockDoubleSlabBehaviorImpl.class)
@@ -7530,7 +8523,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.STONE_BRICK_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.STONE_BRICK_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.STONE_BRICK_WALL == null) {
@@ -7538,6 +8531,12 @@ public final class BlockTypeDefaultInitializer {
                             .builder(BlockWallBehaviorImpl.class)
                             .vanillaBlock(BlockId.STONE_BRICK_WALL)
                             .setProperties(BlockPropertyTypes.WALL_CONNECTION_TYPE_EAST, BlockPropertyTypes.WALL_CONNECTION_TYPE_NORTH, BlockPropertyTypes.WALL_CONNECTION_TYPE_SOUTH, BlockPropertyTypes.WALL_CONNECTION_TYPE_WEST, BlockPropertyTypes.WALL_POST_BIT)
+                            .build();
+        }
+        if (BlockTypes.STONE_BRICKS == null) {
+            BlockTypes.STONE_BRICKS = AllayBlockType
+                            .builder(BlockBricksBehaviorImpl.class)
+                            .vanillaBlock(BlockId.STONE_BRICKS)
                             .build();
         }
         if (BlockTypes.STONE_BUTTON == null) {
@@ -7558,12 +8557,25 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.STONE_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.STONE_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .build();
+        }
+        if (BlockTypes.STONECUTTER == null) {
+            BlockTypes.STONECUTTER = AllayBlockType
+                            .builder(BlockStonecutterBehaviorImpl.class)
+                            .vanillaBlock(BlockId.STONECUTTER)
+                            .build();
+        }
+        if (BlockTypes.STONECUTTER_BLOCK == null) {
+            BlockTypes.STONECUTTER_BLOCK = AllayBlockType
+                            .builder(BlockStonecutterBlockBehaviorImpl.class)
+                            .vanillaBlock(BlockId.STONECUTTER_BLOCK)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CARDINAL_DIRECTION)
                             .build();
         }
         if (BlockTypes.STRAW_BED == null) {
             BlockTypes.STRAW_BED = AllayBlockType
-                            .builder(BlockBedBehaviorImpl.class)
+                            .builder(BlockStrawBedBehaviorImpl.class)
                             .vanillaBlock(BlockId.STRAW_BED)
                             .setProperties(BlockPropertyTypes.HEAD_PIECE_BIT, BlockPropertyTypes.MINECRAFT_CARDINAL_DIRECTION, BlockPropertyTypes.OCCUPIED_BIT)
                             .build();
@@ -7762,12 +8774,6 @@ public final class BlockTypeDefaultInitializer {
                             .vanillaBlock(BlockId.SULFUR)
                             .build();
         }
-        if (BlockTypes.SULFUR_BRICKS == null) {
-            BlockTypes.SULFUR_BRICKS = AllayBlockType
-                            .builder(BlockBricksBehaviorImpl.class)
-                            .vanillaBlock(BlockId.SULFUR_BRICKS)
-                            .build();
-        }
         if (BlockTypes.SULFUR_BRICK_DOUBLE_SLAB == null) {
             BlockTypes.SULFUR_BRICK_DOUBLE_SLAB = AllayBlockType
                             .builder(BlockDoubleSlabBehaviorImpl.class)
@@ -7786,7 +8792,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.SULFUR_BRICK_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.SULFUR_BRICK_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.SULFUR_BRICK_WALL == null) {
@@ -7794,6 +8800,12 @@ public final class BlockTypeDefaultInitializer {
                             .builder(BlockWallBehaviorImpl.class)
                             .vanillaBlock(BlockId.SULFUR_BRICK_WALL)
                             .setProperties(BlockPropertyTypes.WALL_CONNECTION_TYPE_EAST, BlockPropertyTypes.WALL_CONNECTION_TYPE_NORTH, BlockPropertyTypes.WALL_CONNECTION_TYPE_SOUTH, BlockPropertyTypes.WALL_CONNECTION_TYPE_WEST, BlockPropertyTypes.WALL_POST_BIT)
+                            .build();
+        }
+        if (BlockTypes.SULFUR_BRICKS == null) {
+            BlockTypes.SULFUR_BRICKS = AllayBlockType
+                            .builder(BlockBricksBehaviorImpl.class)
+                            .vanillaBlock(BlockId.SULFUR_BRICKS)
                             .build();
         }
         if (BlockTypes.SULFUR_DOUBLE_SLAB == null) {
@@ -7821,7 +8833,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.SULFUR_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.SULFUR_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.SULFUR_WALL == null) {
@@ -7856,7 +8868,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.SWEET_BERRY_BUSH = AllayBlockType
                             .builder(BlockSweetBerryBushBehaviorImpl.class)
                             .vanillaBlock(BlockId.SWEET_BERRY_BUSH)
-                            .setProperties(BlockPropertyTypes.GROWTH)
+                            .setProperties(BlockPropertyTypes.GROWTH_8)
                             .build();
         }
         if (BlockTypes.TALL_DRY_GRASS == null) {
@@ -7908,7 +8920,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.TORCHFLOWER_CROP = AllayBlockType
                             .builder(BlockTorchflowerCropBehaviorImpl.class)
                             .vanillaBlock(BlockId.TORCHFLOWER_CROP)
-                            .setProperties(BlockPropertyTypes.GROWTH)
+                            .setProperties(BlockPropertyTypes.GROWTH_8)
                             .build();
         }
         if (BlockTypes.TRAPDOOR == null) {
@@ -7932,18 +8944,18 @@ public final class BlockTypeDefaultInitializer {
                             .setProperties(BlockPropertyTypes.OMINOUS, BlockPropertyTypes.TRIAL_SPAWNER_STATE)
                             .build();
         }
+        if (BlockTypes.TRIP_WIRE == null) {
+            BlockTypes.TRIP_WIRE = AllayBlockType
+                            .builder(BlockTripWireBehaviorImpl.class)
+                            .vanillaBlock(BlockId.TRIP_WIRE)
+                            .setProperties(BlockPropertyTypes.ATTACHED_BIT, BlockPropertyTypes.DISARMED_BIT, BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST, BlockPropertyTypes.POWERED_BIT, BlockPropertyTypes.SUSPENDED_BIT)
+                            .build();
+        }
         if (BlockTypes.TRIPWIRE_HOOK == null) {
             BlockTypes.TRIPWIRE_HOOK = AllayBlockType
                             .builder(BlockTripwireHookBehaviorImpl.class)
                             .vanillaBlock(BlockId.TRIPWIRE_HOOK)
                             .setProperties(BlockPropertyTypes.ATTACHED_BIT, BlockPropertyTypes.DIRECTION_4, BlockPropertyTypes.POWERED_BIT)
-                            .build();
-        }
-        if (BlockTypes.TRIP_WIRE == null) {
-            BlockTypes.TRIP_WIRE = AllayBlockType
-                            .builder(BlockTripWireBehaviorImpl.class)
-                            .vanillaBlock(BlockId.TRIP_WIRE)
-                            .setProperties(BlockPropertyTypes.ATTACHED_BIT, BlockPropertyTypes.DISARMED_BIT, BlockPropertyTypes.POWERED_BIT, BlockPropertyTypes.SUSPENDED_BIT)
                             .build();
         }
         if (BlockTypes.TUBE_CORAL == null) {
@@ -7978,12 +8990,6 @@ public final class BlockTypeDefaultInitializer {
                             .vanillaBlock(BlockId.TUFF)
                             .build();
         }
-        if (BlockTypes.TUFF_BRICKS == null) {
-            BlockTypes.TUFF_BRICKS = AllayBlockType
-                            .builder(BlockBricksBehaviorImpl.class)
-                            .vanillaBlock(BlockId.TUFF_BRICKS)
-                            .build();
-        }
         if (BlockTypes.TUFF_BRICK_DOUBLE_SLAB == null) {
             BlockTypes.TUFF_BRICK_DOUBLE_SLAB = AllayBlockType
                             .builder(BlockDoubleSlabBehaviorImpl.class)
@@ -8002,7 +9008,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.TUFF_BRICK_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.TUFF_BRICK_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.TUFF_BRICK_WALL == null) {
@@ -8010,6 +9016,12 @@ public final class BlockTypeDefaultInitializer {
                             .builder(BlockWallBehaviorImpl.class)
                             .vanillaBlock(BlockId.TUFF_BRICK_WALL)
                             .setProperties(BlockPropertyTypes.WALL_CONNECTION_TYPE_EAST, BlockPropertyTypes.WALL_CONNECTION_TYPE_NORTH, BlockPropertyTypes.WALL_CONNECTION_TYPE_SOUTH, BlockPropertyTypes.WALL_CONNECTION_TYPE_WEST, BlockPropertyTypes.WALL_POST_BIT)
+                            .build();
+        }
+        if (BlockTypes.TUFF_BRICKS == null) {
+            BlockTypes.TUFF_BRICKS = AllayBlockType
+                            .builder(BlockBricksBehaviorImpl.class)
+                            .vanillaBlock(BlockId.TUFF_BRICKS)
                             .build();
         }
         if (BlockTypes.TUFF_DOUBLE_SLAB == null) {
@@ -8030,7 +9042,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.TUFF_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.TUFF_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.TUFF_WALL == null) {
@@ -8161,6 +9173,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.WARPED_FENCE = AllayBlockType
                             .builder(BlockFenceBehaviorImpl.class)
                             .vanillaBlock(BlockId.WARPED_FENCE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.WARPED_FENCE_GATE == null) {
@@ -8233,7 +9246,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.WARPED_STAIRS = AllayBlockType
                             .builder(BlockStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.WARPED_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.WARPED_STANDING_SIGN == null) {
@@ -8299,6 +9312,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.WAXED_COPPER_BARS = AllayBlockType
                             .builder(BlockCopperBarsBehaviorImpl.class)
                             .vanillaBlock(BlockId.WAXED_COPPER_BARS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.WAXED_COPPER_BULB == null) {
@@ -8317,7 +9331,7 @@ public final class BlockTypeDefaultInitializer {
         }
         if (BlockTypes.WAXED_COPPER_CHEST == null) {
             BlockTypes.WAXED_COPPER_CHEST = AllayBlockType
-                            .builder(BlockWaxedCopperChestBehaviorImpl.class)
+                            .builder(BlockCopperChestBehaviorImpl.class)
                             .vanillaBlock(BlockId.WAXED_COPPER_CHEST)
                             .setProperties(BlockPropertyTypes.MINECRAFT_CARDINAL_DIRECTION)
                             .build();
@@ -8373,7 +9387,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.WAXED_CUT_COPPER_STAIRS = AllayBlockType
                             .builder(BlockCopperStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.WAXED_CUT_COPPER_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.WAXED_DOUBLE_CUT_COPPER_SLAB == null) {
@@ -8399,6 +9413,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.WAXED_EXPOSED_COPPER_BARS = AllayBlockType
                             .builder(BlockCopperBarsBehaviorImpl.class)
                             .vanillaBlock(BlockId.WAXED_EXPOSED_COPPER_BARS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.WAXED_EXPOSED_COPPER_BULB == null) {
@@ -8417,7 +9432,7 @@ public final class BlockTypeDefaultInitializer {
         }
         if (BlockTypes.WAXED_EXPOSED_COPPER_CHEST == null) {
             BlockTypes.WAXED_EXPOSED_COPPER_CHEST = AllayBlockType
-                            .builder(BlockWaxedExposedCopperChestBehaviorImpl.class)
+                            .builder(BlockCopperChestBehaviorImpl.class)
                             .vanillaBlock(BlockId.WAXED_EXPOSED_COPPER_CHEST)
                             .setProperties(BlockPropertyTypes.MINECRAFT_CARDINAL_DIRECTION)
                             .build();
@@ -8473,7 +9488,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.WAXED_EXPOSED_CUT_COPPER_STAIRS = AllayBlockType
                             .builder(BlockCopperStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.WAXED_EXPOSED_CUT_COPPER_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.WAXED_EXPOSED_DOUBLE_CUT_COPPER_SLAB == null) {
@@ -8513,6 +9528,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.WAXED_OXIDIZED_COPPER_BARS = AllayBlockType
                             .builder(BlockCopperBarsBehaviorImpl.class)
                             .vanillaBlock(BlockId.WAXED_OXIDIZED_COPPER_BARS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.WAXED_OXIDIZED_COPPER_BULB == null) {
@@ -8531,7 +9547,7 @@ public final class BlockTypeDefaultInitializer {
         }
         if (BlockTypes.WAXED_OXIDIZED_COPPER_CHEST == null) {
             BlockTypes.WAXED_OXIDIZED_COPPER_CHEST = AllayBlockType
-                            .builder(BlockWaxedOxidizedCopperChestBehaviorImpl.class)
+                            .builder(BlockCopperChestBehaviorImpl.class)
                             .vanillaBlock(BlockId.WAXED_OXIDIZED_COPPER_CHEST)
                             .setProperties(BlockPropertyTypes.MINECRAFT_CARDINAL_DIRECTION)
                             .build();
@@ -8587,7 +9603,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.WAXED_OXIDIZED_CUT_COPPER_STAIRS = AllayBlockType
                             .builder(BlockCopperStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.WAXED_OXIDIZED_CUT_COPPER_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.WAXED_OXIDIZED_DOUBLE_CUT_COPPER_SLAB == null) {
@@ -8620,6 +9636,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.WAXED_WEATHERED_COPPER_BARS = AllayBlockType
                             .builder(BlockCopperBarsBehaviorImpl.class)
                             .vanillaBlock(BlockId.WAXED_WEATHERED_COPPER_BARS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.WAXED_WEATHERED_COPPER_BULB == null) {
@@ -8638,7 +9655,7 @@ public final class BlockTypeDefaultInitializer {
         }
         if (BlockTypes.WAXED_WEATHERED_COPPER_CHEST == null) {
             BlockTypes.WAXED_WEATHERED_COPPER_CHEST = AllayBlockType
-                            .builder(BlockWaxedWeatheredCopperChestBehaviorImpl.class)
+                            .builder(BlockCopperChestBehaviorImpl.class)
                             .vanillaBlock(BlockId.WAXED_WEATHERED_COPPER_CHEST)
                             .setProperties(BlockPropertyTypes.MINECRAFT_CARDINAL_DIRECTION)
                             .build();
@@ -8694,7 +9711,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.WAXED_WEATHERED_CUT_COPPER_STAIRS = AllayBlockType
                             .builder(BlockCopperStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.WAXED_WEATHERED_CUT_COPPER_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.WAXED_WEATHERED_DOUBLE_CUT_COPPER_SLAB == null) {
@@ -8727,6 +9744,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.WEATHERED_COPPER_BARS = AllayBlockType
                             .builder(BlockCopperBarsBehaviorImpl.class)
                             .vanillaBlock(BlockId.WEATHERED_COPPER_BARS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.WEATHERED_COPPER_BULB == null) {
@@ -8745,7 +9763,7 @@ public final class BlockTypeDefaultInitializer {
         }
         if (BlockTypes.WEATHERED_COPPER_CHEST == null) {
             BlockTypes.WEATHERED_COPPER_CHEST = AllayBlockType
-                            .builder(BlockWeatheredCopperChestBehaviorImpl.class)
+                            .builder(BlockCopperChestBehaviorImpl.class)
                             .vanillaBlock(BlockId.WEATHERED_COPPER_CHEST)
                             .setProperties(BlockPropertyTypes.MINECRAFT_CARDINAL_DIRECTION)
                             .build();
@@ -8801,7 +9819,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.WEATHERED_CUT_COPPER_STAIRS = AllayBlockType
                             .builder(BlockCopperStairsBehaviorImpl.class)
                             .vanillaBlock(BlockId.WEATHERED_CUT_COPPER_STAIRS)
-                            .setProperties(BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.WEATHERED_DOUBLE_CUT_COPPER_SLAB == null) {
@@ -8841,7 +9859,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.WHEAT = AllayBlockType
                             .builder(BlockWheatBehaviorImpl.class)
                             .vanillaBlock(BlockId.WHEAT)
-                            .setProperties(BlockPropertyTypes.GROWTH)
+                            .setProperties(BlockPropertyTypes.GROWTH_8)
                             .build();
         }
         if (BlockTypes.WHITE_CANDLE == null) {
@@ -8870,10 +9888,31 @@ public final class BlockTypeDefaultInitializer {
                             .vanillaBlock(BlockId.WHITE_CONCRETE)
                             .build();
         }
+        if (BlockTypes.WHITE_CONCRETE_DOUBLE_SLAB == null) {
+            BlockTypes.WHITE_CONCRETE_DOUBLE_SLAB = AllayBlockType
+                            .builder(BlockDoubleSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.WHITE_CONCRETE_DOUBLE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
         if (BlockTypes.WHITE_CONCRETE_POWDER == null) {
             BlockTypes.WHITE_CONCRETE_POWDER = AllayBlockType
                             .builder(BlockConcretePowderBehaviorImpl.class)
                             .vanillaBlock(BlockId.WHITE_CONCRETE_POWDER)
+                            .build();
+        }
+        if (BlockTypes.WHITE_CONCRETE_SLAB == null) {
+            BlockTypes.WHITE_CONCRETE_SLAB = AllayBlockType
+                            .builder(BlockSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.WHITE_CONCRETE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.WHITE_CONCRETE_STAIRS == null) {
+            BlockTypes.WHITE_CONCRETE_STAIRS = AllayBlockType
+                            .builder(BlockStairsBehaviorImpl.class)
+                            .vanillaBlock(BlockId.WHITE_CONCRETE_STAIRS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.WHITE_GLAZED_TERRACOTTA == null) {
@@ -8899,6 +9938,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.WHITE_STAINED_GLASS_PANE = AllayBlockType
                             .builder(BlockGlassPaneBehaviorImpl.class)
                             .vanillaBlock(BlockId.WHITE_STAINED_GLASS_PANE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.WHITE_TERRACOTTA == null) {
@@ -8919,11 +9959,32 @@ public final class BlockTypeDefaultInitializer {
                             .vanillaBlock(BlockId.WHITE_WOOL)
                             .build();
         }
+        if (BlockTypes.WHITE_WOOL_DOUBLE_SLAB == null) {
+            BlockTypes.WHITE_WOOL_DOUBLE_SLAB = AllayBlockType
+                            .builder(BlockDoubleSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.WHITE_WOOL_DOUBLE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.WHITE_WOOL_SLAB == null) {
+            BlockTypes.WHITE_WOOL_SLAB = AllayBlockType
+                            .builder(BlockSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.WHITE_WOOL_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.WHITE_WOOL_STAIRS == null) {
+            BlockTypes.WHITE_WOOL_STAIRS = AllayBlockType
+                            .builder(BlockStairsBehaviorImpl.class)
+                            .vanillaBlock(BlockId.WHITE_WOOL_STAIRS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
+                            .build();
+        }
         if (BlockTypes.WILDFLOWERS == null) {
             BlockTypes.WILDFLOWERS = AllayBlockType
                             .builder(BlockPlantPileImpl.class)
                             .vanillaBlock(BlockId.WILDFLOWERS)
-                            .setProperties(BlockPropertyTypes.GROWTH, BlockPropertyTypes.MINECRAFT_CARDINAL_DIRECTION)
+                            .setProperties(BlockPropertyTypes.GROWTH_8, BlockPropertyTypes.MINECRAFT_CARDINAL_DIRECTION)
                             .build();
         }
         if (BlockTypes.WITHER_ROSE == null) {
@@ -8986,10 +10047,31 @@ public final class BlockTypeDefaultInitializer {
                             .vanillaBlock(BlockId.YELLOW_CONCRETE)
                             .build();
         }
+        if (BlockTypes.YELLOW_CONCRETE_DOUBLE_SLAB == null) {
+            BlockTypes.YELLOW_CONCRETE_DOUBLE_SLAB = AllayBlockType
+                            .builder(BlockDoubleSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.YELLOW_CONCRETE_DOUBLE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
         if (BlockTypes.YELLOW_CONCRETE_POWDER == null) {
             BlockTypes.YELLOW_CONCRETE_POWDER = AllayBlockType
                             .builder(BlockConcretePowderBehaviorImpl.class)
                             .vanillaBlock(BlockId.YELLOW_CONCRETE_POWDER)
+                            .build();
+        }
+        if (BlockTypes.YELLOW_CONCRETE_SLAB == null) {
+            BlockTypes.YELLOW_CONCRETE_SLAB = AllayBlockType
+                            .builder(BlockSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.YELLOW_CONCRETE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.YELLOW_CONCRETE_STAIRS == null) {
+            BlockTypes.YELLOW_CONCRETE_STAIRS = AllayBlockType
+                            .builder(BlockStairsBehaviorImpl.class)
+                            .vanillaBlock(BlockId.YELLOW_CONCRETE_STAIRS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.YELLOW_GLAZED_TERRACOTTA == null) {
@@ -9022,6 +10104,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.YELLOW_STAINED_GLASS_PANE = AllayBlockType
                             .builder(BlockGlassPaneBehaviorImpl.class)
                             .vanillaBlock(BlockId.YELLOW_STAINED_GLASS_PANE)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.YELLOW_TERRACOTTA == null) {
@@ -9034,6 +10117,27 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.YELLOW_WOOL = AllayBlockType
                             .builder(BlockWoolBehaviorImpl.class)
                             .vanillaBlock(BlockId.YELLOW_WOOL)
+                            .build();
+        }
+        if (BlockTypes.YELLOW_WOOL_DOUBLE_SLAB == null) {
+            BlockTypes.YELLOW_WOOL_DOUBLE_SLAB = AllayBlockType
+                            .builder(BlockDoubleSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.YELLOW_WOOL_DOUBLE_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.YELLOW_WOOL_SLAB == null) {
+            BlockTypes.YELLOW_WOOL_SLAB = AllayBlockType
+                            .builder(BlockSlabBehaviorImpl.class)
+                            .vanillaBlock(BlockId.YELLOW_WOOL_SLAB)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_VERTICAL_HALF)
+                            .build();
+        }
+        if (BlockTypes.YELLOW_WOOL_STAIRS == null) {
+            BlockTypes.YELLOW_WOOL_STAIRS = AllayBlockType
+                            .builder(BlockStairsBehaviorImpl.class)
+                            .vanillaBlock(BlockId.YELLOW_WOOL_STAIRS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CORNER, BlockPropertyTypes.UPSIDE_DOWN_BIT, BlockPropertyTypes.WEIRDO_DIRECTION)
                             .build();
         }
         if (BlockTypes.ZOMBIE_HEAD == null) {

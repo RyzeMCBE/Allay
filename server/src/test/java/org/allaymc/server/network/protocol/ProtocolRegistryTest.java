@@ -41,8 +41,8 @@ class ProtocolRegistryTest {
         assertInstanceOf(Protocol_v860_NetEase.class, registry.resolve(ClientVariant.NETEASE, 860));
         assertNull(registry.resolve(ClientVariant.NETEASE, 818));
         assertEquals(818, registry.getLowest(ClientVariant.INTERNATIONAL).getProtocolVersion());
-        assertEquals(2169, registry.getLatest(ClientVariant.INTERNATIONAL).getProtocolVersion());
-        assertEquals("1.26.45", registry.getLatest(ClientVariant.INTERNATIONAL).getMinecraftVersion());
+        assertEquals(2193, registry.getLatest(ClientVariant.INTERNATIONAL).getProtocolVersion());
+        assertEquals("1.26.52", registry.getLatest(ClientVariant.INTERNATIONAL).getMinecraftVersion());
         assertEquals(766, registry.getLowest(ClientVariant.NETEASE).getProtocolVersion());
         assertEquals(860, registry.getLatest(ClientVariant.NETEASE).getProtocolVersion());
     }

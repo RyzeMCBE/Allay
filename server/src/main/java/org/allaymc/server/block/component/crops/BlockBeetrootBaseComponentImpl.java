@@ -10,7 +10,7 @@ import org.allaymc.server.block.FortuneDropHelper;
 
 import java.util.Set;
 
-import static org.allaymc.api.block.property.type.BlockPropertyTypes.GROWTH;
+import static org.allaymc.api.block.property.type.BlockPropertyTypes.GROWTH_8;
 
 /**
  * @author daoge_cmd
@@ -22,11 +22,18 @@ public class BlockBeetrootBaseComponentImpl extends BlockCropsBaseComponentImpl 
 
     @Override
     public Set<ItemStack> getDrops(Block block, ItemStack usedItem, Entity entity) {
-        var growth = block.getPropertyValue(GROWTH);
-        if (growth < GROWTH.getMax()) {
+        var growth = block.getPropertyValue(GROWTH_8);
+        if (growth < GROWTH_8.getMax()) {
             return Set.of(ItemTypes.BEETROOT_SEEDS.createItemStack());
         }
 
-        return Set.of(ItemTypes.BEETROOT_SEEDS.createItemStack(), ItemTypes.BEETROOT.createItemStack(FortuneDropHelper.binomial(usedItem, 0)));
+        // A mature crop always yields exactly one beetroot, plus a variable amount of
+        // seeds. The seed amount is the fortune-affected roll, not the beetroot amount.
+        var seedCount = FortuneDropHelper.binomial(usedItem, 0);
+        if (seedCount <= 0) {
+            return Set.of(ItemTypes.BEETROOT.createItemStack());
+        }
+
+        return Set.of(ItemTypes.BEETROOT.createItemStack(), ItemTypes.BEETROOT_SEEDS.createItemStack(seedCount));
     }
 }

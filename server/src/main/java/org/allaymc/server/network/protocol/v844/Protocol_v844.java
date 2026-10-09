@@ -28,6 +28,11 @@ public class Protocol_v844 extends Protocol_v827 {
     }
 
     @Override
+    protected String getBlockPaletteResource() {
+        return "protocol_palettes/1_21_111.nbt";
+    }
+
+    @Override
     protected PacketEncoder createEncoder(ProtocolData data) {
         return new PacketEncoder_v844(data);
     }

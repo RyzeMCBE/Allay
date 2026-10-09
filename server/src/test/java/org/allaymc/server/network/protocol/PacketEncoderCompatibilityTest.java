@@ -647,6 +647,28 @@ class PacketEncoderCompatibilityTest {
         }
     }
 
+    @Test
+    void emptyJigsawStructureDataIsEncodedByEveryRegisteredProtocol() {
+        for (var protocol : registry.getProtocols()) {
+            var packet = assertInstanceOf(
+                    JigsawStructureDataPacket.class,
+                    protocol.getEncoder().encodeJigsawStructureData(),
+                    protocol::toString
+            );
+            var rules = packet.getJigsawStructureDataTag();
+            assertEquals(
+                    java.util.Set.of("processors", "template_pools", "jigsaws", "structure_sets"),
+                    rules.keySet(),
+                    protocol::toString
+            );
+            for (var value : rules.values()) {
+                var list = assertInstanceOf(org.cloudburstmc.nbt.NbtList.class, value, protocol::toString);
+                assertTrue(list.isEmpty(), protocol::toString);
+            }
+            assertPacketEncodes(protocol, packet);
+        }
+    }
+
     private static StartGameFixture startGameFixture() {
         var gameRules = mock(GameRules.class);
         when(gameRules.getGameRules()).thenReturn(Map.of());

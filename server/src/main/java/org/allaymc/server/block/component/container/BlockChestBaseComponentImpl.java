@@ -18,7 +18,7 @@ import org.allaymc.server.component.annotation.Dependency;
  */
 public class BlockChestBaseComponentImpl extends BlockBaseComponentImpl {
     @Dependency
-    private BlockBlockEntityHolderComponent<BlockEntityChest> blockEntityHolderComponent;
+    protected BlockBlockEntityHolderComponent<BlockEntityChest> blockEntityHolderComponent;
 
     public BlockChestBaseComponentImpl(BlockType<? extends BlockBehavior> blockType) {
         super(blockType);
@@ -39,7 +39,9 @@ public class BlockChestBaseComponentImpl extends BlockBaseComponentImpl {
         var blockFace = BlockFace.from(direction);
         for (var face : new BlockFace[]{blockFace.rotateY(), blockFace.rotateYCCW()}) {
             var other = oldBlock.offsetPos(face).getBlockEntity();
-            if (other instanceof BlockEntityChest otherChest && !otherChest.isPaired()) {
+            if (other instanceof BlockEntityChest otherChest &&
+                !otherChest.isPaired() &&
+                canPairWith(newBlockState, otherChest.getBlockState())) {
                 if (direction == otherChest.getBlockState().getPropertyValue(BlockPropertyTypes.MINECRAFT_CARDINAL_DIRECTION)) {
                     if (otherChest.tryPairWith(thisChest)) {
                         thisChest.tryPairWith(otherChest);
@@ -48,6 +50,10 @@ public class BlockChestBaseComponentImpl extends BlockBaseComponentImpl {
                 }
             }
         }
+    }
+
+    protected boolean canPairWith(BlockState blockState, BlockState neighborBlockState) {
+        return blockState.getBlockType() == neighborBlockState.getBlockType();
     }
 
     @Override

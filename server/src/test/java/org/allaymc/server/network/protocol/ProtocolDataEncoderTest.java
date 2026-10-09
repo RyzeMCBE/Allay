@@ -153,7 +153,8 @@ class ProtocolDataEncoderTest {
         var air = NetworkHelper.toNetwork(
                 ItemAirStack.AIR_STACK,
                 protocol.getItemDefinitionRegistry(),
-                protocol.getBlockDefinitionRegistry()
+                protocol.getBlockDefinitionRegistry(),
+                protocol.getEncoder()::networkBlockId
         );
         assertTrue(protocol.getItemDefinitionRegistry().isRegistered(air.getDefinition()));
 
