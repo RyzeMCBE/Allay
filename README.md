@@ -42,7 +42,7 @@ Este repositorio contiene un **fork de trabajo de [AllayMC/Allay](https://github
 
 La presencia de un componente en el código no garantiza que todas sus mecánicas estén verificadas en este fork.
 
-🔗 **Biblioteca de protocolo utilizada:** [RyzeMCBE/Protocol](https://github.com/RyzeMCBE/Protocol) (submódulo `protocol-local`).
+🔗 **Dependencias locales del fork:** [RyzeMCBE/Protocol](https://github.com/RyzeMCBE/Protocol) (`protocol-local`) y [RyzeMCBE/StateUpdater](https://github.com/RyzeMCBE/StateUpdater) (`stateupdater-local`). Ambos repositorios están enlazados mediante submódulos Git y builds compuestos de Gradle.
 
 ## 🆕 Novedades documentadas
 
@@ -70,7 +70,7 @@ Allay/
 ├── .github/workflows/     Compilación automática
 ├── build.gradle.kts       Configuración principal de Gradle
 ├── settings.gradle.kts    Módulos y resolución del protocolo
-├── .gitmodules            Referencia al repositorio de protocolo
+├── .gitmodules            Referencias a Protocol y StateUpdater
 └── gradlew                Ejecutor Gradle para Linux/macOS
 ~~~
 
@@ -81,12 +81,12 @@ El código fuente se encuentra directamente en el repositorio: **ya no existe el
 - **JDK 21** configurado.
 - Git.
 - Acceso a las dependencias Maven/Gradle necesarias.
-- Código correcto del protocolo local **protocol-local**.
+- Submódulos locales **protocol-local** y **stateupdater-local** correctamente inicializados.
 - En Linux, permisos de ejecución para el Gradle Wrapper.
 
 ### ⚠️ Dependencia local de protocolo
 
-En este fork, el archivo <code>.gitmodules</code> declara el submódulo **[Mykoss/Protocol](https://github.com/Mykoss/Protocol)** con la ruta <code>protocol-local</code>.
+En este fork, el archivo <code>.gitmodules</code> declara el submódulo **[RyzeMCBE/Protocol](https://github.com/RyzeMCBE/Protocol)** en <code>protocol-local</code> y **[RyzeMCBE/StateUpdater](https://github.com/RyzeMCBE/StateUpdater)** en <code>stateupdater-local</code>.
 
 Además, <code>settings.gradle.kts</code> requiere que exista un archivo de prueba de regresión específico:
 
