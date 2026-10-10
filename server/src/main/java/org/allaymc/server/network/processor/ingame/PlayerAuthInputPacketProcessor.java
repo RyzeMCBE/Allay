@@ -186,9 +186,16 @@ public class PlayerAuthInputPacketProcessor extends PacketProcessor<PlayerAuthIn
 
         var block = new Block(blockToBreak, new Position3i(x, y, z, dimension));
         var event = new PlayerPunchBlockEvent(entity, block, faceToBreak);
-        if (event.call()) {
-            this.blockToBreak.getBlockType().getBlockBehavior().onPunch(block, faceToBreak, entity.getItemInHand(), entity);
+        if (!event.call()) {
+            // The claim plugin (or another protection) denied START_BREAK.
+            // Do not send StartBreakAction, ContinueBreakAction or particles.
+            // Remove the active break and make both Bedrock block layers
+            // authoritative for the client immediately.
+            stopBreak(player);
+            revertClientBlockPrediction(player, x, y, z);
+            return;
         }
+        this.blockToBreak.getBlockType().getBlockBehavior().onPunch(block, faceToBreak, entity.getItemInHand(), entity);
 
         double breakTimeSeconds;
         if (entity.getGameMode() != GameMode.CREATIVE) {
@@ -234,6 +241,9 @@ public class PlayerAuthInputPacketProcessor extends PacketProcessor<PlayerAuthIn
     protected void completeBreak(Player player, int x, int y, int z) {
         if (this.breakingPosX != x || this.breakingPosY != y || this.breakingPosZ != z) {
             log.debug("Player {} tried to complete breaking a different block", player.getOriginName());
+            // The client already predicted AIR for this position. Restore it
+            // even when no server-side break exists (or the position differs).
+            revertClientBlockPrediction(player, x, y, z);
             return;
         }
 
