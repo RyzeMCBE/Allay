@@ -22,6 +22,22 @@ import org.allaymc.server.container.impl.*;
 @SuppressWarnings("unused")
 @UtilityClass
 public final class BlockEntityTypeInitializer {
+    public static void initMobSpawner() {
+        BlockEntityTypes.MOB_SPAWNER = AllayBlockEntityType
+                .builder(BlockEntityMobSpawnerImpl.class)
+                .name(BlockEntityId.MOB_SPAWNER)
+                .addComponent(BlockEntityLegacyNbtBaseComponentImpl::new, BlockEntityLegacyNbtBaseComponentImpl.class)
+                .build();
+    }
+
+    public static void initUnknownStorageEntity() {
+        BlockEntityTypes.UNKNOWN = AllayBlockEntityType
+                .builder(BlockEntityUnknownImpl.class)
+                .name("AllayUnknownStoredBlockEntity")
+                .addComponent(BlockEntityUnknownNbtBaseComponentImpl::new, BlockEntityUnknownNbtBaseComponentImpl.class)
+                .build();
+    }
+
     public static void initBanner() {
         BlockEntityTypes.BANNER = AllayBlockEntityType
                 .builder(BlockEntityBannerImpl.class)
