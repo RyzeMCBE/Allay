@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(AllayTestExtension.class)
 class PocketMineBiomeCompatibilityTest {
@@ -140,4 +141,35 @@ class PocketMineBiomeCompatibilityTest {
         }
         assertThrows(PaletteException.class, () -> HeightAndBiomeCodec.deserialize(data, builder(sections())));
     }
+    @Test
+    void legacy2DBiomeIdsAreUnsigned() {
+        // Modern Bedrock biome IDs can exceed the signed Java byte range.
+        int biomeId = BiomeTypes.PALE_GARDEN.getId();
+        assertTrue(biomeId > 127 && biomeId <= 255, "Expected a known biome with an unsigned byte ID");
+
+        ByteBuf buf = Unpooled.buffer();
+        byte[] data;
+        try {
+            buf.writeZero(512); // Legacy 2D heightmap
+            for (int i = 0; i < 256; i++) {
+                buf.writeByte(biomeId);
+            }
+            data = ByteBufUtil.getBytes(buf);
+        } finally {
+            buf.release();
+        }
+
+        var sections = sections();
+        HeightAndBiomeCodec.deserializeOld(data, builder(sections));
+        assertEquals(BiomeTypes.PALE_GARDEN, sections[0].getBiomeType(0, 0, 0));
+        assertEquals(BiomeTypes.PALE_GARDEN, sections[sections.length - 1].getBiomeType(15, 15, 15));
+    }
+
+    @Test
+    void unknownBiomeIdReturnsNonNullFallback() {
+        // The map-backed registry returns null for unregistered IDs.
+        assertEquals(BiomeTypes.PLAINS, HeightAndBiomeCodec.getBiomeByIdNonNull(Integer.MAX_VALUE));
+        assertEquals(BiomeTypes.PLAINS, HeightAndBiomeCodec.getBiomeByIdNonNull(-1));
+    }
+
 }
