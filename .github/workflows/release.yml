@@ -35,13 +35,13 @@ jobs:
           fetch-depth: 0
 
       - name: Preparar Java 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: '21'
 
       - name: Configurar Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v6
 
       - name: Validar tag, versión y rama
         shell: bash
@@ -113,7 +113,7 @@ jobs:
 
       - name: Conservar informes de pruebas
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: allay-tests-${{ github.sha }}
           path: |
@@ -122,7 +122,7 @@ jobs:
           if-no-files-found: ignore
 
       - name: Adjuntar JAR al workflow
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: allay-${{ env.RELEASE_VERSION }}-${{ github.sha }}
           path: |
