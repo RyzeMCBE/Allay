@@ -140,7 +140,7 @@ public final class HeightAndBiomeCodec {
             for (int x = 0; x < 16; x++) {
                 for (int z = 0; z < 16; z++) {
                     for (int sy = 0; sy < 16; sy++) {
-                        biomePalette.set(HashUtils.hashChunkSectionXYZ(x, sy, z), getBiomeByIdNonNull(biomes[x + 16 * z]));
+                        biomePalette.set(HashUtils.hashChunkSectionXYZ(x, sy, z), getBiomeByIdNonNull(Byte.toUnsignedInt(biomes[x + 16 * z])));
                     }
                 }
             }
@@ -148,11 +148,13 @@ public final class HeightAndBiomeCodec {
     }
 
     public static BiomeType getBiomeByIdNonNull(int id) {
-        try {
-            return Registries.BIOMES.getByK1(id);
-        } catch (ArrayIndexOutOfBoundsException e) {
-            log.warn("Unknown biome id: {}", id);
+        // The biome registry is map-backed: unknown IDs return null instead of
+        // throwing ArrayIndexOutOfBoundsException. Never put null into a palette.
+        var biome = Registries.BIOMES.getByK1(id);
+        if (biome == null) {
+            log.warn("Unknown biome id: {}; using plains as a fallback", id);
             return BiomeTypes.PLAINS;
         }
+        return biome;
     }
 }
