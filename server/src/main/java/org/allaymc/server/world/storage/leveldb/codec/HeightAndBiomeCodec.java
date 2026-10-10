@@ -3,6 +3,7 @@ package org.allaymc.server.world.storage.leveldb.codec;
 import io.netty.buffer.Unpooled;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import org.allaymc.api.block.type.BlockTypes;
 import org.allaymc.api.registry.Registries;
 import org.allaymc.api.utils.hash.HashUtils;
 import org.allaymc.api.world.biome.BiomeType;
@@ -60,8 +61,11 @@ public final class HeightAndBiomeCodec {
 
         // Height map
         short[] heights = new short[HEIGHTMAP_SIZE];
+        boolean placeholderHeightMap = true;
         for (int i = 0; i < HEIGHTMAP_SIZE; i++) {
-            heights[i] = (short) (heightAndBiomesBuffer.readUnsignedShortLE() + dimensionType.getMinHeight());
+            int storedHeight = heightAndBiomesBuffer.readUnsignedShortLE();
+            if (storedHeight != 0) placeholderHeightMap = false;
+            heights[i] = (short) (storedHeight + dimensionType.getMinHeight());
         }
         builder.heightMap(new HeightMap(heights));
 
@@ -74,9 +78,40 @@ public final class HeightAndBiomeCodec {
                 continue;
             }
 
-            section.biomes().readFromStorage(heightAndBiomesBuffer, HeightAndBiomeCodec::getBiomeByIdNonNull, lastPalette);
+            section.biomes().readBiomeFromStorage(heightAndBiomesBuffer, HeightAndBiomeCodec::getBiomeByIdNonNull, lastPalette);
             lastPalette = section.biomes();
         }
+
+        if (placeholderHeightMap) restorePlaceholderHeightMap(builder);
+    }
+
+    /**
+     * Reconstruct heights from decoded block sections when DATA_3D contains
+     * PocketMine-MP's zero-filled placeholder. Never modify block data.
+     */
+    private static void restorePlaceholderHeightMap(AllayChunkBuilder builder) {
+        var dimension = builder.getDimensionType();
+        var sections = builder.getSections();
+        short[] heights = new short[HEIGHTMAP_SIZE];
+        int minSectionY = dimension.minSectionY();
+        for (int x = 0; x < 16; x++) {
+            for (int z = 0; z < 16; z++) {
+                short height = (short) dimension.getMinHeight();
+                search:
+                for (int sectionY = dimension.maxSectionY(); sectionY >= minSectionY; sectionY--) {
+                    var section = sections[sectionY - minSectionY];
+                    if (section == null || section.isAirSection()) continue;
+                    for (int localY = 15; localY >= 0; localY--) {
+                        if (section.getBlockState(x, localY, z, 0).getBlockType() != BlockTypes.AIR) {
+                            height = (short) ((sectionY << 4) + localY);
+                            break search;
+                        }
+                    }
+                }
+                heights[HeightMap.computeIndex(x, z)] = height;
+            }
+        }
+        builder.heightMap(new HeightMap(heights));
     }
 
     /**
