@@ -6,6 +6,7 @@ import org.allaymc.api.block.type.BlockState;
 import org.allaymc.api.block.type.BlockTypes;
 import org.allaymc.api.blockentity.BlockEntity;
 import org.allaymc.api.blockentity.BlockEntityInitInfo;
+import org.allaymc.api.blockentity.type.BlockEntityTypes;
 import org.allaymc.api.entity.Entity;
 import org.allaymc.api.entity.EntityInitInfo;
 import org.allaymc.api.item.ItemStack;
@@ -149,8 +150,10 @@ public class AllayNBTIO implements NBTIO {
         var id = nbt.getString("id");
         var blockEntityType = Registries.BLOCK_ENTITIES.get(id);
         if (blockEntityType == null) {
-            log.warn("Unknown block entity type: {}", id);
-            return null;
+            // Preserve the imported tile NBT rather than deleting it on save.
+            // This is storage compatibility, not support for its gameplay behavior.
+            log.warn("Preserving unsupported block entity type: {}", id);
+            blockEntityType = BlockEntityTypes.UNKNOWN;
         }
 
         return blockEntityType.createBlockEntity(BlockEntityInitInfo.builder().dimension(dimension).nbt(nbt).build());
