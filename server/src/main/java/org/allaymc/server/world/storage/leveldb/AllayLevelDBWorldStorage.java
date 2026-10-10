@@ -115,9 +115,12 @@ public class AllayLevelDBWorldStorage implements WorldStorage {
     public CompletableFuture<Chunk> readChunk(int chunkX, int chunkZ, DimensionType dimensionType) {
         return CompletableFuture
                 .supplyAsync(() -> readChunkSync(chunkX, chunkZ, dimensionType), Server.getInstance().getVirtualThreadPool())
-                .exceptionally(t -> {
-                    log.error("Failed to read chunk ({}, {})", chunkX, chunkZ, t);
-                    return AllayUnsafeChunk.builder().newChunk(chunkX, chunkZ, dimensionType).toSafeChunk();
+                .whenComplete((chunk, error) -> {
+                    if (error != null) {
+                        // Never replace an unreadable stored chunk with an empty one:
+                        // it could later overwrite its original LevelDB records.
+                        log.error("Failed to read chunk ({}, {}): stored data preserved", chunkX, chunkZ, error);
+                    }
                 });
     }
 
