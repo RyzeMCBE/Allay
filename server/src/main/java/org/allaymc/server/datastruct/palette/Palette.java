@@ -209,9 +209,23 @@ public final class Palette<V> {
         }
     }
 
+    /**
+     * Read a biome palette from LevelDB DATA_3D.
+     * PocketMine-MP writes integer biome IDs with the header's NBT flag set;
+     * only the biome reader may accept this legacy header convention.
+     */
+    public void readBiomeFromStorage(ByteBuf byteBuf, IntDeserializer<V> deserializer, Palette<V> last) {
+        readIntegerPaletteFromStorage(byteBuf, deserializer, last, true);
+    }
+
     public void readFromStorage(ByteBuf byteBuf, IntDeserializer<V> deserializer, Palette<V> last) {
+        readIntegerPaletteFromStorage(byteBuf, deserializer, last, false);
+    }
+
+    private void readIntegerPaletteFromStorage(ByteBuf byteBuf, IntDeserializer<V> deserializer,
+                                               Palette<V> last, boolean acceptLegacyBiomeHeader) {
         var header = byteBuf.readUnsignedByte();
-        if (isNBT(header)) {
+        if (isNBT(header) && !acceptLegacyBiomeHeader) {
             throw new PaletteException("Reading nbt palette data with non-nbt method!");
         }
 
