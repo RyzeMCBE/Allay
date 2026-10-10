@@ -465,6 +465,14 @@ public final class BlockTypeInitializer {
                 .build();
     }
 
+    public static void initMobSpawner() {
+        BlockTypes.MOB_SPAWNER = AllayBlockType
+                .builder(BlockMobSpawnerBehaviorImpl.class)
+                .vanillaBlock(BlockId.MOB_SPAWNER)
+                .bindBlockEntity(BlockEntityTypes.MOB_SPAWNER)
+                .build();
+    }
+
     public static void initBarrel() {
         BlockTypes.BARREL = AllayBlockType
                 .builder(BlockBarrelBehaviorImpl.class)
