@@ -1,6 +1,7 @@
 package org.allaymc.api.blockentity.type;
 
 import org.allaymc.api.blockentity.interfaces.*;
+import org.allaymc.api.blockentity.BlockEntity;
 
 /**
  * @author daoge_cmd
@@ -43,4 +44,6 @@ public final class BlockEntityTypes {
     public static BlockEntityType<BlockEntityPistonArm> PISTON_ARM;
     public static BlockEntityType<BlockEntityMovingBlock> MOVING_BLOCK;
     public static BlockEntityType<BlockEntityCauldron> CAULDRON;
+    public static BlockEntityType<BlockEntity> MOB_SPAWNER;
+    public static BlockEntityType<BlockEntity> UNKNOWN;
 }
