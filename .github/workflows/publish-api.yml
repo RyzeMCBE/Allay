@@ -55,7 +55,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew :api:publishRyzeApiPublicationToRyzeMCBERepository --no-daemon -Pryzemcbe.apiVersion="$API_VERSION"
       - name: Subir JAR y fuentes
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: allay-api-${{ github.sha }}
           path: |
