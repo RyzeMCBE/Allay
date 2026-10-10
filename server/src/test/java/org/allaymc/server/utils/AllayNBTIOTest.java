@@ -114,6 +114,45 @@ class AllayNBTIOTest {
     }
 
     @Test
+    void testPocketMineMobSpawnerNbtRoundTrip() {
+        var dimension = Server.getInstance().getWorldPool().getDefaultWorld().getOverWorld();
+        var original = NbtMap.builder()
+                .putString("id", "MobSpawner")
+                .putInt("x", 12).putInt("y", 68).putInt("z", 9)
+                .putShort("Delay", (short) 35)
+                .putShort("MinSpawnDelay", (short) 200)
+                .putShort("MaxSpawnDelay", (short) 800)
+                .putShort("SpawnCount", (short) 4)
+                .putString("EntityIdentifier", "minecraft:zombie")
+                .putString("PocketMineCustomTag", "keep-this-data")
+                .build();
+
+        var loaded = NBTIO.getAPI().fromBlockEntityNBT(dimension, original);
+        org.junit.jupiter.api.Assertions.assertNotNull(loaded);
+        var stored = loaded.saveNBT();
+        assertEquals("MobSpawner", stored.getString("id"));
+        assertEquals((short) 35, stored.getShort("Delay"));
+        assertEquals("minecraft:zombie", stored.getString("EntityIdentifier"));
+        assertEquals("keep-this-data", stored.getString("PocketMineCustomTag"));
+    }
+
+    @Test
+    void testUnknownTileEntityNbtRoundTrip() {
+        var dimension = Server.getInstance().getWorldPool().getDefaultWorld().getOverWorld();
+        var original = NbtMap.builder()
+                .putString("id", "PocketMineCustomTile")
+                .putInt("x", 5).putInt("y", 70).putInt("z", 6)
+                .putString("CustomPluginData", "must-survive")
+                .build();
+
+        var loaded = NBTIO.getAPI().fromBlockEntityNBT(dimension, original);
+        org.junit.jupiter.api.Assertions.assertNotNull(loaded);
+        var stored = loaded.saveNBT();
+        assertEquals("PocketMineCustomTile", stored.getString("id"));
+        assertEquals("must-survive", stored.getString("CustomPluginData"));
+    }
+
+    @Test
     void testFromBlockEntityNBT() {
         var blockEntity1 = BlockEntityTypes.CHEST.createBlockEntity(
                 BlockEntityInitInfo
