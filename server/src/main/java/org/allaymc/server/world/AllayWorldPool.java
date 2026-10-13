@@ -92,11 +92,9 @@ public final class AllayWorldPool implements WorldPool {
                 // Runtime generator changes can be persisted for legacy shared worlds only.
                 if (configured == null) {
                     persistedWorlds.put(name, toWorldSetting(world));
-                } else if ("SHARED".equalsIgnoreCase(configured.dimensionStorageMode())) {
-                    var updated = toWorldSetting(world);
-                    updated.dimensionStorageMode(configured.dimensionStorageMode());
-                    persistedWorlds.put(name, updated);
                 }
+                // Existing configured worlds retain their exact definitions, including
+                // dimensions disabled for maintenance and future storage paths.
             }
         });
         this.worldConfig.worlds().clear();
