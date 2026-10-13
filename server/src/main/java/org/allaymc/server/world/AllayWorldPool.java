@@ -228,6 +228,7 @@ public final class AllayWorldPool implements WorldPool {
                 Preconditions.checkArgument(path.startsWith(root) && !path.equals(root), "Unsafe dimension path: %s", folderName);
                 Preconditions.checkArgument(uniquePaths.add(path), "Duplicate dimension path %s", path);
                 Preconditions.checkArgument(setting.storageType().equalsIgnoreCase("LEVELDB"), "SEPARATE requires LEVELDB storage");
+                Preconditions.checkArgument(!java.nio.file.Files.isSymbolicLink(path), "Symbolic links are not supported for dimension paths: %s", path);
                 DimensionStorageInspector.requireNativeLayout(path, type.getId());
             }
         }
