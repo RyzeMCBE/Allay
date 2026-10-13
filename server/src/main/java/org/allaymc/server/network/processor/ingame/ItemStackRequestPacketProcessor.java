@@ -4,6 +4,9 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import lombok.extern.slf4j.Slf4j;
 import org.allaymc.api.player.Player;
+import org.allaymc.api.eventbus.event.player.PlayerInventoryRequestEvent;
+import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.ItemStackRequestSlotData;
+import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.action.*;
 import org.allaymc.server.container.processor.ActionResponse;
 import org.allaymc.server.container.processor.ContainerActionProcessor;
 import org.allaymc.server.container.processor.ContainerActionProcessorHolder;
@@ -59,6 +62,19 @@ public class ItemStackRequestPacketProcessor extends PacketProcessor<ItemStackRe
                     ));
                     continue label;
                 }
+            }
+
+            try {
+                if (!allowRequest(player, actions)) {
+                    encodedResponses.add(new ItemStackResponse(ItemStackResponseStatus.ERROR,
+                            request.requestId(), Collections.emptyList()));
+                    continue;
+                }
+            } catch (RuntimeException exception) {
+                log.debug("Rejecting invalid inventory request id={}", request.requestId(), exception);
+                encodedResponses.add(new ItemStackResponse(ItemStackResponseStatus.ERROR,
+                        request.requestId(), Collections.emptyList()));
+                continue;
             }
 
             Map<String, Object> dataPool = new HashMap<>();
@@ -128,6 +144,29 @@ public class ItemStackRequestPacketProcessor extends PacketProcessor<ItemStackRe
         allayPlayer.sendPacket(responsePacket);
     }
 
+    boolean allowRequest(Player player, ItemStackRequestAction[] actions) {
+        var slots = new ArrayList<PlayerInventoryRequestEvent.Slot>();
+        for (var action : actions) {
+            for (var slot : referencedSlots(action)) {
+                var container = ContainerActionProcessor.getContainerFrom(player, slot.containerName());
+                int index = ContainerActionProcessor.fromNetworkSlotIndex(container, slot.slot());
+                slots.add(new PlayerInventoryRequestEvent.Slot(container, index));
+            }
+        }
+        return new PlayerInventoryRequestEvent(player.getControlledEntity(), slots).call();
+    }
+
+    static List<ItemStackRequestSlotData> referencedSlots(ItemStackRequestAction action) {
+        return switch (action) {
+            case TransferItemStackRequestAction transfer -> List.of(transfer.source(), transfer.destination());
+            case SwapAction swap -> List.of(swap.source(), swap.destination());
+            case DropAction drop -> List.of(drop.source());
+            case DestroyAction destroy -> List.of(destroy.source());
+            case ConsumeAction consume -> List.of(consume.source());
+            default -> List.of();
+        };
+    }
+
     private ItemStackResponse encodeActionResponses(List<ActionResponse> responses, int requestId) {
         Map<ContainerSlotType, Int2ObjectMap<ItemStackResponseSlot>> changedContainers = new HashMap<>();
 
@@ -160,3 +199,4 @@ public class ItemStackRequestPacketProcessor extends PacketProcessor<ItemStackRe
         return BedrockPacketType.ITEM_STACK_REQUEST;
     }
 }
+
