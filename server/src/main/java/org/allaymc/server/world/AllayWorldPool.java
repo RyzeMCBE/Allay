@@ -30,6 +30,7 @@ import org.allaymc.server.world.dimension.DimensionId;
 import org.allaymc.server.world.light.NoLightEngine;
 import org.allaymc.server.world.storage.DimensionWorldStorage;
 import org.allaymc.server.world.storage.DimensionStorageInspector;
+import org.allaymc.server.world.storage.DimensionConversionPromotion;
 
 import java.nio.file.Path;
 import java.util.Collections;
@@ -229,6 +230,7 @@ public final class AllayWorldPool implements WorldPool {
                 Preconditions.checkArgument(uniquePaths.add(path), "Duplicate dimension path %s", path);
                 Preconditions.checkArgument(setting.storageType().equalsIgnoreCase("LEVELDB"), "SEPARATE requires LEVELDB storage");
                 Preconditions.checkArgument(!java.nio.file.Files.isSymbolicLink(path), "Symbolic links are not supported for dimension paths: %s", path);
+                DimensionConversionPromotion.recoverIfInterrupted(path);
                 DimensionStorageInspector.requireNativeLayout(path, type.getId());
             }
         }
