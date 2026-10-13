@@ -3,7 +3,6 @@ package org.allaymc.server.world.storage;
 import io.netty.buffer.Unpooled;
 import org.allaymc.api.world.storage.WorldStorageException;
 import org.allaymc.server.datastruct.palette.Palette;
-import org.allaymc.server.world.storage.leveldb.LevelDBUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -52,7 +51,7 @@ public final class DimensionData3DConverter {
                 Palette<Integer> last = null;
                 for (int sectionY = sourceMinY >> 4; sectionY <= sourceMaxY >> 4; sectionY++) {
                     var palette = new Palette<>(0);
-                    palette.readBiomeFromStorage(input, b -> b.readIntLE(), last);
+                    palette.readBiomeFromStorage(input, id -> id, last);
                     sourcePalettes.put(sectionY, palette);
                     last = palette;
                 }
