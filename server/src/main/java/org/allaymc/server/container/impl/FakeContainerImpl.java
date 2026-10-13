@@ -27,6 +27,9 @@ public abstract class FakeContainerImpl extends BaseContainer implements FakeCon
     @Getter
     @Setter
     protected String customName;
+    @Getter
+    @Setter
+    protected boolean readOnly = true;
     protected Int2ObjectMap<Set<Runnable>> clickListeners;
     protected Map<ContainerViewer, Vector3ic[]> fakeBlockPositions;
 
@@ -77,6 +80,7 @@ public abstract class FakeContainerImpl extends BaseContainer implements FakeCon
             if (!super.addViewer(player)) {
                 runDelayed(() -> removeFakeBlocks(player));
                 callback.accept(false);
+                return;
             }
 
             callback.accept(true);
