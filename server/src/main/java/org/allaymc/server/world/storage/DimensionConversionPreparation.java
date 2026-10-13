@@ -38,9 +38,9 @@ public final class DimensionConversionPreparation {
         }
         try {
             copyTree(original, saved);
-            verifyTree(original, saved);
+            verifyBackup(original, saved);
             long converted = DimensionLevelDBConverter.copyAsDimension(
-                    original, prepared, sourceId, targetId,
+                    saved, prepared, sourceId, targetId,
                     sourceMinY, sourceMaxY, targetMinY, targetMaxY
             );
             // Copy world metadata and other non-DB files from the verified
@@ -77,13 +77,31 @@ public final class DimensionConversionPreparation {
         }
     }
 
-    private static void verifyTree(Path source, Path copied) throws IOException {
+    /**
+     * Validate both trees, including unexpected additional files and symbolic links.
+     * Re-run immediately before promoting the candidate, while both LevelDB stores
+     * remain closed, to ensure that the preserved original matches its backup.
+     */
+    public static void verifyBackup(Path source, Path copied) throws IOException {
+        verifyTreeSide(source, copied);
+        verifyTreeSide(copied, source);
+    }
+
+    private static void verifyTreeSide(Path source, Path copied) throws IOException {
         try (var files = Files.walk(source)) {
             for (var file : files.toList()) {
+                if (Files.isSymbolicLink(file)) {
+                    throw new WorldStorageException("Symbolic link encountered in conversion backup: " + file);
+                }
                 var corresponding = copied.resolve(source.relativize(file));
+                if (Files.isSymbolicLink(corresponding)) {
+                    throw new WorldStorageException("Symbolic link encountered in conversion backup: " + corresponding);
+                }
                 if (Files.isDirectory(file)) {
-                    if (!Files.isDirectory(corresponding)) throw new WorldStorageException("Missing backup directory");
-                } else if (!Files.isRegularFile(corresponding) ||
+                    if (!Files.isDirectory(corresponding)) {
+                        throw new WorldStorageException("Missing backup directory " + corresponding);
+                    }
+                } else if (!Files.isRegularFile(file) || !Files.isRegularFile(corresponding) ||
                            Files.size(file) != Files.size(corresponding) ||
                            !Arrays.equals(digest(file), digest(corresponding))) {
                     throw new WorldStorageException("Backup validation failed for " + file);
