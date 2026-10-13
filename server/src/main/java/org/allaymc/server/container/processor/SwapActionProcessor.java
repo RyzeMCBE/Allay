@@ -2,6 +2,7 @@ package org.allaymc.server.container.processor;
 
 import lombok.extern.slf4j.Slf4j;
 import org.allaymc.api.player.Player;
+import org.allaymc.api.eventbus.event.container.ContainerItemMoveEvent;
 import org.cloudburstmc.protocol.bedrock.data.inventory.FullContainerName;
 import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.action.ItemStackRequestAction;
 import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.action.ItemStackRequestActionType;
@@ -49,6 +50,15 @@ public class SwapActionProcessor implements ContainerActionProcessor<SwapAction>
 
         if (!ContainerActionProcessor.canPlaceItemToSlot(sourceContainer, sourceSlot, destinationItem)) {
             log.warn("cannot place item {} into restricted slot {}", destinationItem.getItemType().getIdentifier(), sourceSlot);
+            return error();
+        }
+
+        // Swaps move both stacks. Give plugins the same veto as TAKE/PLACE before
+        // either slot changes, including an empty destination helmet slot.
+        if (!new ContainerItemMoveEvent(sourceContainer, sourceSlot, destinationContainer,
+                destinationSlot, sourceItem.getItemType(), sourceItem.getCount()).call()
+                || !new ContainerItemMoveEvent(destinationContainer, destinationSlot, sourceContainer,
+                sourceSlot, destinationItem.getItemType(), destinationItem.getCount()).call()) {
             return error();
         }
 

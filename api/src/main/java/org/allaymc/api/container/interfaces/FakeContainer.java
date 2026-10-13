@@ -17,6 +17,16 @@ import java.util.function.Consumer;
  * @author daoge_cmd
  */
 public interface FakeContainer extends Container {
+    /** Returns whether client item transfers are blocked. Defaults to true. */
+    default boolean isReadOnly() { return true; }
+
+    /**
+     * Enables or disables item transfer blocking. Click callbacks only run in read-only mode.
+     * Editable containers hold real transferable items; callers own saving their contents.
+     * @throws UnsupportedOperationException if this implementation does not support editing
+     */
+    default void setReadOnly(boolean readOnly) { throw new UnsupportedOperationException("Editable GUI unsupported"); }
+
 
     /**
      * @see #addPlayer(Player, Consumer)

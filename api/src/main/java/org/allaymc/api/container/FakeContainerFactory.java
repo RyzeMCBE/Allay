@@ -29,4 +29,7 @@ public interface FakeContainerFactory {
      * @return A new double chest {@code FakeContainer} instance.
      */
     FakeContainer createFakeDoubleChestContainer();
+
+    /** Creates a five-slot virtual hopper for inventory editors. */
+    default FakeContainer createFakeHopperContainer() { throw new UnsupportedOperationException("Virtual hopper unsupported"); }
 }

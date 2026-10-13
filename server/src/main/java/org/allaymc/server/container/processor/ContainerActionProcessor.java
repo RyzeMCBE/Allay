@@ -101,12 +101,12 @@ public interface ContainerActionProcessor<T extends ItemStackRequestAction> {
     }
 
     static boolean tryHandleFakeContainer(Container source, int sourceSlot, Container destination, int destinationSlot) {
-        if (source instanceof FakeContainerImpl fakeContainer) {
+        if (source instanceof FakeContainerImpl fakeContainer && fakeContainer.isReadOnly()) {
             fakeContainer.onClick(sourceSlot);
             return true;
         }
 
-        if (destination instanceof FakeContainerImpl fakeContainer) {
+        if (destination instanceof FakeContainerImpl fakeContainer && fakeContainer.isReadOnly()) {
             fakeContainer.onClick(destinationSlot);
             return true;
         }
