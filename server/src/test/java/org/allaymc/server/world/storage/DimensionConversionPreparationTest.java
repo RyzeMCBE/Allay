@@ -45,4 +45,22 @@ class DimensionConversionPreparationTest {
         assertThrows(RuntimeException.class, () ->
                 DimensionConversionPreparation.prepare(world, backup, stage, 0, 2, -64, 319, 0, 255));
     }
+
+    @Test
+    void detectsChangedOrUnexpectedBackupFiles() throws Exception {
+        var original = root.resolve("unchanged");
+        var backup = root.resolve("saved-copy");
+        Files.createDirectories(original);
+        Files.createDirectories(backup);
+        Files.writeString(original.resolve("levelname.txt"), "original");
+        Files.writeString(backup.resolve("levelname.txt"), "original");
+        DimensionConversionPreparation.verifyBackup(original, backup);
+        Files.writeString(backup.resolve("levelname.txt"), "modified");
+        assertThrows(RuntimeException.class,
+                () -> DimensionConversionPreparation.verifyBackup(original, backup));
+        Files.writeString(backup.resolve("levelname.txt"), "original");
+        Files.writeString(backup.resolve("unexpected.txt"), "unexpected");
+        assertThrows(RuntimeException.class,
+                () -> DimensionConversionPreparation.verifyBackup(original, backup));
+    }
 }
