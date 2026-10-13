@@ -1,6 +1,6 @@
 package org.allaymc.server.world;
 
-import org.allaymc.api.world.dimension.DimensionTypes;
+import org.allaymc.api.utils.identifier.Identifier;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
@@ -29,7 +29,7 @@ class WorldDimensionSettingsTest {
         settings.dimensionStorageMode("separate");
         var normalized = settings.normalized();
         assertEquals("SEPARATE", normalized.dimensionStorageMode());
-        var normalizedEnd = normalized.normalizedDimensions().get(DimensionTypes.THE_END.getIdentifier());
+        var normalizedEnd = normalized.normalizedDimensions().get(new Identifier("minecraft:the_end"));
         assertNotNull(normalizedEnd);
         assertFalse(normalizedEnd.enabled());
         assertEquals("end", normalizedEnd.path());
