@@ -54,6 +54,9 @@ public final class DimensionConversionPromotion {
                 throw new WorldStorageException("Candidate must be on the same filesystem as the original");
             }
             DimensionStorageInspector.requireNativeLayout(staged, targetDimensionId);
+            // Reject promotion if the source changed since backup preparation.
+            // Backups are trusted only when their full file trees still match.
+            DimensionConversionPreparation.verifyBackup(original, saved);
             // Commit intent before touching the original directory. On an error,
             // the same recovery path is used as after an unexpected process exit.
             Files.writeString(journal, journalContents(original), StandardCharsets.UTF_8,
