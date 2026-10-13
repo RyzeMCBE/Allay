@@ -58,9 +58,8 @@ public final class DimensionLevelDBConverter {
                 throw new WorldStorageException("No convertible chunk records were found");
             }
             // Compare record counts after reopening both DBs, not just successful writes.
-            if (countKeys(source.resolve("db")) != count || countKeys(target.resolve("db")) != count) {
-                throw new WorldStorageException("LevelDB record count verification failed");
-            }
+            verifyConvertedRecords(source.resolve("db"), target.resolve("db"),
+                    sourceId, targetId, sourceMinY, sourceMaxY, targetMinY, targetMaxY, count);
             DimensionStorageInspector.requireNativeLayout(target, targetId);
             return count;
         } catch (IOException e) {
@@ -68,13 +67,38 @@ public final class DimensionLevelDBConverter {
         }
     }
 
-    private static long countKeys(Path path) throws IOException {
-        long count = 0;
-        try (var db = new Iq80DBFactory().open(path.toFile(), new Options().createIfMissing(false));
-             var iterator = db.iterator()) {
-            for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) count++;
+    private static void verifyConvertedRecords(Path sourceDb, Path targetDb,
+                                               int sourceId, int targetId,
+                                               int sourceMinY, int sourceMaxY,
+                                               int targetMinY, int targetMaxY,
+                                               long expectedCount) throws IOException {
+        long matched = 0;
+        try (var source = new Iq80DBFactory().open(sourceDb.toFile(), new Options().createIfMissing(false));
+             var destination = new Iq80DBFactory().open(targetDb.toFile(), new Options().createIfMissing(false));
+             var iterator = source.iterator();
+             var destinationIterator = destination.iterator()) {
+            iterator.seekToFirst();
+            destinationIterator.seekToFirst();
+            while (iterator.hasNext()) {
+                var entry = iterator.next();
+                var targetKey = mapKey(entry.getKey(), sourceId, targetId, targetMinY, targetMaxY);
+                var expectedValue = isData3DKey(entry.getKey())
+                        ? DimensionData3DConverter.remap(entry.getValue(), sourceMinY, sourceMaxY, targetMinY, targetMaxY)
+                        : entry.getValue();
+                if (!Arrays.equals(expectedValue, destination.get(targetKey))) {
+                    throw new WorldStorageException("Converted LevelDB record differs from its source");
+                }
+                matched++;
+            }
+            long actual = 0;
+            while (destinationIterator.hasNext()) {
+                destinationIterator.next();
+                actual++;
+            }
+            if (matched != expectedCount || actual != expectedCount) {
+                throw new WorldStorageException("LevelDB record count verification failed");
+            }
         }
-        return count;
     }
 
     static boolean isData3DKey(byte[] key) {
