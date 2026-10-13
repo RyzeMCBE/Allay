@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Read-only preflight for independently stored Bedrock dimensions.
@@ -87,7 +86,7 @@ public final class DimensionStorageInspector {
 
     private static boolean isChunkRecord(int type) {
         return switch (type) {
-            case 43, 44, 45, 46, 49, 50, 51, 52, 53, 54, 55, 56, 57,
+            case 43, 44, 45, 46, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57,
                  58, 59, 60, 61, 62, 63, 64, 65, 118, 119, 254, 255 -> true;
             default -> false;
         };
