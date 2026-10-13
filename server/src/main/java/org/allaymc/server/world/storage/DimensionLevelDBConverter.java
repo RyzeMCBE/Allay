@@ -28,7 +28,7 @@ public final class DimensionLevelDBConverter {
         try {
             Files.createDirectories(target.resolve("db"));
             var readOptions = new Options().createIfMissing(false);
-            var writeOptions = new Options().createIfMissing(false);
+            var writeOptions = new Options().createIfMissing(true);
             long count = 0;
             long changed = 0;
             try (var input = new Iq80DBFactory().open(source.resolve("db").toFile(), readOptions);
@@ -88,7 +88,12 @@ public final class DimensionLevelDBConverter {
             return appendDimension(key, targetId);
         }
         var dimension = DimensionStorageInspector.findDimensionId(key);
-        if (dimension == null) return key.clone();
+        if (dimension == null) {
+            if (hasDigestPrefixSafe(key)) {
+                throw new WorldStorageException("Unsupported actor digest key format");
+            }
+            return key.clone();
+        }
         if (dimension != sourceId) {
             throw new WorldStorageException("Mixed dimension records in source database: " + dimension);
         }
@@ -104,6 +109,10 @@ public final class DimensionLevelDBConverter {
         writeIntLE(result, 8, targetId);
         System.arraycopy(key, 8, result, 12, key.length - 8);
         return result;
+    }
+
+    private static boolean hasDigestPrefixSafe(byte[] key) {
+        return key.length >= 4 && hasDigestPrefix(key);
     }
 
     private static boolean hasDigestPrefix(byte[] key) {
