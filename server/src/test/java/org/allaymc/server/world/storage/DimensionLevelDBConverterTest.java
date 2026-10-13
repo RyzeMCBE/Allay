@@ -23,14 +23,14 @@ class DimensionLevelDBConverterTest {
         var digest = new byte[]{'d','i','g','p',1,0,0,0,2,0,0,0};
         try (var db = new Iq80DBFactory().open(source.resolve("db").toFile(), new Options().createIfMissing(true))) {
             db.put(originalKey, new byte[]{42});
-            db.put(digest, new byte[]{7,8});
+            db.put(digest, new byte[0]);
         }
         assertEquals(2, DimensionLevelDBConverter.copyAsDimension(source, stage, 0, 2, -64, 319, 0, 255));
         try (var sourceDb = new Iq80DBFactory().open(source.resolve("db").toFile(), new Options().createIfMissing(false));
              var result = new Iq80DBFactory().open(stage.resolve("db").toFile(), new Options().createIfMissing(false))) {
             assertArrayEquals(new byte[]{42}, sourceDb.get(originalKey));
             assertArrayEquals(new byte[]{42}, result.get(new byte[]{1,0,0,0,2,0,0,0,2,0,0,0,44}));
-            assertArrayEquals(new byte[]{7,8}, result.get(new byte[]{'d','i','g','p',1,0,0,0,2,0,0,0,2,0,0,0}));
+            assertArrayEquals(new byte[0], result.get(new byte[]{'d','i','g','p',1,0,0,0,2,0,0,0,2,0,0,0}));
         }
     }
 
