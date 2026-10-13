@@ -25,6 +25,9 @@ public final class DimensionLevelDBConverter {
         if (!Files.isDirectory(source.resolve("db")) || Files.exists(target)) {
             throw new WorldStorageException("Expected an existing source DB and a fresh staging directory");
         }
+        // Reject unknown or ambiguous chunk key layouts before creating staging data.
+        // This conservative guard is particularly important for mixed or newer Bedrock worlds.
+        requireKnownChunkLayouts(source);
         DimensionActorIntegrity.verify(source, sourceId);
         try {
             Files.createDirectories(target.resolve("db"));
@@ -67,6 +70,30 @@ public final class DimensionLevelDBConverter {
         } catch (IOException e) {
             throw new WorldStorageException("Could not create or read conversion staging database", e);
         }
+    }
+
+    private static void requireKnownChunkLayouts(Path source) {
+        try (var db = new Iq80DBFactory().open(source.resolve("db").toFile(), new Options().createIfMissing(false));
+             var iterator = db.iterator()) {
+            for (iterator.seekToFirst(); iterator.hasNext();) {
+                var key = iterator.next().getKey();
+                if (key.length == 0) throw new WorldStorageException("Empty LevelDB key");
+                // Chunk record identifiers are located after X/Z and optional dimension ID.
+                // For unknown record types with a plausible chunk prefix, reject rather
+                // // than preserve them under the wrong dimension.
+                if ((key.length == 9 || key.length == 10 || key.length == 13 || key.length == 14)
+                        && !isKnownChunkShape(key)) {
+                    throw new WorldStorageException("Unrecognized chunk-shaped LevelDB key of length " + key.length);
+                }
+            }
+        } catch (IOException e) {
+            throw new WorldStorageException("Cannot inspect source LevelDB chunk keys", e);
+        }
+    }
+
+    private static boolean isKnownChunkShape(byte[] key) {
+        if (DimensionStorageInspector.findDimensionId(key) != null) return true;
+        return key.length >= 4 && (key[0] == 'd' && key[1] == 'i' && key[2] == 'g' && key[3] == 'p');
     }
 
     private static void verifyConvertedRecords(Path sourceDb, Path targetDb,
