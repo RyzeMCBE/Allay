@@ -28,6 +28,8 @@ import org.allaymc.api.world.generator.WorldGenerator;
 import org.allaymc.server.world.dimension.BuiltinDimensionSettings;
 import org.allaymc.server.world.dimension.DimensionId;
 import org.allaymc.server.world.light.NoLightEngine;
+import org.allaymc.server.world.storage.DimensionWorldStorage;
+import org.allaymc.server.world.storage.DimensionStorageInspector;
 
 import java.nio.file.Path;
 import java.util.Collections;
@@ -198,17 +200,58 @@ public final class AllayWorldPool implements WorldPool {
     private void loadWorld(String name, WorldSettings.WorldSetting setting) {
         // A separate layout must never silently fall back to shared storage: this could
         // create or overwrite chunks in the wrong database before conversion is ready.
+        var separate = "SEPARATE".equalsIgnoreCase(setting.dimensionStorageMode());
         Preconditions.checkArgument(
-                "SHARED".equalsIgnoreCase(setting.dimensionStorageMode()),
-                "Dimension storage mode %s for world %s is not supported by this build yet",
-                setting.dimensionStorageMode(), name
+                separate || "SHARED".equalsIgnoreCase(setting.dimensionStorageMode()),
+                "Unknown dimension storage mode %s for world %s", setting.dimensionStorageMode(), name
         );
         var storageFactory = Registries.WORLD_STORAGE_FACTORIES.get(setting.storageType());
         if (storageFactory == null) {
             log.warn("Unknown world storage type {} for {}, falling back to LEVELDB", setting.storageType(), name);
             storageFactory = Preconditions.checkNotNull(Registries.WORLD_STORAGE_FACTORIES.get("LEVELDB"), "LEVELDB storage factory unavailable");
         }
-        var storage = Preconditions.checkNotNull(storageFactory.apply(this.worldFolder.resolve(name)), "Failed to create storage for %s", name);
+        // Preflight every configured path *before* opening any DB. Opening LevelDB
+        // with createIfMissing=true could otherwise silently generate empty chunks.
+        var perDimension = new LinkedHashMap<DimensionType, org.allaymc.api.world.storage.WorldStorage>();
+        var uniquePaths = new java.util.HashSet<Path>();
+        var configuredDimensions = setting.normalizedDimensions();
+        var root = this.worldFolder.toAbsolutePath().normalize();
+        if (separate) {
+            for (var entry : configuredDimensions.entrySet()) {
+                if (!entry.getValue().enabled()) continue;
+                var type = Preconditions.checkNotNull(Registries.DIMENSIONS.getByK2(entry.getKey()), "Unknown dimension %s", entry.getKey());
+                var configuredPath = entry.getValue().path();
+                var folderName = configuredPath == null || configuredPath.isBlank()
+                        ? (type == DimensionTypes.OVERWORLD ? name : type == DimensionTypes.NETHER ? "nether" : "end")
+                        : configuredPath;
+                var path = root.resolve(folderName).normalize();
+                Preconditions.checkArgument(path.startsWith(root) && !path.equals(root), "Unsafe dimension path: %s", folderName);
+                Preconditions.checkArgument(uniquePaths.add(path), "Duplicate dimension path %s", path);
+                Preconditions.checkArgument(setting.storageType().equalsIgnoreCase("LEVELDB"), "SEPARATE requires LEVELDB storage");
+                DimensionStorageInspector.requireNativeLayout(path, type.getId());
+            }
+        }
+        var storage = separate ? null : Preconditions.checkNotNull(storageFactory.apply(this.worldFolder.resolve(name)), "Failed to create storage for %s", name);
+        try {
+            if (separate) {
+                for (var entry : configuredDimensions.entrySet()) {
+                    if (!entry.getValue().enabled()) continue;
+                    var type = Registries.DIMENSIONS.getByK2(entry.getKey());
+                    var configuredPath = entry.getValue().path();
+                    var folderName = configuredPath == null || configuredPath.isBlank()
+                            ? (type == DimensionTypes.OVERWORLD ? name : type == DimensionTypes.NETHER ? "nether" : "end")
+                            : configuredPath;
+                    perDimension.put(type, storageFactory.apply(root.resolve(folderName).normalize()));
+                }
+                var primary = Preconditions.checkNotNull(perDimension.get(DimensionTypes.OVERWORLD), "Overworld must be enabled");
+                storage = new DimensionWorldStorage(primary, perDimension);
+            }
+        } catch (RuntimeException e) {
+            perDimension.values().forEach(open -> {
+                try { open.shutdown(); } catch (RuntimeException cleanup) { e.addSuppressed(cleanup); }
+            });
+            throw e;
+        }
 
         var dimensionSettings = new LinkedHashMap<Identifier, DimensionSetting>();
         for (var entry : setting.normalizedDimensions().entrySet()) {
@@ -225,10 +268,15 @@ public final class AllayWorldPool implements WorldPool {
             );
         }
 
-        loadWorld(
-                new WorldSetting(name, storage, setting.useVirtualThread),
-                dimensionSettings
-        );
+        try {
+            loadWorld(
+                    new WorldSetting(name, storage, setting.useVirtualThread),
+                    dimensionSettings
+            );
+        } catch (RuntimeException | Error e) {
+            try { storage.shutdown(); } catch (RuntimeException cleanup) { e.addSuppressed(cleanup); }
+            throw e;
+        }
     }
 
     private WorldGenerator tryCreateWorldGenerator(WorldSettings.WorldSetting.DimensionSetting settings) {
