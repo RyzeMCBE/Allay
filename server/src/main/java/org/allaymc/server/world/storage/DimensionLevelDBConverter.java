@@ -25,6 +25,7 @@ public final class DimensionLevelDBConverter {
         if (!Files.isDirectory(source.resolve("db")) || Files.exists(target)) {
             throw new WorldStorageException("Expected an existing source DB and a fresh staging directory");
         }
+        DimensionActorIntegrity.verify(source, sourceId);
         try {
             Files.createDirectories(target.resolve("db"));
             var readOptions = new Options().createIfMissing(false);
@@ -61,6 +62,7 @@ public final class DimensionLevelDBConverter {
             verifyConvertedRecords(source.resolve("db"), target.resolve("db"),
                     sourceId, targetId, sourceMinY, sourceMaxY, targetMinY, targetMaxY, count);
             DimensionStorageInspector.requireNativeLayout(target, targetId);
+            DimensionActorIntegrity.verify(target, targetId);
             return count;
         } catch (IOException e) {
             throw new WorldStorageException("Could not create or read conversion staging database", e);
