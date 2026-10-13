@@ -82,13 +82,25 @@ public final class AllayWorldPool implements WorldPool {
             Thread.onSpinWait();
         }
 
-        // Save world settings
-        this.worldConfig.worlds().clear();
+        // Preserve configured worlds even if they were unloaded before shutdown.
+        // Their definitions must not disappear from world-settings.yml.
+        var persistedWorlds = new LinkedHashMap<>(this.worldConfig.worlds());
         this.worlds.forEach((name, world) -> {
             if (!world.isRuntimeOnly()) {
-                this.worldConfig.worlds().put(name, toWorldSetting(world));
+                var configured = persistedWorlds.get(name);
+                // Keep the configured storage layout and disabled dimensions intact.
+                // Runtime generator changes can be persisted for legacy shared worlds only.
+                if (configured == null) {
+                    persistedWorlds.put(name, toWorldSetting(world));
+                } else if ("SHARED".equalsIgnoreCase(configured.dimensionStorageMode())) {
+                    var updated = toWorldSetting(world);
+                    updated.dimensionStorageMode(configured.dimensionStorageMode());
+                    persistedWorlds.put(name, updated);
+                }
             }
         });
+        this.worldConfig.worlds().clear();
+        this.worldConfig.worlds().putAll(persistedWorlds);
         applyBuiltinDimensionSettings(BuiltinDimensionSettings.get());
         this.worldConfig.save();
     }
@@ -186,14 +198,23 @@ public final class AllayWorldPool implements WorldPool {
     }
 
     private void loadWorld(String name, WorldSettings.WorldSetting setting) {
-        var storage = Registries.WORLD_STORAGE_FACTORIES.get(setting.storageType()).apply(this.worldFolder.resolve(name));
-        if (storage == null) {
-            log.error("Cannot find world storage type {}", setting.storageType());
-            storage = Registries.WORLD_STORAGE_FACTORIES.get("LEVELDB").apply(this.worldFolder.resolve(name));
+        // A separate layout must never silently fall back to shared storage: this could
+        // create or overwrite chunks in the wrong database before conversion is ready.
+        Preconditions.checkArgument(
+                "SHARED".equalsIgnoreCase(setting.dimensionStorageMode()),
+                "Dimension storage mode %s for world %s is not supported by this build yet",
+                setting.dimensionStorageMode(), name
+        );
+        var storageFactory = Registries.WORLD_STORAGE_FACTORIES.get(setting.storageType());
+        if (storageFactory == null) {
+            log.warn("Unknown world storage type {} for {}, falling back to LEVELDB", setting.storageType(), name);
+            storageFactory = Preconditions.checkNotNull(Registries.WORLD_STORAGE_FACTORIES.get("LEVELDB"), "LEVELDB storage factory unavailable");
         }
+        var storage = Preconditions.checkNotNull(storageFactory.apply(this.worldFolder.resolve(name)), "Failed to create storage for %s", name);
 
         var dimensionSettings = new LinkedHashMap<Identifier, DimensionSetting>();
         for (var entry : setting.normalizedDimensions().entrySet()) {
+            if (!entry.getValue().enabled()) continue;
             var dimensionType = Registries.DIMENSIONS.getByK2(entry.getKey());
             Preconditions.checkArgument(dimensionType != null, "Dimension type %s is not registered", entry.getKey());
             dimensionSettings.put(
@@ -403,6 +424,11 @@ public final class AllayWorldPool implements WorldPool {
             @CustomKey("use-virtual-thread")
             private boolean useVirtualThread;
 
+            @Setter
+            @CustomKey("dimension-storage-mode")
+            @Comment("SHARED keeps all dimensions in the same LevelDB. SEPARATE requires the conversion engine before activation.")
+            private String dimensionStorageMode = "SHARED";
+
             private Map<String, DimensionSetting> dimensions;
 
             private DimensionSetting overworld;
@@ -464,12 +490,13 @@ public final class AllayWorldPool implements WorldPool {
             public WorldSetting normalized() {
                 var normalizedDimensions = new LinkedHashMap<String, DimensionSetting>();
                 normalizedDimensions().forEach((identifier, setting) -> normalizedDimensions.put(identifier.toString(), setting));
-                return new WorldSetting(storageType, useVirtualThread, normalizedDimensions);
+                var normalizedWorld = new WorldSetting(storageType, useVirtualThread, normalizedDimensions);
+                normalizedWorld.dimensionStorageMode(dimensionStorageMode == null ? "SHARED" : dimensionStorageMode.trim().toUpperCase(java.util.Locale.ROOT));
+                return normalizedWorld;
             }
 
             @Getter
             @Accessors(fluent = true)
-            @AllArgsConstructor
             public static class DimensionSetting extends OkaeriConfig {
                 @CustomKey("generator-type")
                 private String generatorType;
@@ -480,10 +507,23 @@ public final class AllayWorldPool implements WorldPool {
                 @Comment("If set to false, light calculation will be disabled for this dimension")
                 @Comment("All light queries will return max value (15)")
                 @CustomKey("enable-light-calculation")
-                private boolean enableLightCalculation;
+                private boolean enableLightCalculation = true;
+
+                @Setter
+                private boolean enabled = true;
+
+                @Setter
+                @CustomKey("path")
+                private String path;
 
                 public DimensionSetting(String generatorType, String generatorPreset) {
                     this(generatorType, generatorPreset, true);
+                }
+
+                public DimensionSetting(String generatorType, String generatorPreset, boolean enableLightCalculation) {
+                    this.generatorType = generatorType;
+                    this.generatorPreset = generatorPreset;
+                    this.enableLightCalculation = enableLightCalculation;
                 }
             }
         }
