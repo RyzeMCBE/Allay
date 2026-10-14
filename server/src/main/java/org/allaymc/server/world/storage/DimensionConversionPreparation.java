@@ -39,8 +39,19 @@ public final class DimensionConversionPreparation {
         try {
             copyTree(original, saved);
             verifyBackup(original, saved);
+            // The IQ80 LevelDB implementation may update internal DB files even
+            // when opening a database for reading. Never open the sealed backup
+            // (or the live original) in the converter: use a disposable copy.
+            var conversionInput = prepared.resolveSibling(prepared.getFileName() + ".conversion-input");
+            if (Files.exists(conversionInput) || conversionInput.equals(original)
+                    || conversionInput.equals(saved) || conversionInput.startsWith(original)
+                    || conversionInput.startsWith(saved)) {
+                throw new WorldStorageException("Unsafe or already existing conversion scratch directory: " + conversionInput);
+            }
+            copyTree(saved, conversionInput);
+            verifyBackup(saved, conversionInput);
             long converted = DimensionLevelDBConverter.copyAsDimension(
-                    saved, prepared, sourceId, targetId,
+                    conversionInput, prepared, sourceId, targetId,
                     sourceMinY, sourceMaxY, targetMinY, targetMaxY
             );
             // Copy world metadata and other non-DB files from the verified
@@ -59,9 +70,24 @@ public final class DimensionConversionPreparation {
                 }
             }
             DimensionConversionManifest.seal(prepared, targetId, converted);
+            // Final guarantee before reporting a prepared candidate: conversion
+            // has not modified either original source or preserved backup.
+            verifyBackup(original, saved);
+            deleteConversionInput(conversionInput);
             return converted;
         } catch (IOException e) {
             throw new WorldStorageException("Failed to prepare backed-up dimension conversion", e);
+        }
+    }
+
+    private static void deleteConversionInput(Path input) throws IOException {
+        try (var paths = Files.walk(input)) {
+            for (var path : paths.sorted(java.util.Comparator.reverseOrder()).toList()) {
+                if (Files.isSymbolicLink(path)) {
+                    throw new WorldStorageException("Refusing to remove symbolic-link scratch entry: " + path);
+                }
+                Files.delete(path);
+            }
         }
     }
 
