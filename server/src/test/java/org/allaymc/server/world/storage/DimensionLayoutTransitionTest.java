@@ -85,4 +85,36 @@ class DimensionLayoutTransitionTest {
         assertTrue(Files.isDirectory(root.resolve(".dimension-backups").resolve("shared-primary")));
     }
 
+    @Test
+    void refusesOverlappingDimensionDataAndKeepsBothSourcesIntact() throws Exception {
+        var primary = root.resolve("conflict-world");
+        var nether = root.resolve("conflict-nether");
+        Files.createDirectories(primary.resolve("db"));
+        Files.createDirectories(nether.resolve("db"));
+        byte[] sharedNetherKey = {0,0,0,0,0,0,0,0,1,0,0,0,44};
+        byte[] separateNetherKey = {1,0,0,0,0,0,0,0,1,0,0,0,44};
+        try (var db = new Iq80DBFactory().open(primary.resolve("db").toFile(),
+                new Options().createIfMissing(true))) {
+            db.put(sharedNetherKey, new byte[]{3});
+        }
+        try (var db = new Iq80DBFactory().open(nether.resolve("db").toFile(),
+                new Options().createIfMissing(true))) {
+            db.put(separateNetherKey, new byte[]{7});
+        }
+        var destinations = Map.of(0, primary, 1, nether, 2, root.resolve("conflict-end"));
+        var error = assertThrows(org.allaymc.api.world.storage.WorldStorageException.class,
+                () -> DimensionLayoutTransition.ensureLayout(root, "conflict-world", "SEPARATE", destinations));
+        assertTrue(error.getMessage().contains("conflict-world"));
+        assertTrue(error.getMessage().contains("conflict-nether"));
+        assertEquals(Set.of(1), DimensionStorageInspector.detectDimensionIds(primary));
+        assertEquals(Set.of(1), DimensionStorageInspector.detectDimensionIds(nether));
+        try (var db = new Iq80DBFactory().open(primary.resolve("db").toFile(),
+                     new Options().createIfMissing(false));
+             var other = new Iq80DBFactory().open(nether.resolve("db").toFile(),
+                     new Options().createIfMissing(false))) {
+            assertArrayEquals(new byte[]{3}, db.get(sharedNetherKey));
+            assertArrayEquals(new byte[]{7}, other.get(separateNetherKey));
+        }
+    }
+
 }
