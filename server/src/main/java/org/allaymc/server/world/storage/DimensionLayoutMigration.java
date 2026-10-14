@@ -59,6 +59,12 @@ public final class DimensionLayoutMigration {
                 closeAll(output);
             }
             copyMetadata(sharedInput, candidates.get(0));
+            // Restore the original Nether/End metadata (including level.dat and
+            // its spawn coordinates) previously saved in a SHARED sidecar.
+            for (int id = 1; id <= 2; id++) {
+                var sidecar = DimensionSpawnMetadata.sidecarFolder(sharedInput, id);
+                if (Files.isDirectory(sidecar)) copyMetadata(sidecar, candidates.get(id));
+            }
             for (int id = 0; id <= 2; id++) {
                 DimensionStorageInspector.requireNativeLayout(candidates.get(id), id);
                 DimensionActorIntegrity.verify(candidates.get(id), id);
@@ -106,6 +112,12 @@ public final class DimensionLayoutMigration {
                 }
             }
             copyMetadata(separateInputs.get(0), candidate);
+            // Never discard per-dimension level.dat when merging into SHARED:
+            // retain every auxiliary file in the Overworld world's sidecar.
+            for (int id = 1; id <= 2; id++) {
+                copyMetadata(separateInputs.get(id),
+                        DimensionSpawnMetadata.sidecarFolder(candidate, id));
+            }
             return count;
         } catch (IOException e) {
             throw new WorldStorageException("Failed to stage merged SHARED LevelDB", e);
