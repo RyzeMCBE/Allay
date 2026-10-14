@@ -67,4 +67,16 @@ class DimensionLevelDBConverterTest {
                 DimensionLevelDBConverter.mapKey(key, 0, 2, 0, 255));
     }
 
+    @Test
+    void refusesUnknownRecordShapeEvenWhenDirectMapperIsUsed() {
+        assertThrows(WorldStorageException.class, () -> DimensionLevelDBConverter.mapKey(
+                new byte[]{0,0,0,0,0,0,0,0,99}, 0, 2, 0, 255));
+    }
+
+    @Test
+    void preservesGlobalActorKeysUnchanged() {
+        var key = new byte[]{'a','c','t','o','r','p','r','e','f','i','x',1,0,0,0,0,0,0,0};
+        assertArrayEquals(key, DimensionLevelDBConverter.mapKey(key, 0, 2, 0, 255));
+    }
+
 }
