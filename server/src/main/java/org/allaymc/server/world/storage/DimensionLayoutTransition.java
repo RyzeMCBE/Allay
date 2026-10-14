@@ -88,7 +88,21 @@ public final class DimensionLayoutTransition {
         if (expectedMode.equalsIgnoreCase("SEPARATE")) {
             if (!sharedHasOtherDimensions) return false;
             if (otherHasData || Files.exists(paths.get(1)) || Files.exists(paths.get(2))) {
-                throw new WorldStorageException("Both shared and separate dimension folders have data; refusing split");
+                var existingFolders = new ArrayList<String>();
+                for (int id = 1; id <= 2; id++) {
+                    var folder = paths.get(id);
+                    if (!Files.exists(folder)) continue;
+                    var ids = DimensionStorageInspector.detectDimensionIds(folder);
+                    existingFolders.add((id == 1 ? "Nether" : "End") + "=" + folder +
+                            " (chunk dimension IDs: " + ids + ")");
+                }
+                throw new WorldStorageException("Cannot safely migrate world '" + name +
+                        "' from SHARED to SEPARATE. Its shared LevelDB at " + shared +
+                        " already contains dimension IDs " + worldIds +
+                        ", but the target folders already exist: " + existingFolders +
+                        ". No split was performed. Keep both sources and their backups. " +
+                        "For an isolated test, configure distinct, unused destination paths; " +
+                        "do not delete or overwrite the existing dimension folders.");
             }
             transitionSharedToSeparate(root, name, paths, journal);
             return true;
