@@ -71,4 +71,33 @@ class DimensionLayoutPromotionTest {
         assertTrue(Files.isDirectory(active.resolve("db")));
         assertFalse(Files.exists(journal));
     }
+    @Test
+    void recoversOriginalAfterSimulatedCrashMidPromotion() throws Exception {
+        var target = world("crash-world", 0);
+        Files.writeString(target.resolve("original.txt"), "safe");
+        var previous = root.resolve("crash-world.layout-previous-crash");
+        var failed = root.resolve("crash-world.layout-failed-crash");
+        var candidate = world("crash-stage", 0);
+        Files.writeString(candidate.resolve("candidate.txt"), "new");
+        var journal = root.resolve("crash.pending");
+
+        var content = "allay-dimension-layout-v1\n" + encode(root) + "\n" +
+                encode(target) + "|" + encode(candidate) + "|" + encode(previous) + "|" +
+                encode(failed) + "|1|-\n";
+        Files.writeString(journal, content);
+        Files.move(target, previous, java.nio.file.StandardCopyOption.ATOMIC_MOVE);
+        Files.move(candidate, target, java.nio.file.StandardCopyOption.ATOMIC_MOVE);
+
+        assertTrue(DimensionLayoutPromotion.recover(root, journal));
+        assertEquals("safe", Files.readString(target.resolve("original.txt")));
+        assertEquals("new", Files.readString(failed.resolve("candidate.txt")));
+        assertFalse(Files.exists(journal));
+        assertFalse(DimensionLayoutPromotion.recover(root, journal));
+    }
+
+    private static String encode(Path path) {
+        return java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(
+                path.toAbsolutePath().normalize().toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    }
+
 }
