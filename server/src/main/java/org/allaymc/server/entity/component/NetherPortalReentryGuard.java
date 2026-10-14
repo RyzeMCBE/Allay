@@ -17,13 +17,13 @@ final class NetherPortalReentryGuard {
     private boolean requiresExit;
     private int outsideTicks;
 
-    void beginTransfer() {
+    synchronized void beginTransfer() {
         transferPending = true;
         requiresExit = true;
         outsideTicks = 0;
     }
 
-    void finishTransfer(boolean success) {
+    synchronized void finishTransfer(boolean success) {
         transferPending = false;
         if (!success) {
             // A rejected transfer may be retried without forcing the entity
@@ -33,7 +33,11 @@ final class NetherPortalReentryGuard {
         }
     }
 
-    boolean blocksEntry(boolean touchingPortal) {
+    /**
+     * May run on the destination dimension thread while async portal loading
+     * completes on a different thread. Keep all state transitions synchronized.
+     */
+    synchronized boolean blocksEntry(boolean touchingPortal) {
         if (transferPending) {
             return true;
         }

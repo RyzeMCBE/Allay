@@ -269,14 +269,22 @@ public class EntityBaseComponentImpl implements EntityBaseComponent {
         // always unlock the guard on the entity's owning scheduler.
         Server.getInstance().getVirtualThreadPool().submit(() -> {
             try {
-                NetherPortalHelper.teleport(thisEntity).whenComplete((success, error) ->
-                        thisEntity.getScheduler().runLater(thisEntity, () -> {
-                            if (error != null) {
-                                log.error("Nether portal transfer failed while loading destination chunks", error);
-                            }
-                            finishNetherPortalTransfer(error == null && Boolean.TRUE.equals(success));
-                        })
-                );
+                NetherPortalHelper.teleport(thisEntity).whenComplete((success, error) -> {
+                    if (error == null && Boolean.TRUE.equals(success)) {
+                        // A successful teleport may despawn the entity during
+                        // its dimension handoff. Entity-owned scheduled tasks
+                        // are invalid at that point and would leave the reentry
+                        // guard permanently pending. The guard is synchronized.
+                        finishNetherPortalTransfer(true);
+                        return;
+                    }
+                    thisEntity.getScheduler().runLater(thisEntity, () -> {
+                        if (error != null) {
+                            log.error("Nether portal transfer failed while loading destination chunks", error);
+                        }
+                        finishNetherPortalTransfer(false);
+                    });
+                });
             } catch (RuntimeException error) {
                 log.error("Nether portal cannot load destination; teleport aborted", error);
                 thisEntity.getScheduler().runLater(thisEntity, () -> finishNetherPortalTransfer(false));

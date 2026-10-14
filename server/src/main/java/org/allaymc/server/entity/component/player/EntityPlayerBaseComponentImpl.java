@@ -659,19 +659,27 @@ public class EntityPlayerBaseComponentImpl extends EntityBaseComponentImpl imple
         // event-adjusted location, before publishing destination chunks.
         Server.getInstance().getVirtualThreadPool().submit(() -> {
             try {
-                NetherPortalHelper.teleport(thisEntity).whenComplete((success, error) ->
-                        thisEntity.getScheduler().runLater(thisEntity, () -> {
-                            if (error != null) {
-                                log.error("Player Nether portal transfer failed", error);
-                            }
-                            boolean transferred = error == null && Boolean.TRUE.equals(success);
-                            finishNetherPortalTransfer(transferred);
-                            if (!transferred) {
-                                // Recover only if the transfer already announced a dimension switch.
-                                ((AllayPlayer) this.controller).abortDimensionChange();
-                            }
-                        })
-                );
+                NetherPortalHelper.teleport(thisEntity).whenComplete((success, error) -> {
+                    if (error == null && Boolean.TRUE.equals(success)) {
+                        // The entity is temporarily DESPAWNED_LATER/DESPAWNED
+                        // while transferring between dimensions. Tasks created
+                        // by a despawned entity are cancelled by AllayScheduler,
+                        // so NEVER defer a successful guard release with runLater.
+                        // The synchronized guard can safely finish on this thread.
+                        finishNetherPortalTransfer(true);
+                        log.debug("Nether portal transfer finished for {}", thisPlayer.getDisplayName());
+                        return;
+                    }
+                    // The entity never left the source dimension on failure;
+                    // schedule the cooldown reset on its owning tick thread.
+                    thisEntity.getScheduler().runLater(thisEntity, () -> {
+                        if (error != null) {
+                            log.error("Player Nether portal transfer failed", error);
+                        }
+                        finishNetherPortalTransfer(false);
+                        ((AllayPlayer) this.controller).abortDimensionChange();
+                    });
+                });
             } catch (RuntimeException error) {
                 log.error("Player Nether portal destination could not be loaded", error);
                 thisEntity.getScheduler().runLater(thisEntity, () -> {

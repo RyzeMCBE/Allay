@@ -1,6 +1,7 @@
 package org.allaymc.server.block;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.allaymc.api.block.property.enums.PortalAxis;
 import org.allaymc.api.block.type.BlockTypes;
 import org.allaymc.api.entity.Entity;
@@ -26,6 +27,7 @@ import static org.allaymc.api.block.property.type.BlockPropertyTypes.PORTAL_AXIS
  *
  * @author daoge_cmd
  */
+@Slf4j
 public class NetherPortalHelper {
 
     // Nether portal interior size constraints (inclusive)
@@ -316,17 +318,33 @@ public class NetherPortalHelper {
         int flooredX = (int) Math.floor(targetX);
         int flooredZ = (int) Math.floor(targetZ);
 
-        // Load all chunks within the search radius (already on virtual thread, .join() is fine)
+        // Keep the full portal search radius (so nearest portal selection is
+        // unchanged) but avoid serially waiting for up to 289 individual chunk
+        // reads. A bounded group of 8 concurrent loads improves cold
+        // Nether->Overworld preparation without overwhelming the LevelDB store.
+        // This runs in the virtual thread supplied by the portal caller.
+        long preloadStarted = System.nanoTime();
         int cx = flooredX >> 4;
         int cz = flooredZ >> 4;
+        var pendingLoads = new ArrayList<CompletableFuture<?>>(8);
         for (int dx = -searchChunkRadius; dx <= searchChunkRadius; dx++) {
             for (int dz = -searchChunkRadius; dz <= searchChunkRadius; dz++) {
-                targetDim.getChunkManager().getOrLoadChunk(cx + dx, cz + dz).join();
+                pendingLoads.add(targetDim.getChunkManager().getOrLoadChunk(cx + dx, cz + dz));
+                if (pendingLoads.size() == 8) {
+                    CompletableFuture.allOf(pendingLoads.toArray(CompletableFuture[]::new)).join();
+                    pendingLoads.clear();
+                }
             }
         }
+        if (!pendingLoads.isEmpty()) {
+            CompletableFuture.allOf(pendingLoads.toArray(CompletableFuture[]::new)).join();
+        }
 
-        // Search for existing portal using POI index
+        // Search for existing portal using the complete POI index.
         var poiPos = targetDim.findNearestPoi(PoiTypes.NETHER_PORTAL, flooredX, targetY, flooredZ, searchChunkRadius);
+        log.debug("Nether portal destination prepared in {} ms: target={}, searchRadius={}, matchedExistingPortal={}",
+                (System.nanoTime() - preloadStarted) / 1_000_000,
+                targetDimType.getIdentifier(), searchChunkRadius, poiPos != null);
         if (poiPos != null) {
             // Find the bottom of the portal column
             int bottomY = poiPos.y();
