@@ -117,4 +117,30 @@ class DimensionLayoutTransitionTest {
         }
     }
 
+    @Test
+    void retriesWithFreshStageWithoutOverwritingAbandonedCandidate() throws Exception {
+        var overworld = root.resolve("recovery-world");
+        var nether = root.resolve("recovery-world-nether");
+        var end = root.resolve("recovery-world-end");
+        Files.createDirectories(overworld.resolve("db"));
+        try (var db = new Iq80DBFactory().open(overworld.resolve("db").toFile(),
+                new Options().createIfMissing(true))) {
+            db.put(new byte[]{0,0,0,0,0,0,0,0,44}, new byte[]{10});
+            db.put(new byte[]{0,0,0,0,0,0,0,0,1,0,0,0,44}, new byte[]{11});
+            db.put(new byte[]{0,0,0,0,0,0,0,0,2,0,0,0,44}, new byte[]{12});
+        }
+        var abandoned = root.resolve("recovery-world.layout-candidate");
+        Files.createDirectories(abandoned);
+        Files.writeString(abandoned.resolve("unfinished.txt"), "keep this data");
+
+        assertTrue(DimensionLayoutTransition.ensureLayout(root, "recovery-world", "SEPARATE",
+                Map.of(0, overworld, 1, nether, 2, end)));
+        assertEquals("keep this data", Files.readString(abandoned.resolve("unfinished.txt")));
+        assertEquals(Set.of(0), DimensionStorageInspector.detectDimensionIds(overworld));
+        assertEquals(Set.of(1), DimensionStorageInspector.detectDimensionIds(nether));
+        assertEquals(Set.of(2), DimensionStorageInspector.detectDimensionIds(end));
+        assertTrue(Files.isDirectory(root.resolve(".dimension-layout-backups").resolve("recovery-world")));
+    }
+
+
 }
