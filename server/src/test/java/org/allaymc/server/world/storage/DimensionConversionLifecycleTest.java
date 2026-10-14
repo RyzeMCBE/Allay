@@ -44,6 +44,7 @@ class DimensionConversionLifecycleTest {
         DimensionConversionPromotion.promote(original, backup, candidate, 2);
 
         assertTrue(Files.exists(original.resolve(DimensionConversionManifest.FILE_NAME)));
+        DimensionConversionManifest.verify(original, 2);
         assertEquals("Original spawn metadata", Files.readString(original.resolve("level.dat")));
         assertEquals("Original spawn metadata", Files.readString(backup.resolve("level.dat")));
         try (var active = new Iq80DBFactory().open(original.resolve("db").toFile(),
