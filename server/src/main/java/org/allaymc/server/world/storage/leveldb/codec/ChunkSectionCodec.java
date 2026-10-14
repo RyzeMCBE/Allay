@@ -86,8 +86,20 @@ public final class ChunkSectionCodec {
 
                 for (int layer = 0; layer < layers; layer++) {
                     var palette = section.blockLayers()[layer];
-                    palette.readFromStorage(byteBuf, ChunkSectionCodec::fastBlockStateDeserializer);
-                    palette.setDirty(false);
+                    int paletteOffset = byteBuf.readerIndex();
+                    try {
+                        palette.readFromStorage(byteBuf, ChunkSectionCodec::fastBlockStateDeserializer);
+                        palette.setDirty(false);
+                    } catch (RuntimeException error) {
+                        int snapshotStart = Math.min(paletteOffset, data.length);
+                        int snapshotEnd = Math.min(data.length, snapshotStart + 24);
+                        String bytes = java.util.HexFormat.of().formatHex(data, snapshotStart, snapshotEnd);
+                        throw new PaletteException("Cannot decode stored subchunk (" +
+                                chunkX + ", " + sectionY + ", " + chunkZ + ") version=" +
+                                subChunkVersion + " layer=" + layer + " layers=" + layers +
+                                " paletteOffset=" + paletteOffset +
+                                " nearbyHex=" + bytes + " (source data preserved)", error);
+                    }
                 }
                 return section;
             default:
