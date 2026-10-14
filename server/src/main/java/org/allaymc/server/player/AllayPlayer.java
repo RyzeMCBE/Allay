@@ -1302,6 +1302,32 @@ public class AllayPlayer implements Player {
     }
 
     /**
+     * Recover from a portal transfer which was announced to the client but
+     * failed before the entity reached the destination.
+     *
+     * <p>Completing the original transition in this case would acknowledge
+     * the WRONG dimension and can strand the client in a loading screen.</p>
+     */
+    public void abortDimensionChange() {
+        synchronized (chunkPublisherLock) {
+            if (!changingDimension) {
+                return;
+            }
+            var loc = this.controlledEntity.getLocation();
+            var actual = this.controlledEntity.getDimension().getDimensionType();
+            lastChunkPublisherUpdate = null;
+            sendPacket(getProtocol().getEncoder().encodeDimensionChange(actual, loc.x(), loc.y(), loc.z()));
+            sendPacket(getProtocol().getEncoder().encodeDimensionChangeSuccess(
+                    this.controlledEntity.getRuntimeId()
+            ));
+            pendingChunkDimension = null;
+            changingDimension = false;
+            log.warn("Dimension transition aborted player={} restored={}",
+                    getOriginName(), actual.getIdentifier());
+        }
+    }
+
+    /**
      * Sends a packet through the selected protocol after applying the packet send event.
      *
      * @param packet the packet to send; {@code null} is ignored
