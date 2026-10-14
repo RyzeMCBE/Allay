@@ -61,4 +61,28 @@ class DimensionLayoutTransitionTest {
     }
 
 
+    @Test
+    void importsAnOverworldAuthoredEndDirectlyIntoSharedStorage() throws Exception {
+        var world = root.resolve("shared-primary");
+        var end = root.resolve("shared-primary-end");
+        Files.createDirectories(world.resolve("db"));
+        try (var db = new Iq80DBFactory().open(world.resolve("db").toFile(),
+                new Options().createIfMissing(true))) {
+            db.put(new byte[]{0,0,0,0,0,0,0,0,44}, new byte[]{1});
+        }
+        Files.createDirectories(end.resolve("db"));
+        Files.writeString(end.resolve("level.dat"), "My imported End spawn");
+        try (var db = new Iq80DBFactory().open(end.resolve("db").toFile(),
+                new Options().createIfMissing(true))) {
+            db.put(new byte[]{1,0,0,0,2,0,0,0,44}, new byte[]{2});
+        }
+        var paths = Map.of(0, world, 1, root.resolve("shared-primary-nether"), 2, end);
+        assertTrue(DimensionLayoutTransition.ensureLayout(root, "shared-primary", "SHARED", paths));
+        assertEquals(Set.of(0, 2), DimensionStorageInspector.detectDimensionIds(world));
+        assertFalse(Files.exists(end));
+        assertEquals("My imported End spawn", Files.readString(
+                DimensionSpawnMetadata.sidecarFolder(world, 2).resolve("level.dat")));
+        assertTrue(Files.isDirectory(root.resolve(".dimension-backups").resolve("shared-primary")));
+    }
+
 }
