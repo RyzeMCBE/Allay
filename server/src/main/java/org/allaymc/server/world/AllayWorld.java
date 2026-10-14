@@ -438,6 +438,30 @@ public class AllayWorld implements World {
         getWorldStorage().writeWorldData(worldData);
     }
 
+    /**
+     * Release a world that never started its tick thread, for example when
+     * WorldLoadEvent is cancelled or a dimension initializer throws.
+     * Calling shutdown() alone would leave its unopened GameLoop unable to
+     * execute shutdownReally(), leaking the LevelDB handles.
+     */
+    public void abortStartup() {
+        if (worldThread.isAlive() || getState() != WorldState.STARTING) {
+            throw new IllegalStateException("Can only abort a world before its tick thread starts");
+        }
+        try {
+            this.scheduler.shutdown();
+            for (var dim : dimensionMap.values()) {
+                ((AllayDimension) dim).shutdown();
+            }
+        } finally {
+            try {
+                this.worldStorage.shutdown();
+            } finally {
+                this.state.set(WorldState.STOPPED);
+            }
+        }
+    }
+
     public void shutdown() {
         // Mark the world as STOPPING, the real shutdown logic is in shutdownReally() method
         state.set(WorldState.STOPPING);
