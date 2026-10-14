@@ -157,13 +157,15 @@ public class AllayDimension implements Dimension {
         this.entityManager.addEntity(entity, () -> {
             try {
                 afterPlayerRegistered.run();
+                // Dimension-scoped visual data follows the destination ack,
+                // just like its chunks.
+                if (player.getClientState() == ClientState.IN_GAME) {
+                    addPrimitiveShapesTo(player);
+                }
             } finally {
                 this.chunkManager.addChunkLoader(entity);
             }
         });
-        if (player.getClientState() == ClientState.IN_GAME) {
-            addPrimitiveShapesTo(player);
-        }
     }
 
     /**
