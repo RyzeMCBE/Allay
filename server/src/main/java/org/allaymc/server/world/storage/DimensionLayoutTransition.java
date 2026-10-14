@@ -73,6 +73,45 @@ public final class DimensionLayoutTransition {
 
         var journal = root.resolve(".dimension-layout-journal").resolve(name + ".pending");
         DimensionLayoutPromotion.recover(root, journal);
+
+        // Already supplied independent dimensions are authoritative in SEPARATE.
+        // Do not inspect, extract, or rewrite embedded Nether/End records in
+        // world/db: old Bedrock worlds can retain these even when custom maps
+        // exist in their own folders. Only inspect the two configured stores.
+        if ("SEPARATE".equalsIgnoreCase(expectedMode)) {
+            var nether = paths.get(1);
+            var end = paths.get(2);
+            boolean hasNether = Files.isDirectory(nether.resolve("db"));
+            boolean hasEnd = Files.isDirectory(end.resolve("db"));
+            if (hasNether && hasEnd) {
+                for (int id = 1; id <= 2; id++) {
+                    var path = paths.get(id);
+                    var ids = DimensionStorageInspector.detectDimensionIds(path);
+                    if (!ids.isEmpty() && !ids.equals(Set.of(id)) && !ids.equals(Set.of(0))) {
+                        throw new WorldStorageException("Independent " +
+                                (id == 1 ? "Nether" : "End") + " at " + path +
+                                " has unsupported dimension IDs " + ids +
+                                ". Expected " + id + " or imported Overworld ID 0.");
+                    }
+                }
+                org.slf4j.LoggerFactory.getLogger(DimensionLayoutTransition.class).info(
+                        "SEPARATE world {}: loading configured Nether {} and End {} directly. " +
+                        "Embedded dimensions in the Overworld LevelDB are ignored and preserved.",
+                        name, nether, end);
+                return false;
+            }
+            if (hasNether != hasEnd || Files.exists(nether) || Files.exists(end)) {
+                throw new WorldStorageException("SEPARATE world '" + name +
+                        "' has incomplete independent dimension folders. Nether: " + nether +
+                        " (db=" + hasNether + "), End: " + end + " (db=" + hasEnd + "). " +
+                        "Restore both custom maps from their original backups before starting. " +
+                        "No shared-world data was migrated.");
+            }
+            // Neither independent folder exists. Preserve the existing
+            // SHARED-to-SEPARATE migration path for users explicitly switching
+            // modes on a formerly shared world.
+        }
+
         var shared = paths.get(0);
         var worldIds = DimensionStorageInspector.detectDimensionIds(shared);
         if (!worldIds.stream().allMatch(id -> id >= 0 && id <= 2)) {
