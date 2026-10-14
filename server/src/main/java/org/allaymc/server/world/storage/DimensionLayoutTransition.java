@@ -32,6 +32,24 @@ public final class DimensionLayoutTransition {
 
     public static boolean ensureLayout(Path worldsRoot, String name, String expectedMode,
                                        Map<Integer, Path> dimensionPaths) {
+        return ensureLayout(worldsRoot, name, expectedMode, dimensionPaths, "FAIL");
+    }
+
+    /**
+     * Explicitly opt in to using already-imported SEPARATE Nether/End worlds
+     * instead of the corresponding dimensions embedded in the shared source.
+     * The default FAIL policy continues to reject all conflicting layouts.
+     */
+    public static boolean ensureLayout(Path worldsRoot, String name, String expectedMode,
+                                       Map<Integer, Path> dimensionPaths, String conflictPolicy) {
+        if (!"FAIL".equalsIgnoreCase(conflictPolicy) &&
+                !"PREFER_SEPARATE".equalsIgnoreCase(conflictPolicy)) {
+            throw new WorldStorageException("Unknown dimension conflict policy " + conflictPolicy);
+        }
+        if ("PREFER_SEPARATE".equalsIgnoreCase(conflictPolicy) &&
+                !"SEPARATE".equalsIgnoreCase(expectedMode)) {
+            throw new WorldStorageException("PREFER_SEPARATE requires dimension-storage-mode: SEPARATE");
+        }
         var root = worldsRoot.toAbsolutePath().normalize();
         if (!name.matches("[A-Za-z0-9_.-]+") || name.equals(".") || name.equals("..") ||
                 !dimensionPaths.keySet().equals(Set.of(0, 1, 2))) {
@@ -88,6 +106,10 @@ public final class DimensionLayoutTransition {
         if (expectedMode.equalsIgnoreCase("SEPARATE")) {
             if (!sharedHasOtherDimensions) return false;
             if (otherHasData || Files.exists(paths.get(1)) || Files.exists(paths.get(2))) {
+                if ("PREFER_SEPARATE".equalsIgnoreCase(conflictPolicy)) {
+                    transitionPreferSeparate(root, name, paths, journal, worldIds);
+                    return true;
+                }
                 var existingFolders = new ArrayList<String>();
                 for (int id = 1; id <= 2; id++) {
                     var folder = paths.get(id);
@@ -116,6 +138,67 @@ public final class DimensionLayoutTransition {
             return true;
         }
         throw new IllegalArgumentException("Unknown dimension storage mode " + expectedMode);
+    }
+
+    /**
+     * Resolve a shared Overworld which also contains old Nether/End chunks, if
+     * the administrator has provided two independent custom dimensions.
+     *
+     * The supplied Nether and End are authoritative. This procedure NEVER
+     * writes either of those folders. We archive the original shared world,
+     * including its discarded embedded dimensions, in a verified backup and
+     * preserve the extracted embedded records separately for inspection.
+     * The independent custom End may still require the normal one-time
+     * Overworld-ID -> End-ID conversion after this transaction completes.
+     */
+    private static void transitionPreferSeparate(Path root, String name, Map<Integer, Path> paths,
+                                                 Path journal, Set<Integer> sharedIds) {
+        if (!sharedIds.contains(0)) {
+            throw new WorldStorageException("Cannot prioritize imported dimensions without Overworld chunk records");
+        }
+        for (int id = 1; id <= 2; id++) {
+            var source = paths.get(id);
+            if (!Files.isDirectory(source.resolve("db")) || Files.isSymbolicLink(source)) {
+                throw new WorldStorageException("PREFER_SEPARATE requires an existing independent " +
+                        (id == 1 ? "Nether" : "End") + " LevelDB: " + source);
+            }
+            var ids = DimensionStorageInspector.detectDimensionIds(source);
+            if (!ids.equals(Set.of(id)) && !ids.equals(Set.of(0))) {
+                throw new WorldStorageException("PREFER_SEPARATE cannot identify " + source +
+                        ", dimension IDs " + ids + "; expected native " + id + " or imported 0");
+            }
+        }
+        requireSpace(root, List.of(paths.get(0)));
+        var backupRoot = newBackupRoot(root, name);
+        var originalBackup = backupRoot.resolve("shared-original");
+        DimensionFileBackup.copyVerified(paths.get(0), originalBackup);
+        var scratch = backupRoot.resolve("shared-scratch");
+        DimensionFileBackup.copyVerified(originalBackup, scratch);
+
+        // Extract all three parts from a disposable copy. The embedded Nether
+        // and End are stored *inside the backup*, never over imported worlds.
+        var candidates = Map.of(
+                0, stagePath(paths.get(0)),
+                1, backupRoot.resolve("embedded-nether-not-active"),
+                2, backupRoot.resolve("embedded-end-not-active")
+        );
+        DimensionLayoutMigration.splitToCandidates(scratch, candidates);
+        verifyOriginals(List.of(paths.get(0)), List.of(originalBackup));
+
+        // Verify that custom source LevelDBs did not change while the shared
+        // source was being processed. No custom DB is opened for write here.
+        for (int id = 1; id <= 2; id++) {
+            var ids = DimensionStorageInspector.detectDimensionIds(paths.get(id));
+            if (!ids.equals(Set.of(id)) && !ids.equals(Set.of(0))) {
+                throw new WorldStorageException("Imported dimension changed during reconciliation: " + paths.get(id));
+            }
+        }
+        DimensionLayoutPromotion.promote(root, journal,
+                List.of(new DimensionLayoutPromotion.Change(paths.get(0), candidates.get(0))));
+        org.slf4j.LoggerFactory.getLogger(DimensionLayoutTransition.class).info(
+                "Reconciled world {} using imported Nether and End. " +
+                "The old shared LevelDB and extracted embedded dimensions are preserved in {}",
+                name, backupRoot);
     }
 
     private static void transitionSharedToSeparate(Path root, String name, Map<Integer, Path> paths, Path journal) {
