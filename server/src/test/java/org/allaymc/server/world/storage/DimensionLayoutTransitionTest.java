@@ -175,8 +175,6 @@ class DimensionLayoutTransitionTest {
         // substituted for the imported custom End.
         assertFalse(DimensionLayoutTransition.ensureLayout(
                 root, "custom-world", "SEPARATE", paths));
-        assertFalse(DimensionLayoutTransition.ensureLayout(
-                root, "custom-world", "SEPARATE", paths, "PREFER_SEPARATE"));
         assertEquals(Set.of(0, 2), DimensionStorageInspector.detectDimensionIds(shared));
         assertEquals(Set.of(1), DimensionStorageInspector.detectDimensionIds(nether));
         assertEquals(Set.of(0), DimensionStorageInspector.detectDimensionIds(end));
@@ -204,7 +202,7 @@ class DimensionLayoutTransitionTest {
     }
 
     @Test
-    void rejectsPreferringCustomDimensionsWhenOneIsMissing() throws Exception {
+    void refusesPartiallyConfiguredSeparateDimensions() throws Exception {
         var shared = root.resolve("one-custom-world");
         var end = root.resolve("one-custom-end");
         Files.createDirectories(shared.resolve("db"));
@@ -220,8 +218,7 @@ class DimensionLayoutTransitionTest {
         }
         assertThrows(org.allaymc.api.world.storage.WorldStorageException.class,
                 () -> DimensionLayoutTransition.ensureLayout(root, "one-custom-world", "SEPARATE",
-                        Map.of(0, shared, 1, root.resolve("missing-nether"), 2, end),
-                        "PREFER_SEPARATE"));
+                        Map.of(0, shared, 1, root.resolve("missing-nether"), 2, end)));
         assertEquals(Set.of(0, 2), DimensionStorageInspector.detectDimensionIds(shared));
         assertEquals(Set.of(0), DimensionStorageInspector.detectDimensionIds(end));
     }
