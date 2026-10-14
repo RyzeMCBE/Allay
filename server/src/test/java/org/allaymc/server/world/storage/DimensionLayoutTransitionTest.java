@@ -44,7 +44,7 @@ class DimensionLayoutTransitionTest {
         assertFalse(DimensionLayoutTransition.ensureLayout(root, "world", "SHARED", locations));
         assertFalse(Files.exists(nether));
         assertFalse(Files.exists(end));
-        firstTwoOrAll(DimensionStorageInspector.detectDimensionIds(world));
+        assertEquals(Set.of(0, 1, 2), DimensionStorageInspector.detectDimensionIds(world));
         assertEquals("Custom End coordinates", Files.readString(
                 DimensionSpawnMetadata.sidecarFolder(world, 2).resolve("level.dat")));
 
@@ -60,11 +60,5 @@ class DimensionLayoutTransitionTest {
         }
     }
 
-    // The inspector stops as soon as two physical IDs are detected because
-    // that is sufficient to identify mixed storage.
-    private static Set<Integer> firstTwoOrAll(Set<Integer> ids) {
-        assertTrue(ids.contains(0));
-        assertTrue(ids.contains(1) || ids.contains(2));
-        return ids;
-    }
+
 }
