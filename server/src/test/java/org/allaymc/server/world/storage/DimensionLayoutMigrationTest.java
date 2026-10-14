@@ -68,4 +68,37 @@ class DimensionLayoutMigrationTest {
                 shared, Map.of(0, conflict, 1, root.resolve("nether"), 2, root.resolve("end"))));
         assertTrue(Files.isDirectory(conflict));
     }
+    @Test
+    void keepsCustomEndLevelDatWhenMergingAndSplittingAgain() throws Exception {
+        var inputs = Map.of(0, root.resolve("base-world"),
+                1, root.resolve("base-nether"), 2, root.resolve("base-end"));
+        for (int id = 0; id <= 2; id++) {
+            var folder = inputs.get(id);
+            Files.createDirectories(folder.resolve("db"));
+            try (var db = new Iq80DBFactory().open(folder.resolve("db").toFile(),
+                    new Options().createIfMissing(true))) {
+                var key = id == 0
+                        ? new byte[]{0,0,0,0,0,0,0,0,44}
+                        : new byte[]{0,0,0,0,0,0,0,0,(byte) id,0,0,0,44};
+                db.put(key, new byte[]{(byte) id});
+            }
+        }
+        Files.writeString(inputs.get(0).resolve("level.dat"), "Overworld spawn");
+        Files.writeString(inputs.get(2).resolve("level.dat"), "Imported custom End spawn");
+        Files.writeString(inputs.get(1).resolve("level.dat"), "Imported custom Nether spawn");
+
+        var merged = root.resolve("merged-world");
+        assertEquals(3L, DimensionLayoutMigration.mergeToCandidate(inputs, merged));
+        assertEquals("Imported custom End spawn", Files.readString(
+                DimensionSpawnMetadata.sidecarFolder(merged, 2).resolve("level.dat")));
+        assertEquals("Imported custom Nether spawn", Files.readString(
+                DimensionSpawnMetadata.sidecarFolder(merged, 1).resolve("level.dat")));
+
+        var back = Map.of(0, root.resolve("roundtrip-world"),
+                1, root.resolve("roundtrip-nether"), 2, root.resolve("roundtrip-end"));
+        DimensionLayoutMigration.splitToCandidates(merged, back);
+        assertEquals("Imported custom End spawn", Files.readString(back.get(2).resolve("level.dat")));
+        assertEquals("Imported custom Nether spawn", Files.readString(back.get(1).resolve("level.dat")));
+    }
+
 }
