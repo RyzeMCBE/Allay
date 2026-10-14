@@ -5,6 +5,7 @@ import org.allaymc.api.math.location.Location3d;
 import org.allaymc.api.world.Dimension;
 import org.allaymc.api.world.World;
 import org.allaymc.server.world.storage.DimensionWorldStorage;
+import org.allaymc.server.world.storage.DimensionSpawnMetadata;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
 
@@ -33,6 +34,11 @@ public final class EndArrivalHelper {
             if (imported != null && insideDimension(destination, imported.y())) {
                 return new Vector3i(imported);
             }
+        }
+        var sidecar = DimensionSpawnMetadata.readSavedSpawn(
+                java.nio.file.Path.of("worlds").resolve(world.getName()), destination.getDimensionType());
+        if (sidecar != null && insideDimension(destination, sidecar.y())) {
+            return new Vector3i(sidecar);
         }
         return new Vector3i(VANILLA_END_ENTRY);
     }
