@@ -125,7 +125,7 @@ public class AllayPlayer implements Player {
     private final Object protocolLifecycleLock = new Object();
     private final Object chunkPublisherLock = new Object();
     private NetworkChunkPublisherUpdatePacket lastChunkPublisherUpdate;
-    private volatile long lastDimensionChangeStartedNanos;
+    private final DimensionLoadingScreenTracker dimensionLoadingScreen = new DimensionLoadingScreenTracker();
     @Getter
     protected volatile ProtocolSession protocolSession;
     protected final AtomicInteger fullyJoinChunkThreshold;
@@ -268,15 +268,6 @@ public class AllayPlayer implements Player {
     }
 
     public void handlePacketSync(BedrockPacket packet, long receiveTime) {
-        // The client, not the server, controls END_LOADING_SCREEN. Record its
-        // real delay without altering the protocol or forcing UI dismissal.
-        if (packet instanceof ServerboundLoadingScreenPacket loading && lastDimensionChangeStartedNanos > 0) {
-            long elapsedMs = TimeUnit.NANOSECONDS.toMillis(
-                    System.nanoTime() - lastDimensionChangeStartedNanos
-            );
-            log.debug("Bedrock loading screen {} for {} after {} ms since dimension change",
-                    loading.getType(), getOriginName(), elapsedMs);
-        }
         var selectedSession = protocolSession;
         if (selectedSession == null) {
             log.debug("Ignoring sync packet before protocol negotiation: {}", packet);
@@ -470,6 +461,7 @@ public class AllayPlayer implements Player {
             // DIMENSION_CHANGE_SUCCESS to preserve wire order.
             sendNetworkChunkPublisherUpdateIfNeeded();
             sendPacket(encoded);
+            dimensionLoadingScreen.chunkQueued(System.nanoTime());
         }
         // Async chunks are sent after the target entity is registered.
         this.controlledEntity.getDimension().getEntityManager().forEachEntitiesInChunk(chunk.getX(), chunk.getZ(), entity -> entity.spawnTo(this));
@@ -1280,16 +1272,48 @@ public class AllayPlayer implements Player {
         sendPacket(getProtocol().getEncoder().encodeFogStack(fogStack));
     }
 
+    /**
+     * Loading screen callbacks come from the network thread. They must not
+     * block target chunk publication and do not synthesize a client END event.
+     */
+    public void onClientDimensionLoadingScreen(ServerboundLoadingScreenPacket packet) {
+        var progress = dimensionLoadingScreen.clientScreenEvent(
+                packet.getType(), packet.getLoadingScreenId(), System.nanoTime()
+        );
+        if (!progress.matched()) {
+            log.debug("Ignoring unmatched Bedrock loading screen player={} type={} receivedId={} expectedId={}",
+                    getOriginName(), packet.getType(), packet.getLoadingScreenId(), progress.loadingScreenId());
+            return;
+        }
+        log.debug("Bedrock dimension loading player={} stage={} id={} elapsedMs={} firstChunkMs={} chunksQueued={} started={} finished={}",
+                getOriginName(), packet.getType(), progress.loadingScreenId(), progress.elapsedMillis(),
+                progress.firstChunkMillis(), progress.chunksQueued(), progress.clientStarted(), progress.clientFinished());
+    }
+
+    /** Called when Bedrock acknowledges a ChangeDimensionPacket. */
+    public void onClientDimensionChangeAcknowledged() {
+        var progress = dimensionLoadingScreen.clientAcknowledged(System.nanoTime());
+        if (progress.matched()) {
+            log.debug("Bedrock dimension client ACK player={} id={} elapsedMs={} firstChunkMs={} chunksQueued={}",
+                    getOriginName(), progress.loadingScreenId(), progress.elapsedMillis(),
+                    progress.firstChunkMillis(), progress.chunksQueued());
+        }
+    }
+
     @Override
     public void beginDimensionChange(DimensionType targetDimType, double x, double y, double z) {
         synchronized (chunkPublisherLock) {
             lastChunkPublisherUpdate = null;
             pendingChunkDimension = targetDimType;
             changingDimension = true;
-            lastDimensionChangeStartedNanos = System.nanoTime();
-            sendPacket(getProtocol().getEncoder().encodeDimensionChange(targetDimType, x, y, z));
-            log.debug("Dimension transition BEGIN player={} target={} position=({},{},{})",
-                    getOriginName(), targetDimType.getIdentifier(), x, y, z);
+            var packet = getProtocol().getEncoder().encodeDimensionChange(targetDimType, x, y, z);
+            // v712+ supports a unique loading screen ID. All supported client
+            // protocols (v766 and newer) serialize this optional field.
+            int screenId = dimensionLoadingScreen.begin(System.nanoTime());
+            packet.setLoadingScreenId(screenId);
+            sendPacket(packet);
+            log.debug("Dimension transition BEGIN player={} target={} loadingScreenId={} position=({},{},{})",
+                    getOriginName(), targetDimType.getIdentifier(), screenId, x, y, z);
         }
     }
 
@@ -1328,7 +1352,9 @@ public class AllayPlayer implements Player {
             var loc = this.controlledEntity.getLocation();
             var actual = this.controlledEntity.getDimension().getDimensionType();
             lastChunkPublisherUpdate = null;
-            sendPacket(getProtocol().getEncoder().encodeDimensionChange(actual, loc.x(), loc.y(), loc.z()));
+            var restorePacket = getProtocol().getEncoder().encodeDimensionChange(actual, loc.x(), loc.y(), loc.z());
+            restorePacket.setLoadingScreenId(dimensionLoadingScreen.begin(System.nanoTime()));
+            sendPacket(restorePacket);
             sendPacket(getProtocol().getEncoder().encodeDimensionChangeSuccess(
                     this.controlledEntity.getRuntimeId()
             ));

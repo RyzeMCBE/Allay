@@ -3,6 +3,7 @@ package org.allaymc.server.network.processor.ingame;
 import lombok.extern.slf4j.Slf4j;
 import org.allaymc.api.player.Player;
 import org.allaymc.server.network.processor.PacketProcessor;
+import org.allaymc.server.player.AllayPlayer;
 import org.cloudburstmc.protocol.bedrock.data.PlayerActionType;
 import org.cloudburstmc.protocol.bedrock.packet.BedrockPacketType;
 import org.cloudburstmc.protocol.bedrock.packet.PacketSignal;
@@ -17,6 +18,13 @@ public class PlayerActionPacketProcessor extends PacketProcessor<PlayerActionPac
     public PacketSignal handleAsync(Player player, PlayerActionPacket packet, long receiveTime) {
         var entity = player.getControlledEntity();
         return switch (packet.getAction()) {
+            case DIMENSION_CHANGE_SUCCESS -> {
+                // This is the CLIENT acknowledgement. The server independently
+                // sends its own ACK when the destination is registered; do not
+                // defer chunk sends until the client closes its loading screen.
+                ((AllayPlayer) player).onClientDimensionChangeAcknowledged();
+                yield PacketSignal.HANDLED;
+            }
             case START_ITEM_USE_ON -> {
                 if (entity.isUsingItemOnBlock()) {
                     log.debug("Player {} tried to start item use on without stopping", player.getOriginName());

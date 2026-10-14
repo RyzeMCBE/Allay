@@ -70,7 +70,7 @@ public abstract class Protocol_v766 extends Protocol {
         registry.register(
                 EnumSet.of(ClientState.SPAWNED, ClientState.IN_GAME),
                 BedrockPacketType.SERVERBOUND_LOADING_SCREEN,
-                () -> new NoopPacketProcessor(BedrockPacketType.SERVERBOUND_LOADING_SCREEN)
+                ServerboundLoadingScreenPacketProcessor::new
         );
         registry.register(
                 EnumSet.of(ClientState.SPAWNED, ClientState.IN_GAME),
