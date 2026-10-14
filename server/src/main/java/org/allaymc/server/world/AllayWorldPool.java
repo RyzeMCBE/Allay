@@ -307,7 +307,8 @@ public final class AllayWorldPool implements WorldPool {
                     configuredPath == null || configuredPath.isBlank() ? defaultFolder : configuredPath
             ).normalize());
         }
-        DimensionLayoutTransition.ensureLayout(root, name, setting.dimensionStorageMode(), layoutPaths);
+        DimensionLayoutTransition.ensureLayout(root, name, setting.dimensionStorageMode(),
+                layoutPaths, setting.dimensionConflictPolicy());
         if (!separate) {
             // Switching from SEPARATE to SHARED without merging first would
             // silently load an empty Nether/End from the Overworld LevelDB.
@@ -611,6 +612,11 @@ public final class AllayWorldPool implements WorldPool {
             @Comment("SHARED keeps all dimensions in the same LevelDB. SEPARATE requires the conversion engine before activation.")
             private String dimensionStorageMode = "SHARED";
 
+            @Setter
+            @CustomKey("dimension-conflict-policy")
+            @Comment("FAIL (default) rejects overlapping SHARED/SEPARATE data. PREFER_SEPARATE explicitly prioritizes custom Nether/End with verified backups.")
+            private String dimensionConflictPolicy = "FAIL";
+
             private Map<String, DimensionSetting> dimensions;
 
             private DimensionSetting overworld;
@@ -674,6 +680,8 @@ public final class AllayWorldPool implements WorldPool {
                 normalizedDimensions().forEach((identifier, setting) -> normalizedDimensions.put(identifier.toString(), setting));
                 var normalizedWorld = new WorldSetting(storageType, useVirtualThread, normalizedDimensions);
                 normalizedWorld.dimensionStorageMode(dimensionStorageMode == null ? "SHARED" : dimensionStorageMode.trim().toUpperCase(java.util.Locale.ROOT));
+                normalizedWorld.dimensionConflictPolicy(dimensionConflictPolicy == null ? "FAIL" :
+                        dimensionConflictPolicy.trim().toUpperCase(java.util.Locale.ROOT));
                 return normalizedWorld;
             }
 
