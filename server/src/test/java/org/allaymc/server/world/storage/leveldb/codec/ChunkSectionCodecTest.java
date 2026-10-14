@@ -191,6 +191,32 @@ class ChunkSectionCodecTest {
                 section.getBlockState(6, 1, 1, 0));
     }
 
+    @Test
+    void testPocketMine4ExtraLengthInSingletonSubchunkPalette() {
+        // A real legacy PM4/CustomItemAPI subchunk may contain a nonvanilla
+        // LE length of 1 between a V0 palette header and its state NBT.
+        // Verify that this does not corrupt subsequent subchunk layers.
+        var legacy = LevelDBUtils.withByteBufToArray(buffer -> {
+            buffer.writeByte(AllayChunkSection.CURRENT_CHUNK_SECTION_VERSION);
+            buffer.writeByte(2);
+            buffer.writeByte(0);
+            buffer.writeByte(0); // first storage: zero bits per block, NBT
+            buffer.writeIntLE(1); // invalid extra length in some PM4 maps
+            try (var writer = NbtUtils.createWriterLE(new io.netty.buffer.ByteBufOutputStream(buffer))) {
+                writer.writeTag(STONE.getDefaultState().getBlockStateNBT());
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+            // Second layer uses the standard single-state encoding.
+            var secondLayer = new Palette<>(AIR.getDefaultState().getBlockStateNBT());
+            secondLayer.writeToStorage(buffer, entry -> entry);
+        });
+        var section = ChunkSectionCodec.deserialize(legacy, 0, 0, 0);
+        assertNotNull(section);
+        assertEquals(STONE.getDefaultState(), section.getBlockState(1, 1, 1, 0));
+        assertEquals(AIR.getDefaultState(), section.getBlockState(1, 1, 1, 1));
+    }
+
     private static Palette<NbtMap> readRawLayer0(byte[] data) {
         var buffer = Unpooled.wrappedBuffer(data);
         buffer.skipBytes(3); // bölüm sürümü, katman sayısı, bölüm y
