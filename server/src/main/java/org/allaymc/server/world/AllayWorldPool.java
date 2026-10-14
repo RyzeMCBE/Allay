@@ -246,13 +246,35 @@ public final class AllayWorldPool implements WorldPool {
         var uniquePaths = new java.util.HashSet<Path>();
         var configuredDimensions = setting.normalizedDimensions();
         var root = this.worldFolder.toAbsolutePath().normalize();
+        if (!separate) {
+            // Switching from SEPARATE to SHARED without merging first would
+            // silently load an empty Nether/End from the Overworld LevelDB.
+            // Never accept this data-loss scenario.
+            for (var entry : configuredDimensions.entrySet()) {
+                if (!entry.getValue().enabled()) continue;
+                var type = Registries.DIMENSIONS.getByK2(entry.getKey());
+                if (type == null || type == DimensionTypes.OVERWORLD) continue;
+                var configuredPath = entry.getValue().path();
+                var folderName = configuredPath == null || configuredPath.isBlank()
+                        ? name + (type == DimensionTypes.NETHER ? "-nether" : "-end")
+                        : configuredPath;
+                var otherFolder = root.resolve(folderName).normalize();
+                if (otherFolder.equals(root.resolve(name).normalize())) continue;
+                if (java.nio.file.Files.isDirectory(otherFolder.resolve("db")) &&
+                        DimensionStorageInspector.detectDimensionIds(otherFolder).contains(type.getId())) {
+                    throw new IllegalStateException("World " + name + " has SEPARATE data for " +
+                            type.getIdentifier() + " at " + otherFolder +
+                            ". Prepare and verify SHARED layout migration before switching modes.");
+                }
+            }
+        }
         if (separate) {
             for (var entry : configuredDimensions.entrySet()) {
                 if (!entry.getValue().enabled()) continue;
                 var type = Preconditions.checkNotNull(Registries.DIMENSIONS.getByK2(entry.getKey()), "Unknown dimension %s", entry.getKey());
                 var configuredPath = entry.getValue().path();
                 var folderName = configuredPath == null || configuredPath.isBlank()
-                        ? (type == DimensionTypes.OVERWORLD ? name : type == DimensionTypes.NETHER ? "nether" : "end")
+                        ? (type == DimensionTypes.OVERWORLD ? name : name + (type == DimensionTypes.NETHER ? "-nether" : "-end"))
                         : configuredPath;
                 var path = root.resolve(folderName).normalize();
                 Preconditions.checkArgument(path.startsWith(root) && !path.equals(root), "Unsafe dimension path: %s", folderName);
@@ -281,7 +303,7 @@ public final class AllayWorldPool implements WorldPool {
                     var type = Registries.DIMENSIONS.getByK2(entry.getKey());
                     var configuredPath = entry.getValue().path();
                     var folderName = configuredPath == null || configuredPath.isBlank()
-                            ? (type == DimensionTypes.OVERWORLD ? name : type == DimensionTypes.NETHER ? "nether" : "end")
+                            ? (type == DimensionTypes.OVERWORLD ? name : name + (type == DimensionTypes.NETHER ? "-nether" : "-end"))
                             : configuredPath;
                     var dimensionPath = root.resolve(folderName).normalize();
                     var backend = Preconditions.checkNotNull(storageFactory.apply(dimensionPath), "Missing LevelDB backend for %s", type);
