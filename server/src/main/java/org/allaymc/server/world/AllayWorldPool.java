@@ -32,6 +32,7 @@ import org.allaymc.server.world.storage.DimensionWorldStorage;
 import org.allaymc.server.world.storage.DimensionStorageInspector;
 import org.allaymc.server.world.storage.DimensionConversionPromotion;
 import org.allaymc.server.world.storage.DimensionStorageAutoConverter;
+import org.allaymc.server.world.storage.DimensionLayoutTransition;
 
 import java.nio.file.Path;
 import java.util.Collections;
@@ -246,6 +247,19 @@ public final class AllayWorldPool implements WorldPool {
         var uniquePaths = new java.util.HashSet<Path>();
         var configuredDimensions = setting.normalizedDimensions();
         var root = this.worldFolder.toAbsolutePath().normalize();
+        // A mode switch is an offline multi-directory transaction. This call
+        // also rolls back an interrupted switch before opening any LevelDB.
+        var layoutPaths = new LinkedHashMap<Integer, Path>();
+        for (var dimensionId : DimensionId.values()) {
+            var dimensionConfig = configuredDimensions.get(dimensionId.getIdentifier());
+            var configuredPath = dimensionConfig == null ? null : dimensionConfig.path();
+            var defaultFolder = dimensionId == DimensionId.OVERWORLD
+                    ? name : name + (dimensionId == DimensionId.NETHER ? "-nether" : "-end");
+            layoutPaths.put(dimensionId.getId(), root.resolve(
+                    configuredPath == null || configuredPath.isBlank() ? defaultFolder : configuredPath
+            ).normalize());
+        }
+        DimensionLayoutTransition.ensureLayout(root, name, setting.dimensionStorageMode(), layoutPaths);
         if (!separate) {
             // Switching from SEPARATE to SHARED without merging first would
             // silently load an empty Nether/End from the Overworld LevelDB.
@@ -261,7 +275,8 @@ public final class AllayWorldPool implements WorldPool {
                 var otherFolder = root.resolve(folderName).normalize();
                 if (otherFolder.equals(root.resolve(name).normalize())) continue;
                 if (java.nio.file.Files.isDirectory(otherFolder.resolve("db")) &&
-                        DimensionStorageInspector.detectDimensionIds(otherFolder).contains(type.getId())) {
+                        (!DimensionStorageInspector.detectDimensionIds(otherFolder).isEmpty() ||
+                                java.nio.file.Files.exists(otherFolder.resolve("level.dat")))) {
                     throw new IllegalStateException("World " + name + " has SEPARATE data for " +
                             type.getIdentifier() + " at " + otherFolder +
                             ". Prepare and verify SHARED layout migration before switching modes.");
