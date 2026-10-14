@@ -97,29 +97,34 @@ public final class ChunkSectionCodec {
     }
 
     private static BlockState fastBlockStateDeserializer(ByteBuf buffer) {
-        int blockStateHash;
-        NbtMap rawNbt = null;
-        try (var bufInputStream = new ByteBufInputStream(buffer);
-             var input = new LittleEndianDataInputStream(bufInputStream);
-             var nbtInputStream = new NBTInputStream(input)) {
-            blockStateHash = PaletteUtils.fastReadBlockStateHash(input, buffer);
-            if (blockStateHash == PaletteUtils.HASH_NOT_LATEST) {
-                rawNbt = (NbtMap) nbtInputStream.readTag();
+        // The hash reader is an optimization, not an authoritative NBT decoder.
+        // Legacy and custom worlds may have a missing/differently ordered version
+        // tag. In that case the hash reader can consume the whole entry before
+        // returning HASH_NOT_LATEST (or throwing). Always rewind before retrying
+        // with the standard little-endian NBT reader.
+        int entryStart = buffer.readerIndex();
+        Exception fastReadFailure = null;
+        try (var input = new LittleEndianDataInputStream(new ByteBufInputStream(buffer))) {
+            int blockStateHash = PaletteUtils.fastReadBlockStateHash(input, buffer);
+            if (blockStateHash != PaletteUtils.HASH_NOT_LATEST) {
+                var blockState = Registries.BLOCK_STATE_PALETTE.get(blockStateHash);
+                if (blockState != null) {
+                    return blockState;
+                }
             }
-        } catch (IOException e) {
-            throw new PaletteException(e);
+        } catch (Exception e) {
+            fastReadFailure = e;
         }
 
-        if (rawNbt == null) {
-            var blockState = Registries.BLOCK_STATE_PALETTE.get(blockStateHash);
-            if (blockState != null) {
-                return blockState;
-            }
-
-            // The fast path consumed a current-version state whose hash is unknown to this server.
-            // Re-read the same palette entry so it can survive a load/save cycle byte-for-byte.
-            buffer.resetReaderIndex();
+        buffer.readerIndex(entryStart);
+        NbtMap rawNbt;
+        try {
             rawNbt = readBlockStateNbt(buffer);
+        } catch (PaletteException e) {
+            if (fastReadFailure != null) {
+                e.addSuppressed(fastReadFailure);
+            }
+            throw e;
         }
 
         var resolved = NBTIO.getAPI().fromBlockStateNBT(rawNbt);
