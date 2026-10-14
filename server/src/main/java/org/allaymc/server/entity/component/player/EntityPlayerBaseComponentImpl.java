@@ -647,13 +647,16 @@ public class EntityPlayerBaseComponentImpl extends EntityBaseComponentImpl imple
         // impossible until the previous one finishes AND the portal is exited.
         beginNetherPortalTransfer();
 
-        // Show the loading screen immediately; the target chunks load asynchronously.
-        var loc = thisEntity.getLocation();
-        var targetDimType = targetDim.getDimensionType();
-        double targetX = NetherPortalHelper.scaleCoordinate(loc.x(), currentDimType, targetDimType);
-        double targetZ = NetherPortalHelper.scaleCoordinate(loc.z(), currentDimType, targetDimType);
-        this.controller.beginDimensionChange(targetDimType, targetX, loc.y(), targetZ);
-
+        // Do NOT announce a dimension change at the scaled *approximate* position.
+        // NetherPortalHelper may find a real portal several blocks away, create
+        // one at a safer Y, or a teleport event may change its destination.
+        // Announcing one position and later sending MovePlayerPacket to another
+        // desynchronizes Bedrock's transfer/loading handshake (observed when
+        // returning from Nether to Overworld).
+        //
+        // Load and resolve the destination asynchronously first. The existing
+        // teleportOverDimension() sends ChangeDimensionPacket with the final
+        // event-adjusted location, before publishing destination chunks.
         Server.getInstance().getVirtualThreadPool().submit(() -> {
             try {
                 NetherPortalHelper.teleport(thisEntity).whenComplete((success, error) ->
@@ -664,7 +667,7 @@ public class EntityPlayerBaseComponentImpl extends EntityBaseComponentImpl imple
                             boolean transferred = error == null && Boolean.TRUE.equals(success);
                             finishNetherPortalTransfer(transferred);
                             if (!transferred) {
-                                // Clear the early change signal if no transfer occurred.
+                                // Recover only if the transfer already announced a dimension switch.
                                 ((AllayPlayer) this.controller).abortDimensionChange();
                             }
                         })

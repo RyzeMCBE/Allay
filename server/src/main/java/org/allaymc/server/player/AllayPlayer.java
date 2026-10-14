@@ -1277,7 +1277,8 @@ public class AllayPlayer implements Player {
             pendingChunkDimension = targetDimType;
             changingDimension = true;
             sendPacket(getProtocol().getEncoder().encodeDimensionChange(targetDimType, x, y, z));
-            log.debug("Dimension transition BEGIN player={} target={}", getOriginName(), targetDimType.getIdentifier());
+            log.debug("Dimension transition BEGIN player={} target={} position=({},{},{})",
+                    getOriginName(), targetDimType.getIdentifier(), x, y, z);
         }
     }
 
