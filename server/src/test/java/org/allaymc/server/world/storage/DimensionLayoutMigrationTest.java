@@ -101,4 +101,26 @@ class DimensionLayoutMigrationTest {
         assertEquals("Imported custom Nether spawn", Files.readString(back.get(1).resolve("level.dat")));
     }
 
+    @Test
+    void reportsUnknownChunkKeyWithoutTouchingOriginalDatabase() throws Exception {
+        var shared = root.resolve("unknown-key-shared");
+        Files.createDirectories(shared.resolve("db"));
+        var unknownKey = new byte[]{1,0,0,0,2,0,0,0,99};
+        try (var db = new Iq80DBFactory().open(shared.resolve("db").toFile(),
+                new Options().createIfMissing(true))) {
+            db.put(unknownKey, new byte[]{42});
+        }
+
+        var outputs = Map.of(0, root.resolve("out0"),
+                1, root.resolve("out1"), 2, root.resolve("out2"));
+        var failure = assertThrows(WorldStorageException.class,
+                () -> DimensionLayoutMigration.splitToCandidates(shared, outputs));
+        assertTrue(failure.getMessage().contains("010000000200000063"));
+        assertTrue(failure.getMessage().contains("keyLength=9"));
+        try (var source = new Iq80DBFactory().open(shared.resolve("db").toFile(),
+                new Options().createIfMissing(false))) {
+            assertArrayEquals(new byte[]{42}, source.get(unknownKey));
+        }
+    }
+
 }
