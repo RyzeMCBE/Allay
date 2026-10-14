@@ -116,7 +116,7 @@ public final class DimensionLayoutMigration {
             // retain every auxiliary file in the Overworld world's sidecar.
             for (int id = 1; id <= 2; id++) {
                 copyMetadata(separateInputs.get(id),
-                        DimensionSpawnMetadata.sidecarFolder(candidate, id));
+                        DimensionSpawnMetadata.sidecarFolder(candidate, id), true);
             }
             return count;
         } catch (IOException e) {
@@ -214,6 +214,10 @@ public final class DimensionLayoutMigration {
     }
 
     private static void copyMetadata(Path source, Path destination) throws IOException {
+        copyMetadata(source, destination, false);
+    }
+
+    private static void copyMetadata(Path source, Path destination, boolean replaceExisting) throws IOException {
         try (var walk = Files.walk(source)) {
             for (var file : walk.toList()) {
                 if (Files.isSymbolicLink(file)) throw new WorldStorageException("Unexpected link in source metadata");
@@ -223,7 +227,15 @@ public final class DimensionLayoutMigration {
                 if (Files.isDirectory(file)) Files.createDirectories(target);
                 else {
                     Files.createDirectories(target.getParent());
-                    Files.copy(file, target, StandardCopyOption.COPY_ATTRIBUTES);
+                    if (replaceExisting) {
+                        // In a subsequent mode switch the Overworld may carry an
+                        // older sidecar; the independent dimension's current data
+                        // takes precedence, while the old directory is backed up.
+                        Files.copy(file, target, StandardCopyOption.COPY_ATTRIBUTES,
+                                StandardCopyOption.REPLACE_EXISTING);
+                    } else {
+                        Files.copy(file, target, StandardCopyOption.COPY_ATTRIBUTES);
+                    }
                 }
             }
         }
