@@ -355,7 +355,16 @@ public final class AllayWorldPool implements WorldPool {
                                 type.getIdentifier(), name);
                     }
                 } else {
-                    DimensionStorageInspector.requireNativeLayout(path, type.getId());
+                    // SEPARATE's Overworld backend only reads ID 0 keys.
+                    // It must not reject older world.db files that still
+                    // contain unused legacy Nether/End records. Nor should it
+                    // examine those records to decide where dimensions load.
+                    if (java.nio.file.Files.exists(path.resolve("level.dat")) &&
+                            !java.nio.file.Files.isDirectory(path.resolve("db"))) {
+                        throw new IllegalStateException("Existing Overworld has no LevelDB database: " + path);
+                    }
+                    Preconditions.checkArgument(!java.nio.file.Files.isSymbolicLink(path.resolve("db")),
+                            "Unsafe Overworld LevelDB symlink: %s", path.resolve("db"));
                 }
             }
         }
