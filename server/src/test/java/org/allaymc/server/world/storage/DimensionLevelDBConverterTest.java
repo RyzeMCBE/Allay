@@ -47,4 +47,24 @@ class DimensionLevelDBConverterTest {
         assertThrows(WorldStorageException.class,
                 () -> DimensionLevelDBConverter.mapKey(netherRecord, 0, 2, 0, 255));
     }
+    @Test
+    void rejectsUnknownChunkShapedKeysBeforeCreatingStage() throws Exception {
+        var source = temporary.resolve("unknown-source");
+        var stage = temporary.resolve("unknown-stage");
+        Files.createDirectories(source.resolve("db"));
+        try (var db = new Iq80DBFactory().open(source.resolve("db").toFile(), new Options().createIfMissing(true))) {
+            db.put(new byte[]{0,0,0,0,0,0,0,0,99}, new byte[]{1});
+        }
+        assertThrows(WorldStorageException.class,
+                () -> DimensionLevelDBConverter.copyAsDimension(source, stage, 0, 2, -64, 319, 0, 255));
+        assertFalse(Files.exists(stage));
+    }
+
+    @Test
+    void handlesLegacyTerrainKeyAsRecognizedChunkData() {
+        var key = new byte[]{0,0,0,0,0,0,0,0,48};
+        assertArrayEquals(new byte[]{0,0,0,0,0,0,0,0,2,0,0,0,48},
+                DimensionLevelDBConverter.mapKey(key, 0, 2, 0, 255));
+    }
+
 }
