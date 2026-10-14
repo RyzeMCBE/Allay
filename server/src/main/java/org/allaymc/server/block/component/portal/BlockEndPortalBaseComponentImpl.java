@@ -73,7 +73,15 @@ public class BlockEndPortalBaseComponentImpl extends BlockBaseComponentImpl {
                 entity.setPortalCooldown(0);
                 return;
             }
-            var preferred = EndArrivalHelper.preferredSpawn(world, theEnd);
+            org.joml.Vector3ic preferred;
+            try {
+                preferred = EndArrivalHelper.preferredSpawn(world, theEnd);
+            } catch (RuntimeException e) {
+                org.slf4j.LoggerFactory.getLogger(BlockEndPortalBaseComponentImpl.class)
+                        .error("Could not read custom End spawn metadata; refusing unsafe teleport", e);
+                entity.setPortalCooldown(0);
+                return;
+            }
 
             if (entity instanceof EntityPlayer player && player.isActualPlayer()) {
                 player.getController().beginDimensionChange(theEnd.getDimensionType(),
