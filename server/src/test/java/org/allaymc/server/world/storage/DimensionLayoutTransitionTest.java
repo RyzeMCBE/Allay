@@ -51,8 +51,12 @@ class DimensionLayoutTransitionTest {
         assertTrue(DimensionLayoutTransition.ensureLayout(root, "world", "SEPARATE", locations));
         assertEquals("Custom End coordinates", Files.readString(end.resolve("level.dat")));
         assertEquals("Custom Nether coordinates", Files.readString(nether.resolve("level.dat")));
+        Files.writeString(end.resolve("level.dat"), "Updated custom End coordinates");
+        assertTrue(DimensionLayoutTransition.ensureLayout(root, "world", "SHARED", locations));
+        assertEquals("Updated custom End coordinates", Files.readString(
+                DimensionSpawnMetadata.sidecarFolder(world, 2).resolve("level.dat")));
         try (var backups = Files.list(root.resolve(".dimension-layout-backups").resolve("world"))) {
-            assertEquals(3, backups.count());
+            assertEquals(4, backups.count());
         }
     }
 
