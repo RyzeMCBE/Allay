@@ -145,6 +145,20 @@ public final class DimensionLevelDBConverter {
             if (hasDigestPrefixSafe(key)) {
                 throw new WorldStorageException("Unsupported actor digest key format");
             }
+            // Actor records themselves have a stable global key and should stay
+            // byte-for-byte identical, unlike the dimension-scoped digp keys.
+            if (hasActorPrefix(key)) {
+                if (key.length != ACTOR_PREFIX.length + Long.BYTES) {
+                    throw new WorldStorageException("Unsupported actor record key length");
+                }
+                return key.clone();
+            }
+            // Unclassified short keys are world metadata and may be copied as-is,
+            // but a chunk-like key with unknown type must never be copied without
+            // its target dimension prefix.
+            if (key.length == 9 || key.length == 10 || key.length == 13 || key.length == 14) {
+                throw new WorldStorageException("Unrecognized chunk-shaped key cannot be safely converted");
+            }
             return key.clone();
         }
         if (dimension != sourceId) {
@@ -162,6 +176,16 @@ public final class DimensionLevelDBConverter {
         writeIntLE(result, 8, targetId);
         System.arraycopy(key, 8, result, 12, key.length - 8);
         return result;
+    }
+
+    private static final byte[] ACTOR_PREFIX = "actorprefix".getBytes(java.nio.charset.StandardCharsets.US_ASCII);
+
+    private static boolean hasActorPrefix(byte[] key) {
+        if (key.length < ACTOR_PREFIX.length) return false;
+        for (int i = 0; i < ACTOR_PREFIX.length; i++) {
+            if (key[i] != ACTOR_PREFIX[i]) return false;
+        }
+        return true;
     }
 
     private static boolean hasDigestPrefixSafe(byte[] key) {
