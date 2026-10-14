@@ -6,6 +6,8 @@ import org.allaymc.api.world.WorldData;
 import org.allaymc.api.world.chunk.Chunk;
 import org.allaymc.api.world.dimension.DimensionType;
 import org.allaymc.api.world.storage.WorldStorage;
+import org.joml.Vector3i;
+import org.joml.Vector3ic;
 
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
@@ -24,9 +26,16 @@ import java.util.concurrent.CompletableFuture;
 public final class DimensionWorldStorage implements WorldStorage {
     private final WorldStorage primary;
     private final Map<DimensionType, WorldStorage> byDimension;
+    private final Map<DimensionType, Vector3ic> importedSpawnPoints;
 
     public DimensionWorldStorage(WorldStorage primary, Map<DimensionType, WorldStorage> byDimension) {
+        this(primary, byDimension, Map.of());
+    }
+
+    public DimensionWorldStorage(WorldStorage primary, Map<DimensionType, WorldStorage> byDimension,
+                                 Map<DimensionType, Vector3ic> importedSpawnPoints) {
         this.primary = Objects.requireNonNull(primary, "primary");
+        Objects.requireNonNull(importedSpawnPoints, "importedSpawnPoints");
         if (byDimension == null || byDimension.isEmpty()) {
             throw new IllegalArgumentException("At least the overworld dimension must be provided");
         }
@@ -44,6 +53,20 @@ public final class DimensionWorldStorage implements WorldStorage {
             throw new IllegalArgumentException("Primary storage is not assigned to a dimension");
         }
         this.byDimension = Map.copyOf(result);
+        var saved = new LinkedHashMap<DimensionType, Vector3ic>();
+        importedSpawnPoints.forEach((type, pos) -> {
+            if (!result.containsKey(type)) throw new IllegalArgumentException("Spawn dimension not enabled: " + type);
+            saved.put(type, new Vector3i(Objects.requireNonNull(pos, "spawn")));
+        });
+        this.importedSpawnPoints = Map.copyOf(saved);
+    }
+
+    /**
+     * Per-dimension spawn loaded from an imported dimension's own level.dat.
+     * Do not substitute the Overworld's global spawn when metadata is absent.
+     */
+    public Vector3ic getImportedSpawnPoint(DimensionType dimensionType) {
+        return importedSpawnPoints.get(dimensionType);
     }
 
     private WorldStorage forDimension(DimensionType dimensionType) {
