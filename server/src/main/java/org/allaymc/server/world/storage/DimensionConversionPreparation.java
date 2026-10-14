@@ -58,6 +58,7 @@ public final class DimensionConversionPreparation {
                     }
                 }
             }
+            DimensionConversionManifest.seal(prepared, targetId, converted);
             return converted;
         } catch (IOException e) {
             throw new WorldStorageException("Failed to prepare backed-up dimension conversion", e);
