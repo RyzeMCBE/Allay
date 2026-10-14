@@ -188,9 +188,28 @@ public final class DimensionLayoutMigration {
             return -1; // caller already knows which independent database owns it
         }
         if (key.length == 9 || key.length == 10 || key.length == 13 || key.length == 14) {
-            throw new WorldStorageException("Unknown chunk-shaped key; layout migration rejected");
+            // Record the exact offending key without reading or changing its value.
+            // Key length alone cannot distinguish newer Bedrock chunk formats
+            // from short global metadata keys. Never assign an unknown key to
+            // the Overworld by guesswork, or silently discard it.
+            throw new WorldStorageException("Unknown chunk-shaped LevelDB key; layout migration rejected. " +
+                    "keyLength=" + key.length +
+                    ", hex=" + java.util.HexFormat.of().formatHex(key) +
+                    ", printableAscii=" + printableAscii(key) +
+                    ", recordKindAt8=" + (key[8] & 0xff) +
+                    (key.length >= 13 ? ", recordKindAt12=" + (key[12] & 0xff) : "") +
+                    ". The source DB and custom dimension maps are preserved.");
         }
         return 0; // global world metadata stays with the Overworld
+    }
+
+    private static String printableAscii(byte[] key) {
+        var result = new StringBuilder();
+        for (var value : key) {
+            int code = value & 0xff;
+            result.append(code >= 32 && code <= 126 ? (char) code : '.');
+        }
+        return result.toString();
     }
 
     private static int digestDimension(byte[] key) {
