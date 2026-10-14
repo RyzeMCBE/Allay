@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -91,7 +90,7 @@ public final class DimensionLayoutMigration {
                         for (it.seekToFirst(); it.hasNext();) {
                             var entry = it.next();
                             var owner = classify(entry.getKey(), Map.of(), false);
-                            if (owner != id && !(owner == -1 && id != 0)) {
+                            if (owner != id && owner != -1) {
                                 throw new WorldStorageException("Key from " + folder + " belongs to dimension " + owner);
                             }
                             if (owner == -1 && !startsWith(entry.getKey(), ACTOR)) {
