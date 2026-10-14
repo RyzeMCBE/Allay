@@ -117,9 +117,19 @@ public final class AllayWorldPool implements WorldPool {
     public void shutdown() {
         this.worlds.values().forEach(AllayWorld::shutdown);
 
-        // Waiting for all worlds to fully shutdown
-        while (this.worlds.values().stream().anyMatch(world -> world.getState() != WorldState.STOPPED)) {
-            Thread.onSpinWait();
+        // Wait for a finite time; never spin forever if a world tick thread
+        // crashes during shutdown and leaves its LevelDB handle open.
+        for (var world : this.worlds.values()) {
+            try {
+                world.getWorldThread().join(30_000L);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new IllegalStateException("Interrupted while waiting for world shutdown", e);
+            }
+            if (world.getState() != WorldState.STOPPED) {
+                throw new IllegalStateException("World " + world.getName() +
+                        " failed to stop cleanly; settings and LevelDB are left untouched");
+            }
         }
 
         // Preserve configured worlds even if they were unloaded before shutdown.
@@ -231,6 +241,9 @@ public final class AllayWorldPool implements WorldPool {
             return;
         }
 
+        if (Thread.currentThread() == world.getWorldThread()) {
+            throw new IllegalStateException("Cannot block waiting to unload a world from its own tick thread");
+        }
         world.shutdown();
         // Never expose an unloaded name while its LevelDB handles are still
         // open: reloading during async shutdown would race the DB file lock.
