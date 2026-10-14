@@ -117,6 +117,9 @@ class DimensionLayoutMigrationTest {
                 () -> DimensionLayoutMigration.splitToCandidates(shared, outputs));
         assertTrue(failure.getMessage().contains("010000000200000063"));
         assertTrue(failure.getMessage().contains("keyLength=9"));
+        assertFalse(Files.exists(outputs.get(0)));
+        assertFalse(Files.exists(outputs.get(1)));
+        assertFalse(Files.exists(outputs.get(2)));
         try (var source = new Iq80DBFactory().open(shared.resolve("db").toFile(),
                 new Options().createIfMissing(false))) {
             assertArrayEquals(new byte[]{42}, source.get(unknownKey));
