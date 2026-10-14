@@ -34,6 +34,10 @@ public final class DimensionLayoutMigration {
         validatePaths(java.util.List.of(sharedInput), candidates.values());
         try {
             var ownership = collectActorOwners(sharedInput.resolve("db"));
+            // Validate the complete source keyspace before creating *any*
+            // candidate database. Unknown keys should not leave half-created
+            // dimensions behind that block the next safe startup.
+            preflightSharedKeys(sharedInput.resolve("db"), ownership);
             var counts = new HashMap<Integer, Long>();
             var output = new HashMap<Integer, DB>();
             try {
@@ -169,6 +173,15 @@ public final class DimensionLayoutMigration {
             }
         }
         return owners;
+    }
+
+    private static void preflightSharedKeys(Path database, Map<Long, Integer> owners) throws IOException {
+        try (var db = new Iq80DBFactory().open(database.toFile(), new Options().createIfMissing(false));
+             var iterator = db.iterator()) {
+            for (iterator.seekToFirst(); iterator.hasNext();) {
+                classify(iterator.next().getKey(), owners, true);
+            }
+        }
     }
 
     private static int classify(byte[] key, Map<Long, Integer> ownership, boolean isShared) {
