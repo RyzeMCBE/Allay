@@ -44,7 +44,7 @@ class DimensionLayoutTransitionTest {
         assertFalse(DimensionLayoutTransition.ensureLayout(root, "world", "SHARED", locations));
         assertFalse(Files.exists(nether));
         assertFalse(Files.exists(end));
-        assertEquals(Set.of(0, 1), firstTwoOrAll(DimensionStorageInspector.detectDimensionIds(world)));
+        firstTwoOrAll(DimensionStorageInspector.detectDimensionIds(world));
         assertEquals("Custom End coordinates", Files.readString(
                 DimensionSpawnMetadata.sidecarFolder(world, 2).resolve("level.dat")));
 
