@@ -112,14 +112,21 @@ public final class DimensionConversionManifest {
                     if (Files.isSymbolicLink(file)) {
                         throw new WorldStorageException("Symbolic links are forbidden in staged world: " + file);
                     }
-                    if (Files.isDirectory(file)) continue;
-                    if (!Files.isRegularFile(file)) {
-                        throw new WorldStorageException("Unsupported file type in staged world: " + file);
-                    }
-                    if (file.startsWith(dbFolder) || file.equals(worldFolder.resolve(FILE_NAME))) {
+                    if (file.startsWith(dbFolder) || file.equals(worldFolder.resolve(FILE_NAME))
+                            || file.equals(worldFolder)) {
                         continue;
                     }
                     var relative = worldFolder.relativize(file).toString().replace('\\', '/');
+                    if (Files.isDirectory(file)) {
+                        // Include empty directories as well as files so the staged
+                        // layout can be checked against the completion manifest.
+                        md.update((byte) 0x7e);
+                        addFramed(md, relative.getBytes(StandardCharsets.UTF_8));
+                        continue;
+                    }
+                    if (!Files.isRegularFile(file)) {
+                        throw new WorldStorageException("Unsupported file type in staged world: " + file);
+                    }
                     md.update((byte) 0x7f);
                     addFramed(md, relative.getBytes(StandardCharsets.UTF_8));
                     var originalSize = Files.size(file);
