@@ -119,7 +119,9 @@ public class AllayLevelDBWorldStorage implements WorldStorage {
                     if (error != null) {
                         // Never replace an unreadable stored chunk with an empty one:
                         // it could later overwrite its original LevelDB records.
-                        log.error("Failed to read chunk ({}, {}): stored data preserved", chunkX, chunkZ, error);
+                        log.error("Failed to read chunk ({}, {}) in dimension {} from {}: " +
+                                        "stored data preserved", chunkX, chunkZ,
+                                dimensionType.getIdentifier(), path, error);
                     }
                 });
     }
