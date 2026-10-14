@@ -1,6 +1,7 @@
 package org.allaymc.server.world.storage;
 
 import org.allaymc.api.world.storage.WorldStorageException;
+import org.allaymc.server.world.dimension.DimensionId;
 import org.iq80.leveldb.Options;
 import org.iq80.leveldb.impl.Iq80DBFactory;
 
@@ -63,9 +64,18 @@ public final class DimensionLayoutTransition {
         for (int id = 1; id <= 2; id++) {
             var folder = paths.get(id);
             var ids = DimensionStorageInspector.detectDimensionIds(folder);
+            if (ids.equals(Set.of(0)) && expectedMode.equalsIgnoreCase("SHARED") && !worldIds.contains(id)) {
+                // Merge a custom Nether/End authored as Overworld by first
+                // converting it with its own permanent backup. This lets a
+                // user import a custom End directly into SHARED mode.
+                var dim = id == 1 ? DimensionId.NETHER : DimensionId.THE_END;
+                DimensionStorageAutoConverter.ensureNativeLayout(root, name, folder, id,
+                        dim.getDefaultMinHeight(), dim.getDefaultMaxHeight());
+                ids = DimensionStorageInspector.detectDimensionIds(folder);
+            }
             if (!ids.isEmpty() && !ids.equals(Set.of(id))) {
-                // An Overworld-authored custom dimension is handled separately
-                // by the one-time imported-map converter in SEPARATE mode.
+                // In SEPARATE mode the one-time converter runs after layout
+                // preflight. Otherwise, preserve the folder and fail closed.
                 if (!expectedMode.equalsIgnoreCase("SEPARATE") || !ids.equals(Set.of(0))) {
                     throw new WorldStorageException("Ambiguous dimension data in " + folder + ": " + ids);
                 }
