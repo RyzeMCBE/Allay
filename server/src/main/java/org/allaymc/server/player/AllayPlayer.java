@@ -164,6 +164,8 @@ public class AllayPlayer implements Player {
 
     @Getter
     protected volatile boolean changingDimension;
+    // Client's announced destination, used to drop stale async chunk sends.
+    protected volatile DimensionType pendingChunkDimension;
 
     // Container
     protected byte containerIdCounter;
@@ -444,15 +446,36 @@ public class AllayPlayer implements Player {
 
     @Override
     public void viewChunk(Chunk chunk) {
-        sendNetworkChunkPublisherUpdateIfNeeded();
-        sendPacket(createLevelChunkPacket(chunk));
-        // This method will be called in a non-ticking thread if async chunk sending is enabled. Let's
-        // send the entities in this chunk to the player next tick in the main thread: use forEachEntitiesInChunk()
-        // instead of forEachEntitiesInChunkImmediately()
+        // Async sender queues can outlive the old dimension. Reject stale
+        // chunks before encoding and again before enqueuing the packet.
+        if (!acceptsChunkDimension(chunk)) {
+            return;
+        }
+        var encoded = createLevelChunkPacket(chunk);
+        synchronized (chunkPublisherLock) {
+            if (!acceptsChunkDimension(chunk)) {
+                return;
+            }
+            // Serializes chunk emission with ChangeDimensionPacket and
+            // DIMENSION_CHANGE_SUCCESS to preserve wire order.
+            sendNetworkChunkPublisherUpdateIfNeeded();
+            sendPacket(encoded);
+        }
+        // Async chunks are sent after the target entity is registered.
         this.controlledEntity.getDimension().getEntityManager().forEachEntitiesInChunk(chunk.getX(), chunk.getZ(), entity -> entity.spawnTo(this));
         if (fullyJoinChunkThreshold.get() > 0 && fullyJoinChunkThreshold.decrementAndGet() == 0) {
             onFullyJoin();
         }
+    }
+
+    private boolean acceptsChunkDimension(Chunk chunk) {
+        var entity = this.controlledEntity;
+        return entity != null && ChunkDimensionGate.accepts(
+                chunk.getDimensionType(),
+                entity.getDimension().getDimensionType(),
+                changingDimension,
+                pendingChunkDimension
+        );
     }
 
     protected void sendNetworkChunkPublisherUpdateIfNeeded() {
@@ -1251,20 +1274,57 @@ public class AllayPlayer implements Player {
     public void beginDimensionChange(DimensionType targetDimType, double x, double y, double z) {
         synchronized (chunkPublisherLock) {
             lastChunkPublisherUpdate = null;
+            pendingChunkDimension = targetDimType;
+            changingDimension = true;
+            sendPacket(getProtocol().getEncoder().encodeDimensionChange(targetDimType, x, y, z));
+            log.debug("Dimension transition BEGIN player={} target={}", getOriginName(), targetDimType.getIdentifier());
         }
-        this.changingDimension = true;
-        sendPacket(getProtocol().getEncoder().encodeDimensionChange(targetDimType, x, y, z));
     }
 
     @Override
     public void completeDimensionChange() {
-        this.changingDimension = false;
+        synchronized (chunkPublisherLock) {
+            if (!changingDimension) {
+                // No matching transition; a duplicate success would confuse Bedrock.
+                return;
+            }
+            // Bedrock >= 1.19.50: the server sends the success acknowledgement.
+            // Queue it BEFORE clearing the transition flag and allowing target
+            // chunks. The caller registers the destination entity first.
+            sendPacket(getProtocol().getEncoder().encodeDimensionChangeSuccess(
+                    this.controlledEntity.getRuntimeId()
+            ));
+            log.debug("Dimension transition ACK player={} dimension={}",
+                    getOriginName(), this.controlledEntity.getDimension().getDimensionType().getIdentifier());
+            pendingChunkDimension = null;
+            changingDimension = false;
+        }
+    }
 
-        // As of v1.19.50, the dimension ack that is meant to be sent by the client is now sent by the server.
-        // Send it after the player has been added to the target dimension.
-        sendPacket(getProtocol().getEncoder().encodeDimensionChangeSuccess(
-                this.controlledEntity.getRuntimeId()
-        ));
+    /**
+     * Recover from a portal transfer which was announced to the client but
+     * failed before the entity reached the destination.
+     *
+     * <p>Completing the original transition in this case would acknowledge
+     * the WRONG dimension and can strand the client in a loading screen.</p>
+     */
+    public void abortDimensionChange() {
+        synchronized (chunkPublisherLock) {
+            if (!changingDimension) {
+                return;
+            }
+            var loc = this.controlledEntity.getLocation();
+            var actual = this.controlledEntity.getDimension().getDimensionType();
+            lastChunkPublisherUpdate = null;
+            sendPacket(getProtocol().getEncoder().encodeDimensionChange(actual, loc.x(), loc.y(), loc.z()));
+            sendPacket(getProtocol().getEncoder().encodeDimensionChangeSuccess(
+                    this.controlledEntity.getRuntimeId()
+            ));
+            pendingChunkDimension = null;
+            changingDimension = false;
+            log.warn("Dimension transition aborted player={} restored={}",
+                    getOriginName(), actual.getIdentifier());
+        }
     }
 
     /**

@@ -144,6 +144,31 @@ public class AllayDimension implements Dimension {
     }
 
     /**
+     * Add a player after a dimension switch. Complete the destination
+     * handshake after entity registration but BEFORE enabling its chunk
+     * loader. The regular addPlayer path is unchanged for initial logins.
+     *
+     * <p>Prevents target LevelChunkPackets racing ahead of the server's
+     * DIMENSION_CHANGE_SUCCESS acknowledgement.</p>
+     */
+    public void addPlayerForDimensionChange(Player player, Runnable afterPlayerRegistered) {
+        var entity = Preconditions.checkNotNull(player.getControlledEntity());
+        this.players.add(player);
+        this.entityManager.addEntity(entity, () -> {
+            try {
+                afterPlayerRegistered.run();
+                // Dimension-scoped visual data follows the destination ack,
+                // just like its chunks.
+                if (player.getClientState() == ClientState.IN_GAME) {
+                    addPrimitiveShapesTo(player);
+                }
+            } finally {
+                this.chunkManager.addChunkLoader(entity);
+            }
+        });
+    }
+
+    /**
      * Set this method to public because it is used in {@link SetLocalPlayerAsInitializedPacketProcessor}
      */
     public void addPrimitiveShapesTo(WorldViewer viewer) {
