@@ -31,6 +31,7 @@ import org.allaymc.server.world.light.NoLightEngine;
 import org.allaymc.server.world.storage.DimensionWorldStorage;
 import org.allaymc.server.world.storage.DimensionStorageInspector;
 import org.allaymc.server.world.storage.DimensionConversionPromotion;
+import org.allaymc.server.world.storage.DimensionStorageAutoConverter;
 
 import java.nio.file.Path;
 import java.util.Collections;
@@ -232,7 +233,17 @@ public final class AllayWorldPool implements WorldPool {
                 Preconditions.checkArgument(setting.storageType().equalsIgnoreCase("LEVELDB"), "SEPARATE requires LEVELDB storage");
                 Preconditions.checkArgument(!java.nio.file.Files.isSymbolicLink(path), "Symbolic links are not supported for dimension paths: %s", path);
                 DimensionConversionPromotion.recoverIfInterrupted(path);
-                DimensionStorageInspector.requireNativeLayout(path, type.getId());
+                if (type != DimensionTypes.OVERWORLD) {
+                    boolean converted = DimensionStorageAutoConverter.ensureNativeLayout(
+                            root, name, path, type.getId(), type.getMinHeight(), type.getMaxHeight()
+                    );
+                    if (converted) {
+                        log.info("Imported custom dimension {} in world {} with verified backup and recovery journal",
+                                type.getIdentifier(), name);
+                    }
+                } else {
+                    DimensionStorageInspector.requireNativeLayout(path, type.getId());
+                }
             }
         }
         var storage = separate ? null : Preconditions.checkNotNull(storageFactory.apply(this.worldFolder.resolve(name)), "Failed to create storage for %s", name);
