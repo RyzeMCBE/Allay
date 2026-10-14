@@ -267,8 +267,12 @@ public class NetherPortalHelper {
             int bx = x + dx * i;
             int bz = z + dz * i;
             int floorY = y - 1;
-            dimension.setBlockState(bx + px, floorY, bz + pz, netherrack, 0, true, false);
-            dimension.setBlockState(bx - px, floorY, bz - pz, netherrack, 0, true, false);
+            if (dimension.getBlockState(bx + px, floorY, bz + pz).getBlockType() == BlockTypes.AIR) {
+                dimension.setBlockState(bx + px, floorY, bz + pz, netherrack, 0, true, false);
+            }
+            if (dimension.getBlockState(bx - px, floorY, bz - pz).getBlockType() == BlockTypes.AIR) {
+                dimension.setBlockState(bx - px, floorY, bz - pz, netherrack, 0, true, false);
+            }
         }
     }
 
@@ -339,6 +343,11 @@ public class NetherPortalHelper {
 
         // No portal found — create one
         int safeY = findSafeY(targetDim, flooredX, targetY, flooredZ);
+        if (safeY < 0) {
+            // The destination contains no appropriate free area for a portal.
+            // Do not carve into custom terrain or suffocate the arriving entity.
+            return failOnDimensionThread(entity);
+        }
         var createPos = new Vector3i(flooredX, safeY, flooredZ);
 
         // Compute portal interior positions and fire event before mutating the world
@@ -410,8 +419,8 @@ public class NetherPortalHelper {
             }
         }
 
-        // Fallback: just use the original Y
-        return Math.clamp(y, minY, maxY);
+        // No safe spot was found. An arbitrary fallback would overwrite terrain.
+        return -1;
     }
 
     private static boolean isSuitableForPortal(Dimension dimension, int x, int y, int z) {
@@ -419,16 +428,14 @@ public class NetherPortalHelper {
         for (int dx = -1; dx <= 2; dx++) {
             for (int dy = -1; dy <= 3; dy++) {
                 var type = dimension.getBlockState(x + dx, y + dy, z).getBlockType();
-                if (dy == -1) {
-                    // Bottom row: needs solid ground or we can place obsidian
+                if (dy == -1 || dx == -1 || dx == 2 || dy == 3) {
+                    // Only replace natural Nether terrain or air/old obsidian
+                    // with the new frame, never an arbitrary custom structure.
+                    if (type != BlockTypes.AIR && type != BlockTypes.OBSIDIAN &&
+                            type != BlockTypes.NETHERRACK) return false;
                     continue;
                 }
-                if (dx == -1 || dx == 2 || dy == 3) {
-                    // Frame edges: we'll replace these anyway
-                    continue;
-                }
-                // Interior should be air
-                if (type != BlockTypes.AIR) {
+                if (type != BlockTypes.AIR && type != BlockTypes.FIRE && type != BlockTypes.PORTAL) {
                     return false;
                 }
             }
