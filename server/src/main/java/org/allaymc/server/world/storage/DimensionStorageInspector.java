@@ -51,11 +51,10 @@ public final class DimensionStorageInspector {
                 if (dimensionId != null) {
                     seen.add(dimensionId);
                 }
-                // Mixed dimensions are unsafe in a separate folder. In particular,
-                // source Overworld chunks cannot be read as target End chunks.
-                if (seen.size() > 1) {
-                    break;
-                }
+                // Scan the complete database. The Overworld's shorter keys can
+                // sort AFTER Nether/End keys with the same X/Z prefix, so stopping
+                // at two IDs could wrongly conclude that a shared world has no
+                // Overworld data and silently omit that dimension during a split.
             }
         } catch (IOException e) {
             throw new WorldStorageException(e);
