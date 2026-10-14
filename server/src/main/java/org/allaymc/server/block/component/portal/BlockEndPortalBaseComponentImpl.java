@@ -12,11 +12,11 @@ import org.allaymc.api.entity.interfaces.EntityPlayer;
 import org.allaymc.api.eventbus.event.entity.EntityPortalEnterEvent;
 import org.allaymc.api.eventbus.event.entity.EntityTeleportEvent;
 import org.allaymc.api.item.ItemStack;
-import org.allaymc.api.math.location.Location3d;
 import org.allaymc.api.server.Server;
 import org.allaymc.api.world.Dimension;
 import org.allaymc.api.world.dimension.DimensionTypes;
 import org.allaymc.server.block.component.BlockBaseComponentImpl;
+import org.allaymc.server.block.EndArrivalHelper;
 
 import java.util.Set;
 
@@ -31,11 +31,6 @@ import static org.allaymc.api.block.property.type.BlockPropertyTypes.END_PORTAL_
  * @author daoge_cmd
  */
 public class BlockEndPortalBaseComponentImpl extends BlockBaseComponentImpl {
-
-    private static final int END_SPAWN_X = 100;
-    private static final int END_SPAWN_Y = 49;
-    private static final int END_SPAWN_Z = 0;
-    private static final int END_PLATFORM_SIZE = 5;
 
     public BlockEndPortalBaseComponentImpl(BlockType<? extends BlockBehavior> blockType) {
         super(blockType);
@@ -73,46 +68,53 @@ public class BlockEndPortalBaseComponentImpl extends BlockBaseComponentImpl {
         var currentDimType = entity.getDimension().getDimensionType();
 
         if (currentDimType != DimensionTypes.THE_END) {
-            // Teleport to The End — run in virtual thread to allow chunk loading
             var theEnd = world.getTheEnd();
             if (theEnd == null) {
                 entity.setPortalCooldown(0);
                 return;
             }
+            var preferred = EndArrivalHelper.preferredSpawn(world, theEnd);
 
-            // Show the dimension switching loading screen immediately for players
             if (entity instanceof EntityPlayer player && player.isActualPlayer()) {
-                player.getController().beginDimensionChange(theEnd.getDimensionType(), END_SPAWN_X + 0.5, END_SPAWN_Y + 1, END_SPAWN_Z + 0.5);
+                player.getController().beginDimensionChange(theEnd.getDimensionType(),
+                        preferred.x() + 0.5, preferred.y(), preferred.z() + 0.5);
             }
 
+            // Chunk loading can block; keep it off the server tick thread.
             Server.getInstance().getVirtualThreadPool().submit(() -> {
-                // Load chunks covering the 5×5 platform area before placing blocks
-                int startX = END_SPAWN_X - END_PLATFORM_SIZE / 2;
-                int startZ = END_SPAWN_Z - END_PLATFORM_SIZE / 2;
-                int endX = startX + END_PLATFORM_SIZE - 1;
-                int endZ = startZ + END_PLATFORM_SIZE - 1;
-                int minCX = startX >> 4, maxCX = endX >> 4;
-                int minCZ = startZ >> 4, maxCZ = endZ >> 4;
-                for (int cx = minCX; cx <= maxCX; cx++) {
-                    for (int cz = minCZ; cz <= maxCZ; cz++) {
-                        theEnd.getChunkManager().getOrLoadChunk(cx, cz).join();
+                try {
+                    int radius = EndArrivalHelper.searchRadius() + 2;
+                    for (int cx = (preferred.x() - radius) >> 4;
+                         cx <= (preferred.x() + radius) >> 4; cx++) {
+                        for (int cz = (preferred.z() - radius) >> 4;
+                             cz <= (preferred.z() + radius) >> 4; cz++) {
+                            theEnd.getChunkManager().getOrLoadChunk(cx, cz).join();
+                        }
                     }
-                }
 
-                var target = new Location3d(END_SPAWN_X + 0.5, END_SPAWN_Y + 1, END_SPAWN_Z + 0.5, theEnd);
-                // Schedule platform creation on the End dimension thread (BlockPlaceEvent contract),
-                // then teleport on the entity's current dimension thread (EntityTeleportEvent contract)
-                theEnd.getScheduler().runLater(entity, () -> {
-                    createEndPlatform(theEnd);
-                    entity.getScheduler().runLater(entity, () -> {
-                        if (!entity.teleport(target, EntityTeleportEvent.Reason.END_PORTAL)) {
-                            entity.setPortalCooldown(0);
-                            if (entity instanceof EntityPlayer player && player.isActualPlayer()) {
-                                player.getController().completeDimensionChange();
+                    // Position checks and block changes occur on the End scheduler.
+                    theEnd.getScheduler().runLater(entity, () -> {
+                        var arrival = EndArrivalHelper.findOrCreateArrival(theEnd, preferred);
+                        entity.getScheduler().runLater(entity, () -> {
+                            if (arrival.isEmpty() ||
+                                    !entity.teleport(arrival.orElseThrow(), EntityTeleportEvent.Reason.END_PORTAL)) {
+                                entity.setPortalCooldown(0);
+                                if (entity instanceof EntityPlayer player && player.isActualPlayer()) {
+                                    player.getController().completeDimensionChange();
+                                }
                             }
+                        });
+                    });
+                } catch (RuntimeException e) {
+                    org.slf4j.LoggerFactory.getLogger(BlockEndPortalBaseComponentImpl.class)
+                            .error("Cannot load custom End spawn chunks", e);
+                    entity.getScheduler().runLater(entity, () -> {
+                        entity.setPortalCooldown(0);
+                        if (entity instanceof EntityPlayer player && player.isActualPlayer()) {
+                            player.getController().completeDimensionChange();
                         }
                     });
-                });
+                }
             });
         } else {
             // Teleport back to overworld spawn
@@ -124,24 +126,13 @@ public class BlockEndPortalBaseComponentImpl extends BlockBaseComponentImpl {
     }
 
     /**
-     * Create a 5×5 obsidian platform at the end spawn point and clear 3 blocks above it.
+     * Compatibility entrypoint used by existing callers. Unlike the former
+     * implementation, this never clears custom builds or overwrites terrain.
+     * Call it only after the surrounding End chunks have been loaded.
      */
     public static void createEndPlatform(Dimension theEnd) {
-        var obsidian = BlockTypes.OBSIDIAN.getDefaultState();
-        var air = BlockTypes.AIR.getDefaultState();
-        int startX = END_SPAWN_X - END_PLATFORM_SIZE / 2;
-        int startZ = END_SPAWN_Z - END_PLATFORM_SIZE / 2;
-
-        for (int x = startX; x < startX + END_PLATFORM_SIZE; x++) {
-            for (int z = startZ; z < startZ + END_PLATFORM_SIZE; z++) {
-                // Place obsidian platform
-                theEnd.setBlockState(x, END_SPAWN_Y, z, obsidian);
-                // Clear 3 blocks above
-                for (int y = END_SPAWN_Y + 1; y <= END_SPAWN_Y + 3; y++) {
-                    theEnd.setBlockState(x, y, z, air);
-                }
-            }
-        }
+        EndArrivalHelper.findOrCreateArrival(theEnd,
+                EndArrivalHelper.preferredSpawn(theEnd.getWorld(), theEnd));
     }
 
     @Override
