@@ -70,6 +70,10 @@ public final class AllayWorldPool implements WorldPool {
     }
 
     public void loadWorlds() {
+        // Every configured world reserves its three dimension paths, including
+        // disabled dimensions whose data must be preserved during mode changes.
+        // Never let two logical worlds open or convert the same LevelDB folder.
+        validateConfiguredWorldPaths();
         this.worldConfig.worlds().forEach((name, setting) -> {
             try {
                 loadWorld(name, setting);
@@ -77,6 +81,37 @@ public final class AllayWorldPool implements WorldPool {
                 log.error("Error when loading world {}, skipped.", name, e);
             }
         });
+    }
+
+    private void validateConfiguredWorldPaths() {
+        var root = worldFolder.toAbsolutePath().normalize();
+        var reservations = new LinkedHashMap<Path, String>();
+        for (var worldEntry : worldConfig.worlds().entrySet()) {
+            var worldName = worldEntry.getKey();
+            if (!worldName.matches("[A-Za-z0-9_.-]+") ||
+                    worldName.equals(".") || worldName.equals("..")) {
+                throw new IllegalStateException("Unsafe logical world name: " + worldName);
+            }
+            var dimensions = worldEntry.getValue().normalizedDimensions();
+            for (var id : DimensionId.values()) {
+                var config = dimensions.get(id.getIdentifier());
+                var configuredPath = config == null ? null : config.path();
+                var defaultFolder = id == DimensionId.OVERWORLD
+                        ? worldName : worldName + (id == DimensionId.NETHER ? "-nether" : "-end");
+                var path = root.resolve(configuredPath == null || configuredPath.isBlank()
+                        ? defaultFolder : configuredPath).normalize();
+                if (!path.startsWith(root) || path.equals(root)) {
+                    throw new IllegalStateException("Unsafe dimension path: " + path);
+                }
+                for (var previous : reservations.entrySet()) {
+                    if (path.startsWith(previous.getKey()) || previous.getKey().startsWith(path)) {
+                        throw new IllegalStateException("World storage overlap: " + worldName + "/" +
+                                id + " at " + path + " conflicts with " + previous.getValue());
+                    }
+                }
+                reservations.put(path, worldName + "/" + id);
+            }
+        }
     }
 
     public void shutdown() {
