@@ -214,6 +214,7 @@ public final class AllayWorldPool implements WorldPool {
         // Preflight every configured path *before* opening any DB. Opening LevelDB
         // with createIfMissing=true could otherwise silently generate empty chunks.
         var perDimension = new LinkedHashMap<DimensionType, org.allaymc.api.world.storage.WorldStorage>();
+        var importedSpawnPoints = new LinkedHashMap<DimensionType, org.joml.Vector3ic>();
         var uniquePaths = new java.util.HashSet<Path>();
         var configuredDimensions = setting.normalizedDimensions();
         var root = this.worldFolder.toAbsolutePath().normalize();
@@ -244,10 +245,19 @@ public final class AllayWorldPool implements WorldPool {
                     var folderName = configuredPath == null || configuredPath.isBlank()
                             ? (type == DimensionTypes.OVERWORLD ? name : type == DimensionTypes.NETHER ? "nether" : "end")
                             : configuredPath;
-                    perDimension.put(type, storageFactory.apply(root.resolve(folderName).normalize()));
+                    var dimensionPath = root.resolve(folderName).normalize();
+                    var backend = Preconditions.checkNotNull(storageFactory.apply(dimensionPath), "Missing LevelDB backend for %s", type);
+                    perDimension.put(type, backend);
+                    // Some custom End/Nether maps contain their own level.dat. Read
+                    // their saved spawn before world initialization, and never confuse
+                    // its coordinates with the Overworld's global level.dat.
+                    if (type != DimensionTypes.OVERWORLD &&
+                            java.nio.file.Files.isRegularFile(dimensionPath.resolve("level.dat"))) {
+                        importedSpawnPoints.put(type, new org.joml.Vector3i(backend.readWorldData().getSpawnPoint()));
+                    }
                 }
                 var primary = Preconditions.checkNotNull(perDimension.get(DimensionTypes.OVERWORLD), "Overworld must be enabled");
-                storage = new DimensionWorldStorage(primary, perDimension);
+                storage = new DimensionWorldStorage(primary, perDimension, importedSpawnPoints);
             }
         } catch (RuntimeException e) {
             perDimension.values().forEach(open -> {
