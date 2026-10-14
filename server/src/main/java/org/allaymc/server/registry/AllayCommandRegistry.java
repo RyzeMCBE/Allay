@@ -139,7 +139,12 @@ public class AllayCommandRegistry extends CommandRegistry {
 
         try {
             var result = command.execute(sender, spilt.toArray(new String[0]));
-            var sendCommandFeedback = sender.getCommandExecuteLocation().dimension().getWorld().getWorldData().<Boolean>getGameRuleValue(GameRule.SEND_COMMAND_FEEDBACK);
+            // Console commands (notably /stop) must still work when a failed
+            // dimension load leaves no default world. In that state there is
+            // no world gamerule to consult, so allow command feedback.
+            var sendCommandFeedback = Server.getInstance().getWorldPool().getDefaultWorld() == null ||
+                    sender.getCommandExecuteLocation().dimension().getWorld().getWorldData()
+                            .<Boolean>getGameRuleValue(GameRule.SEND_COMMAND_FEEDBACK);
             if (result.context() == null || !sendCommandFeedback) {
                 return result;
             }
