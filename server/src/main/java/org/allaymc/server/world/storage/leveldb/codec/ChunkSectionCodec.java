@@ -119,7 +119,19 @@ public final class ChunkSectionCodec {
                 rawNbt = (NbtMap) nbtInputStream.readTag();
             }
         } catch (IOException e) {
-            throw new PaletteException(e);
+            // The hash-only scanner is an optimization, not a format
+            // requirement. For older Bedrock/PocketMine blockstate encodings,
+            // retry with the full NBT parser from the same starting offset.
+            // If that also fails the enclosing chunk loader will retain the
+            // original LevelDB record instead of silently regenerating it.
+            buffer.resetReaderIndex();
+            try {
+                rawNbt = readBlockStateNbt(buffer);
+                blockStateHash = PaletteUtils.HASH_NOT_LATEST;
+            } catch (PaletteException fallbackError) {
+                fallbackError.addSuppressed(e);
+                throw fallbackError;
+            }
         }
 
         if (rawNbt == null) {
