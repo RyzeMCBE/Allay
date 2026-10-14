@@ -247,12 +247,24 @@ public class EntityBaseComponentImpl implements EntityBaseComponent {
         // Run teleport in a virtual thread to avoid blocking the dimension tick thread
         // while loading chunks in the target dimension
         Server.getInstance().getVirtualThreadPool().submit(() -> {
-            NetherPortalHelper.teleport(thisEntity).thenAccept(success -> {
-                if (!success) {
-                    // Teleport failed, reset cooldown so entity can try again
-                    portalCooldown = 0;
-                }
-            });
+            try {
+                NetherPortalHelper.teleport(thisEntity).whenComplete((success, error) -> {
+                    if (error != null) {
+                        log.error("Nether portal transfer failed while loading destination chunks; " +
+                                "keeping entity in its original dimension", error);
+                    }
+                    if (error != null || !Boolean.TRUE.equals(success)) {
+                        // Callback can run on an IO thread when chunk reads fail.
+                        // Keep entity state mutations on its owning scheduler.
+                        thisEntity.getScheduler().runLater(thisEntity, () -> portalCooldown = 0);
+                    }
+                });
+            } catch (RuntimeException error) {
+                // The initial destination chunk loads use join() and may throw
+                // before teleport() can return its CompletableFuture.
+                log.error("Nether portal cannot load destination; teleport aborted", error);
+                thisEntity.getScheduler().runLater(thisEntity, () -> portalCooldown = 0);
+            }
         });
     }
 
