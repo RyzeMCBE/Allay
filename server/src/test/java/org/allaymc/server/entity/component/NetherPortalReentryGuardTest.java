@@ -44,4 +44,23 @@ class NetherPortalReentryGuardTest {
         guard.beginTransfer();
         assertTrue(guard.blocksEntry(true));
     }
+    @Test
+    void asyncSuccessfulCompletionAllowsReturnAfterLeavingDestinationPortal() throws Exception {
+        var guard = new NetherPortalReentryGuard();
+        guard.beginTransfer();
+
+        // Cross-dimension entity removal temporarily makes its TaskCreator
+        // invalid. The successful completion must therefore not depend on an
+        // entity-owned scheduled task being executed at a later tick.
+        var completion = Thread.ofVirtual().start(() -> guard.finishTransfer(true));
+        completion.join();
+
+        for (int tick = 0; tick < 600; tick++) {
+            assertTrue(guard.blocksEntry(true), "Cannot bounce back from the destination portal");
+        }
+        assertTrue(guard.blocksEntry(false));
+        assertFalse(guard.blocksEntry(false), "Moving out must re-arm the portal");
+        assertFalse(guard.blocksEntry(true), "A later deliberate re-entry must work");
+    }
+
 }
