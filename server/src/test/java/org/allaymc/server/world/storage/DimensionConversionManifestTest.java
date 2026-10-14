@@ -20,7 +20,16 @@ class DimensionConversionManifestTest {
         try (var db = new Iq80DBFactory().open(candidate.resolve("db").toFile(), new Options().createIfMissing(true))) {
             db.put(key, new byte[]{42});
         }
+        Files.writeString(candidate.resolve("level.dat"), "Original custom spawn metadata");
         DimensionConversionManifest.seal(candidate, 2, 1);
+        DimensionConversionManifest.verify(candidate, 2);
+        Files.writeString(candidate.resolve("level.dat"), "Modified custom spawn metadata");
+        assertThrows(WorldStorageException.class, () -> DimensionConversionManifest.verify(candidate, 2));
+        Files.writeString(candidate.resolve("level.dat"), "Original custom spawn metadata");
+        DimensionConversionManifest.verify(candidate, 2);
+        Files.writeString(candidate.resolve("additional-file.txt"), "Unexpected file");
+        assertThrows(WorldStorageException.class, () -> DimensionConversionManifest.verify(candidate, 2));
+        Files.delete(candidate.resolve("additional-file.txt"));
         DimensionConversionManifest.verify(candidate, 2);
         assertThrows(WorldStorageException.class, () -> DimensionConversionManifest.verify(candidate, 1));
         try (var db = new Iq80DBFactory().open(candidate.resolve("db").toFile(), new Options().createIfMissing(false))) {
