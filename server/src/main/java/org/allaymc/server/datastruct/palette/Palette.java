@@ -194,6 +194,10 @@ public final class Palette<V> {
                             "the original LevelDB data is preserved until normal chunk save");
                 }
             }
+            if (!byteBuf.isReadable() || byteBuf.getUnsignedByte(byteBuf.readerIndex()) != 10) {
+                throw new PaletteException("Block palette is missing its NBT Compound after " +
+                        "the singleton header (or has an unsupported legacy length prefix)");
+            }
             this.palette.add(deserializer.deserialize(byteBuf));
             return;
         }
