@@ -75,6 +75,11 @@ public final class ChunkHolder {
     @Getter
     private Chunk chunk;
     /**
+     * A persisted chunk that could not be decoded is not a new chunk.
+     * Never generate over or save a placeholder to its existing LevelDB keys.
+     */
+    private volatile boolean readFailed;
+    /**
      * Whether the chunk is currently locked.
      */
     private boolean locked;
@@ -105,12 +110,18 @@ public final class ChunkHolder {
         this.lock();
         chunkReadFuture.whenComplete((c, t) -> {
             if (t != null) {
-                log.error("Error while loading chunk ({},{}) !", x, z, t);
+                log.error("Error while loading chunk ({},{}) in dimension {}; " +
+                        "preserved stored chunk and aborted its load", x, z,
+                        this.dimension.getDimensionType().getIdentifier(), t);
+                this.readFailed = true;
+                // Only a transient placeholder so the holder can finish its
+                // lifecycle. It must never enter the generator or persistence.
                 this.chunk = AllayUnsafeChunk.builder().voidChunk(x, z, this.dimension.getDimensionType()).toSafeChunk();
+                this.loadFuture.completeExceptionally(t);
             } else {
                 this.chunk = c;
             }
-            if (this.chunk.getState() == ChunkState.FULL) {
+            if (!this.readFailed && this.chunk.getState() == ChunkState.FULL) {
                 onChunkLoad();
             }
             this.unlock();
@@ -139,7 +150,8 @@ public final class ChunkHolder {
     }
 
     private boolean shouldUpdate() {
-        return this.targetState != null && getCurrentState().isBefore(this.targetState);
+        return !this.readFailed && this.targetState != null &&
+                getCurrentState().isBefore(this.targetState);
     }
 
     private boolean isUnloading() {
@@ -174,11 +186,19 @@ public final class ChunkHolder {
             } catch (Throwable t) {
                 log.error("Error while trying to unload chunk ({}, {}) !", this.x, this.z, t);
             } finally {
-                worldStorage.writeChunk(this.chunk).thenRun(() -> {
+                if (this.readFailed) {
+                    // A disk read failed. Saving even an empty placeholder
+                    // would replace the original stored terrain.
                     this.unloadFuture.complete(null);
                     this.chunkManager.removeChunkHolder(this.x, this.z);
                     unlock();
-                });
+                } else {
+                    worldStorage.writeChunk(this.chunk).thenRun(() -> {
+                        this.unloadFuture.complete(null);
+                        this.chunkManager.removeChunkHolder(this.x, this.z);
+                        unlock();
+                    });
+                }
             }
         }
 
