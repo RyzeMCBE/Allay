@@ -144,7 +144,7 @@ class DimensionLayoutTransitionTest {
 
 
     @Test
-    void explicitlyPrefersCustomNetherAndEndOverEmbeddedSharedEnd() throws Exception {
+    void separateUsesExistingCustomWorldsAndNeverSplitsLegacyWorld() throws Exception {
         var shared = root.resolve("custom-world");
         var nether = root.resolve("custom-nether");
         var end = root.resolve("custom-end");
@@ -170,44 +170,37 @@ class DimensionLayoutTransitionTest {
         }
         var paths = Map.of(0, shared, 1, nether, 2, end);
 
-        // The default remains fail-closed even when both imported maps exist.
-        assertThrows(org.allaymc.api.world.storage.WorldStorageException.class,
-                () -> DimensionLayoutTransition.ensureLayout(root, "custom-world", "SEPARATE", paths));
-
-        assertTrue(DimensionLayoutTransition.ensureLayout(
+        // SEPARATE reads the supplied dimension folders directly. Embedded
+        // End records in the Overworld must neither trigger a split nor be
+        // substituted for the imported custom End.
+        assertFalse(DimensionLayoutTransition.ensureLayout(
+                root, "custom-world", "SEPARATE", paths));
+        assertFalse(DimensionLayoutTransition.ensureLayout(
                 root, "custom-world", "SEPARATE", paths, "PREFER_SEPARATE"));
-        assertEquals(Set.of(0), DimensionStorageInspector.detectDimensionIds(shared));
+        assertEquals(Set.of(0, 2), DimensionStorageInspector.detectDimensionIds(shared));
         assertEquals(Set.of(1), DimensionStorageInspector.detectDimensionIds(nether));
         assertEquals(Set.of(0), DimensionStorageInspector.detectDimensionIds(end));
-        try (var db = new Iq80DBFactory().open(nether.resolve("db").toFile(),
-                new Options().createIfMissing(false));
-             var other = new Iq80DBFactory().open(end.resolve("db").toFile(),
+        assertFalse(Files.exists(root.resolve(".dimension-layout-backups")));
+        try (var db = new Iq80DBFactory().open(shared.resolve("db").toFile(),
                 new Options().createIfMissing(false))) {
-            assertArrayEquals(new byte[]{3}, db.get(netherKey));
-            assertArrayEquals(new byte[]{4}, other.get(importedEndKey));
+            assertArrayEquals(new byte[]{1}, db.get(overworldKey));
+            assertArrayEquals(new byte[]{2}, db.get(sharedEndKey));
         }
 
-        var backupParent = root.resolve(".dimension-layout-backups/custom-world");
-        try (var backupDirs = Files.list(backupParent)) {
-            var backup = backupDirs.findFirst().orElseThrow();
-            assertEquals(Set.of(0, 2), DimensionStorageInspector.detectDimensionIds(
-                    backup.resolve("shared-original")));
-            assertEquals(Set.of(2), DimensionStorageInspector.detectDimensionIds(
-                    backup.resolve("embedded-end-not-active")));
-        }
-
-        // The custom End is converted into its native dimension after
-        // shared-versus-separate reconciliation. Its data takes precedence.
+        // The existing custom End is converted *in its own folder* through
+        // the backed-up one-time importer; no shared End keys are moved.
         assertTrue(DimensionStorageAutoConverter.ensureNativeLayout(
                 root, "custom-world", end, 2, 0, 255));
         assertEquals(Set.of(2), DimensionStorageInspector.detectDimensionIds(end));
         assertFalse(DimensionLayoutTransition.ensureLayout(root, "custom-world", "SEPARATE", paths));
+        assertEquals(Set.of(0, 2), DimensionStorageInspector.detectDimensionIds(shared));
         try (var db = new Iq80DBFactory().open(end.resolve("db").toFile(),
                 new Options().createIfMissing(false))) {
             assertArrayEquals(new byte[]{4}, db.get(new byte[]{
                     1,0,0,0,0,0,0,0,2,0,0,0,44
             }));
         }
+        assertTrue(Files.isDirectory(root.resolve(".dimension-backups/custom-world")));
     }
 
     @Test
