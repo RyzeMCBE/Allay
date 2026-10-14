@@ -23,6 +23,7 @@ import org.allaymc.api.math.location.Location3ic;
 import org.allaymc.api.message.TrContainer;
 import org.allaymc.api.player.GameMode;
 import org.allaymc.api.player.Player;
+import org.allaymc.api.player.ClientState;
 import org.allaymc.api.player.PlayerAbility;
 import org.allaymc.api.player.Skin;
 import org.allaymc.api.primitiveshape.PrimitiveShape;
@@ -603,6 +604,23 @@ public class EntityPlayerBaseComponentImpl extends EntityBaseComponentImpl imple
     }
 
     @Override
+    protected void tickPortal() {
+        // The entity can tick while the client is only SPAWNED. Starting a
+        // ChangeDimensionPacket then overlaps the initial login screen and
+        // SetLocalPlayerAsInitializedPacket. Never start a portal transition
+        // until the real client has finished joining.
+        if (!PortalEntryGate.mayTickPortal(
+                isActualPlayer(),
+                controller == null ? null : controller.getClientState(),
+                controller != null && controller.isChangingDimension())) {
+            portalTicks = 0;
+            inNetherPortal = false;
+            return;
+        }
+        super.tickPortal();
+    }
+
+    @Override
     protected void performNetherPortalTeleport() {
         if (!isActualPlayer()) {
             super.performNetherPortalTeleport();
@@ -682,13 +700,19 @@ public class EntityPlayerBaseComponentImpl extends EntityBaseComponentImpl imple
                     // ChangeDimensionPacket was not sent early — send it now
                     this.controller.beginDimensionChange(targetDim.getDimensionType(), target.x(), target.y(), target.z());
                 }
-                targetDim.addPlayer(this.controller, () -> {
+                Runnable afterSpawn = () -> {
                     if (dimensionChanged) {
-                        // As of v1.19.50, the dimension ack is sent by the server after dimension transfer completes
+                        // After the player is registered in the destination, but
+                        // before the target dimension starts publishing chunks.
                         this.controller.completeDimensionChange();
                     }
                     this.controller.viewEntityLocation(thisPlayer, location, true);
-                });
+                };
+                if (dimensionChanged) {
+                    targetDim.addPlayerForDimensionChange(this.controller, afterSpawn);
+                } else {
+                    targetDim.addPlayer(this.controller, afterSpawn);
+                }
             });
         } else {
             super.teleportOverDimension(target);
