@@ -21,11 +21,16 @@ class DimensionConversionManifestTest {
             db.put(key, new byte[]{42});
         }
         Files.writeString(candidate.resolve("level.dat"), "Original custom spawn metadata");
+        Files.createDirectories(candidate.resolve("unused-but-preserved"));
         DimensionConversionManifest.seal(candidate, 2, 1);
         DimensionConversionManifest.verify(candidate, 2);
         Files.writeString(candidate.resolve("level.dat"), "Modified custom spawn metadata");
         assertThrows(WorldStorageException.class, () -> DimensionConversionManifest.verify(candidate, 2));
         Files.writeString(candidate.resolve("level.dat"), "Original custom spawn metadata");
+        DimensionConversionManifest.verify(candidate, 2);
+        Files.delete(candidate.resolve("unused-but-preserved"));
+        assertThrows(WorldStorageException.class, () -> DimensionConversionManifest.verify(candidate, 2));
+        Files.createDirectories(candidate.resolve("unused-but-preserved"));
         DimensionConversionManifest.verify(candidate, 2);
         Files.writeString(candidate.resolve("additional-file.txt"), "Unexpected file");
         assertThrows(WorldStorageException.class, () -> DimensionConversionManifest.verify(candidate, 2));
