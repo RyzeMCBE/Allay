@@ -20,7 +20,11 @@ public final class DimensionStorageInspector {
 
     public static void requireNativeLayout(Path dimensionFolder, int expectedDimensionId) {
         var seen = detectDimensionIds(dimensionFolder);
-        return java.util.Set.copyOf(seen);
+        if (!seen.isEmpty() && (seen.size() != 1 || !seen.contains(expectedDimensionId))) {
+            throw new WorldStorageException("Dimension data in " + dimensionFolder +
+                    " uses storage IDs " + seen + ", but this dimension requires " +
+                    expectedDimensionId + ". A verified one-time conversion is required.");
+        }
     }
 
     /**
@@ -57,13 +61,7 @@ public final class DimensionStorageInspector {
             throw new WorldStorageException(e);
         }
 
-        if (!seen.isEmpty() && (seen.size() != 1 || !seen.contains(expectedDimensionId))) {
-            throw new WorldStorageException(
-                    "Dimension data in " + dimensionFolder + " uses storage IDs " + seen +
-                    ", but this dimension requires " + expectedDimensionId +
-                    ". A verified backup and one-time conversion are required before loading."
-            );
-        }
+        return java.util.Set.copyOf(seen);
     }
 
     /**
