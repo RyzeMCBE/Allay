@@ -665,7 +665,7 @@ public class EntityPlayerBaseComponentImpl extends EntityBaseComponentImpl imple
                             finishNetherPortalTransfer(transferred);
                             if (!transferred) {
                                 // Clear the early change signal if no transfer occurred.
-                                this.controller.completeDimensionChange();
+                                ((AllayPlayer) this.controller).abortDimensionChange();
                             }
                         })
                 );
@@ -673,7 +673,7 @@ public class EntityPlayerBaseComponentImpl extends EntityBaseComponentImpl imple
                 log.error("Player Nether portal destination could not be loaded", error);
                 thisEntity.getScheduler().runLater(thisEntity, () -> {
                     finishNetherPortalTransfer(false);
-                    this.controller.completeDimensionChange();
+                    ((AllayPlayer) this.controller).abortDimensionChange();
                 });
             }
         });
