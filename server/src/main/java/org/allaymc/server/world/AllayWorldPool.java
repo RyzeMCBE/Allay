@@ -138,29 +138,45 @@ public final class AllayWorldPool implements WorldPool {
         try {
             world = new AllayWorld(name, worldSetting.storage(), useVirtualThread);
         } catch (Throwable t) {
+            try {
+                worldSetting.storage().shutdown();
+            } catch (RuntimeException cleanup) {
+                t.addSuppressed(cleanup);
+            }
             log.error("Error while initializing world {}", name, t);
             return;
         }
 
-        var overworldSetting = Preconditions.checkNotNull(
-                validatedDimensionSettings.get(DimensionTypes.OVERWORLD.getIdentifier()),
-                "World must have the overworld dimension"
-        );
-        loadDimension(world, overworldSetting, useVirtualThread);
-        for (var setting : validatedDimensionSettings.values()) {
-            if (setting.dimensionType() == DimensionTypes.OVERWORLD) {
-                continue;
+        try {
+            var overworldSetting = Preconditions.checkNotNull(
+                    validatedDimensionSettings.get(DimensionTypes.OVERWORLD.getIdentifier()),
+                    "World must have the overworld dimension"
+            );
+            loadDimension(world, overworldSetting, useVirtualThread);
+            for (var setting : validatedDimensionSettings.values()) {
+                if (setting.dimensionType() != DimensionTypes.OVERWORLD) {
+                    loadDimension(world, setting, useVirtualThread);
+                }
             }
-            loadDimension(world, setting, useVirtualThread);
-        }
 
-        var event = new WorldLoadEvent(world);
-        if (!event.call()) {
-            return;
+            if (!new WorldLoadEvent(world).call()) {
+                world.abortStartup();
+                log.warn("Loading of world {} was cancelled; storage has been closed", name);
+                return;
+            }
+            this.worlds.put(world.getName(), world);
+            world.startTick();
+        } catch (RuntimeException | Error failure) {
+            if (world.getState() == WorldState.STARTING && !world.getWorldThread().isAlive()) {
+                try {
+                    world.abortStartup();
+                } catch (RuntimeException cleanup) {
+                    failure.addSuppressed(cleanup);
+                }
+            }
+            this.worlds.remove(world.getName(), world);
+            throw failure;
         }
-
-        this.worlds.put(world.getName(), world);
-        world.startTick();
         log.info(I18n.get().tr(TrKeys.ALLAY_WORLD_LOADED, name));
     }
 
@@ -180,7 +196,18 @@ public final class AllayWorldPool implements WorldPool {
         }
 
         world.shutdown();
-        this.worlds.remove(name);
+        // Never expose an unloaded name while its LevelDB handles are still
+        // open: reloading during async shutdown would race the DB file lock.
+        try {
+            world.getWorldThread().join(30_000L);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Interrupted while unloading world " + name, e);
+        }
+        if (world.getState() != WorldState.STOPPED) {
+            throw new IllegalStateException("World " + name + " did not finish shutdown; refusing unsafe reload");
+        }
+        this.worlds.remove(name, world);
     }
 
     @Override
