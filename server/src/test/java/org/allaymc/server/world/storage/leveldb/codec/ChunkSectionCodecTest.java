@@ -217,6 +217,29 @@ class ChunkSectionCodecTest {
         assertEquals(AIR.getDefaultState(), section.getBlockState(1, 1, 1, 1));
     }
 
+    @Test
+    void testVersion8LegacyStateWithoutVersionDoesNotConsumeTheNextPaletteEntry() {
+        // Some imported PocketMine/legacy maps have block-state compounds without a
+        // version tag. The optimized reader must rewind before falling back to NBT.
+        var legacyStone = NbtMap.builder()
+                .putString("name", "minecraft:stone")
+                .putCompound("states", NbtMap.EMPTY)
+                .build();
+        var layer0 = new Palette<>(AIR.getDefaultState().getBlockStateNBT());
+        layer0.set(hashChunkSectionXYZ(1, 2, 3), legacyStone);
+        layer0.set(hashChunkSectionXYZ(4, 5, 6), OAK_WOOD.getDefaultState().getBlockStateNBT());
+
+        var data = LevelDBUtils.withByteBufToArray(buffer -> {
+            buffer.writeByte(8); // Legacy Bedrock subchunk, no section-y byte.
+            buffer.writeByte(1); // One stored block layer.
+            layer0.writeToStorage(buffer, tag -> tag);
+        });
+
+        var section = assertDoesNotThrow(() -> ChunkSectionCodec.deserialize(data, 0, -2, -2));
+        assertNotNull(section);
+        assertEquals(OAK_WOOD.getDefaultState(), section.getBlockState(4, 5, 6, 0));
+    }
+
     private static Palette<NbtMap> readRawLayer0(byte[] data) {
         var buffer = Unpooled.wrappedBuffer(data);
         buffer.skipBytes(3); // bölüm sürümü, katman sayısı, bölüm y
