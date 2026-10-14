@@ -180,10 +180,24 @@ public final class DimensionLayoutTransition {
 
     private static Path stagePath(Path input) {
         var stage = input.resolveSibling(input.getFileName() + ".layout-candidate");
-        if (Files.exists(stage)) {
-            throw new WorldStorageException("Old layout candidate exists; inspect interrupted migration: " + stage);
+        if (!Files.exists(stage, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
+            return stage;
         }
-        return stage;
+        // An earlier failed conversion may have left an incomplete candidate.
+        // Never delete, overwrite or reuse it: it may contain recoverable data.
+        // The layout recovery journal is checked before this method is called.
+        // Prepare the next attempt at a fresh, unique path instead.
+        for (int attempts = 0; attempts < 16; attempts++) {
+            var fresh = input.resolveSibling(input.getFileName() +
+                    ".layout-candidate-" + UUID.randomUUID());
+            if (!Files.exists(fresh, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
+                org.slf4j.LoggerFactory.getLogger(DimensionLayoutTransition.class)
+                        .warn("Preserving previous layout candidate {}. " +
+                                "New conversion will use {} (original data unchanged).", stage, fresh);
+                return fresh;
+            }
+        }
+        throw new WorldStorageException("Cannot allocate a new, unused layout candidate for " + input);
     }
 
     private static Path newBackupRoot(Path root, String name) {
