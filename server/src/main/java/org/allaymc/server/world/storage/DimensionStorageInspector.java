@@ -19,6 +19,15 @@ public final class DimensionStorageInspector {
     private DimensionStorageInspector() {}
 
     public static void requireNativeLayout(Path dimensionFolder, int expectedDimensionId) {
+        var seen = detectDimensionIds(dimensionFolder);
+        return java.util.Set.copyOf(seen);
+    }
+
+    /**
+     * Identify the physical source dimension without creating databases or
+     * choosing a dimension arbitrarily when a folder contains mixed IDs.
+     */
+    public static java.util.Set<Integer> detectDimensionIds(Path dimensionFolder) {
         var database = dimensionFolder.resolve("db");
         if (!Files.isDirectory(database)) {
             // A configured path containing a map's level.dat but no database is
@@ -26,7 +35,7 @@ public final class DimensionStorageInspector {
             if (Files.exists(dimensionFolder.resolve("level.dat")) || Files.exists(database)) {
                 throw new WorldStorageException("World folder has no readable LevelDB: " + dimensionFolder);
             }
-            return;
+            return java.util.Set.of();
         }
 
         var seen = new HashSet<Integer>();
@@ -40,7 +49,7 @@ public final class DimensionStorageInspector {
                 }
                 // Mixed dimensions are unsafe in a separate folder. In particular,
                 // source Overworld chunks cannot be read as target End chunks.
-                if (seen.size() > 1 || (seen.size() == 1 && !seen.contains(expectedDimensionId))) {
+                if (seen.size() > 1) {
                     break;
                 }
             }
