@@ -609,7 +609,6 @@ public class EntityPlayerBaseComponentImpl extends EntityBaseComponentImpl imple
             return;
         }
 
-        // Determine target dimension to show loading screen early
         var world = thisEntity.getWorld();
         var currentDimType = thisEntity.getDimension().getDimensionType();
         Dimension targetDim;
@@ -626,11 +625,11 @@ public class EntityPlayerBaseComponentImpl extends EntityBaseComponentImpl imple
             return;
         }
 
-        portalCooldown = PORTAL_COOLDOWN_TICKS;
-        portalTicks = 0;
+        // The guard outlives the 300-tick cooldown: another transfer is
+        // impossible until the previous one finishes AND the portal is exited.
+        beginNetherPortalTransfer();
 
-        // Send dimension change screen immediately so the client shows the loading UI
-        // while chunks are being loaded asynchronously in the target dimension
+        // Show the loading screen immediately; the target chunks load asynchronously.
         var loc = thisEntity.getLocation();
         var targetDimType = targetDim.getDimensionType();
         double targetX = NetherPortalHelper.scaleCoordinate(loc.x(), currentDimType, targetDimType);
@@ -638,12 +637,27 @@ public class EntityPlayerBaseComponentImpl extends EntityBaseComponentImpl imple
         this.controller.beginDimensionChange(targetDimType, targetX, loc.y(), targetZ);
 
         Server.getInstance().getVirtualThreadPool().submit(() -> {
-            NetherPortalHelper.teleport(thisEntity).thenAccept(success -> {
-                if (!success) {
-                    portalCooldown = 0;
+            try {
+                NetherPortalHelper.teleport(thisEntity).whenComplete((success, error) ->
+                        thisEntity.getScheduler().runLater(thisEntity, () -> {
+                            if (error != null) {
+                                log.error("Player Nether portal transfer failed", error);
+                            }
+                            boolean transferred = error == null && Boolean.TRUE.equals(success);
+                            finishNetherPortalTransfer(transferred);
+                            if (!transferred) {
+                                // Clear the early change signal if no transfer occurred.
+                                this.controller.completeDimensionChange();
+                            }
+                        })
+                );
+            } catch (RuntimeException error) {
+                log.error("Player Nether portal destination could not be loaded", error);
+                thisEntity.getScheduler().runLater(thisEntity, () -> {
+                    finishNetherPortalTransfer(false);
                     this.controller.completeDimensionChange();
-                }
-            });
+                });
+            }
         });
     }
 
