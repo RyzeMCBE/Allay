@@ -143,4 +143,95 @@ class DimensionLayoutTransitionTest {
     }
 
 
+    @Test
+    void explicitlyPrefersCustomNetherAndEndOverEmbeddedSharedEnd() throws Exception {
+        var shared = root.resolve("custom-world");
+        var nether = root.resolve("custom-nether");
+        var end = root.resolve("custom-end");
+        Files.createDirectories(shared.resolve("db"));
+        Files.createDirectories(nether.resolve("db"));
+        Files.createDirectories(end.resolve("db"));
+        byte[] overworldKey = {0,0,0,0,0,0,0,0,44};
+        byte[] sharedEndKey = {0,0,0,0,0,0,0,0,2,0,0,0,44};
+        byte[] netherKey = {0,0,0,0,0,0,0,0,1,0,0,0,44};
+        byte[] importedEndKey = {1,0,0,0,0,0,0,0,44};
+        try (var db = new Iq80DBFactory().open(shared.resolve("db").toFile(),
+                new Options().createIfMissing(true))) {
+            db.put(overworldKey, new byte[]{1});
+            db.put(sharedEndKey, new byte[]{2});
+        }
+        try (var db = new Iq80DBFactory().open(nether.resolve("db").toFile(),
+                new Options().createIfMissing(true))) {
+            db.put(netherKey, new byte[]{3});
+        }
+        try (var db = new Iq80DBFactory().open(end.resolve("db").toFile(),
+                new Options().createIfMissing(true))) {
+            db.put(importedEndKey, new byte[]{4});
+        }
+        var paths = Map.of(0, shared, 1, nether, 2, end);
+
+        // The default remains fail-closed even when both imported maps exist.
+        assertThrows(org.allaymc.api.world.storage.WorldStorageException.class,
+                () -> DimensionLayoutTransition.ensureLayout(root, "custom-world", "SEPARATE", paths));
+
+        assertTrue(DimensionLayoutTransition.ensureLayout(
+                root, "custom-world", "SEPARATE", paths, "PREFER_SEPARATE"));
+        assertEquals(Set.of(0), DimensionStorageInspector.detectDimensionIds(shared));
+        assertEquals(Set.of(1), DimensionStorageInspector.detectDimensionIds(nether));
+        assertEquals(Set.of(0), DimensionStorageInspector.detectDimensionIds(end));
+        try (var db = new Iq80DBFactory().open(nether.resolve("db").toFile(),
+                new Options().createIfMissing(false));
+             var other = new Iq80DBFactory().open(end.resolve("db").toFile(),
+                new Options().createIfMissing(false))) {
+            assertArrayEquals(new byte[]{3}, db.get(netherKey));
+            assertArrayEquals(new byte[]{4}, other.get(importedEndKey));
+        }
+
+        var backupParent = root.resolve(".dimension-layout-backups/custom-world");
+        try (var backupDirs = Files.list(backupParent)) {
+            var backup = backupDirs.findFirst().orElseThrow();
+            assertEquals(Set.of(0, 2), DimensionStorageInspector.detectDimensionIds(
+                    backup.resolve("shared-original")));
+            assertEquals(Set.of(2), DimensionStorageInspector.detectDimensionIds(
+                    backup.resolve("embedded-end-not-active")));
+        }
+
+        // The custom End is converted into its native dimension after
+        // shared-versus-separate reconciliation. Its data takes precedence.
+        assertTrue(DimensionStorageAutoConverter.ensureNativeLayout(
+                root, "custom-world", end, 2, 0, 255));
+        assertEquals(Set.of(2), DimensionStorageInspector.detectDimensionIds(end));
+        assertFalse(DimensionLayoutTransition.ensureLayout(root, "custom-world", "SEPARATE", paths));
+        try (var db = new Iq80DBFactory().open(end.resolve("db").toFile(),
+                new Options().createIfMissing(false))) {
+            assertArrayEquals(new byte[]{4}, db.get(new byte[]{
+                    1,0,0,0,0,0,0,0,2,0,0,0,44
+            }));
+        }
+    }
+
+    @Test
+    void rejectsPreferringCustomDimensionsWhenOneIsMissing() throws Exception {
+        var shared = root.resolve("one-custom-world");
+        var end = root.resolve("one-custom-end");
+        Files.createDirectories(shared.resolve("db"));
+        Files.createDirectories(end.resolve("db"));
+        try (var db = new Iq80DBFactory().open(shared.resolve("db").toFile(),
+                new Options().createIfMissing(true))) {
+            db.put(new byte[]{0,0,0,0,0,0,0,0,44}, new byte[]{1});
+            db.put(new byte[]{0,0,0,0,0,0,0,0,2,0,0,0,44}, new byte[]{2});
+        }
+        try (var db = new Iq80DBFactory().open(end.resolve("db").toFile(),
+                new Options().createIfMissing(true))) {
+            db.put(new byte[]{1,0,0,0,0,0,0,0,44}, new byte[]{3});
+        }
+        assertThrows(org.allaymc.api.world.storage.WorldStorageException.class,
+                () -> DimensionLayoutTransition.ensureLayout(root, "one-custom-world", "SEPARATE",
+                        Map.of(0, shared, 1, root.resolve("missing-nether"), 2, end),
+                        "PREFER_SEPARATE"));
+        assertEquals(Set.of(0, 2), DimensionStorageInspector.detectDimensionIds(shared));
+        assertEquals(Set.of(0), DimensionStorageInspector.detectDimensionIds(end));
+    }
+
+
 }
