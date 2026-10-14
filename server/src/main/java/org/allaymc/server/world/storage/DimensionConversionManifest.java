@@ -5,6 +5,7 @@ import org.iq80.leveldb.Options;
 import org.iq80.leveldb.impl.Iq80DBFactory;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -12,6 +13,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Comparator;
 import java.util.HexFormat;
 
 /**
@@ -20,7 +22,8 @@ import java.util.HexFormat;
  *
  * <p>The digest covers every LevelDB key and value, with length framing,
  * in LevelDB iteration order. A conversion may be promoted only if its
- * marker, record count, target dimension and contents agree. This is a
+ * marker, record count, target dimension and contents agree. Non-LevelDB
+ * metadata files (including level.dat) are also hashed. This is a
  * corruption/tampering check, not an authentication mechanism.</p>
  */
 public final class DimensionConversionManifest {
@@ -101,6 +104,40 @@ public final class DimensionConversionManifest {
                     records++;
                 }
             }
+            // Also bind the manifest to the complete non-LevelDB world metadata.
+            // Without this a custom map could silently lose its configured spawn
+            // point if level.dat changed between staging and promotion.
+            try (var walk = Files.walk(worldFolder)) {
+                for (var file : walk.sorted(Comparator.comparing(Path::toString)).toList()) {
+                    if (Files.isSymbolicLink(file)) {
+                        throw new WorldStorageException("Symbolic links are forbidden in staged world: " + file);
+                    }
+                    if (Files.isDirectory(file)) continue;
+                    if (!Files.isRegularFile(file)) {
+                        throw new WorldStorageException("Unsupported file type in staged world: " + file);
+                    }
+                    if (file.startsWith(dbFolder) || file.equals(worldFolder.resolve(FILE_NAME))) {
+                        continue;
+                    }
+                    var relative = worldFolder.relativize(file).toString().replace('\\', '/');
+                    md.update((byte) 0x7f);
+                    addFramed(md, relative.getBytes(StandardCharsets.UTF_8));
+                    var originalSize = Files.size(file);
+                    addLong(md, originalSize);
+                    long readTotal = 0;
+                    try (InputStream input = Files.newInputStream(file)) {
+                        var buffer = new byte[65536];
+                        int n;
+                        while ((n = input.read(buffer)) != -1) {
+                            md.update(buffer, 0, n);
+                            readTotal += n;
+                        }
+                    }
+                    if (readTotal != originalSize) {
+                        throw new WorldStorageException("Staged metadata changed during hashing: " + file);
+                    }
+                }
+            }
             return new Fingerprint(records, HexFormat.of().formatHex(md.digest()));
         } catch (IOException e) {
             throw new WorldStorageException("Cannot fingerprint staged LevelDB", e);
@@ -114,6 +151,12 @@ public final class DimensionConversionManifest {
         digest.update(new byte[]{(byte) (len >>> 24), (byte) (len >>> 16),
                 (byte) (len >>> 8), (byte) len});
         digest.update(bytes);
+    }
+
+    private static void addLong(MessageDigest digest, long value) {
+        for (int shift = 56; shift >= 0; shift -= 8) {
+            digest.update((byte) (value >>> shift));
+        }
     }
 
     private record Fingerprint(long records, String sha256) {}
