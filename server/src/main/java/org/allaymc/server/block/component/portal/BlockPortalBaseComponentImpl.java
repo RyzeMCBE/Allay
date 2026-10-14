@@ -33,9 +33,10 @@ public class BlockPortalBaseComponentImpl extends BlockBaseComponentImpl {
 
     @Override
     public void onEntityInside(Block block, Entity entity) {
-        if (entity.getPortalCooldown() > 0) {
-            return;
-        }
+        // Always report contact. The entity's portal state machine decides
+        // whether an actual entry is permitted during cooldown or transfer.
+        // Ignoring contact here would make a player waiting in the destination
+        // portal look as if they had exited it.
         entity.setInNetherPortal(true);
     }
 

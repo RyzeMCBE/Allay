@@ -140,6 +140,9 @@ public class EntityBaseComponentImpl implements EntityBaseComponent {
     @Getter
     protected long tick;
 
+    // A timer alone does not prevent looping when the destination is also a portal.
+    protected final NetherPortalReentryGuard netherPortalReentryGuard = new NetherPortalReentryGuard();
+
     public EntityBaseComponentImpl(EntityInitInfo info) {
         this.location = new Location3d(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, info.dimension());
         this.lastLocation = new Location3d(this.location);
@@ -205,8 +208,15 @@ public class EntityBaseComponentImpl implements EntityBaseComponent {
     }
 
     protected void tickPortal() {
-        if (portalCooldown > 0) {
+        // Observe portal contact even while cooling down. Otherwise, we cannot
+        // distinguish remaining in the destination portal from leaving it.
+        boolean reentryBlocked = netherPortalReentryGuard.blocksEntry(inNetherPortal);
+        boolean coolingDown = portalCooldown > 0;
+        if (coolingDown) {
             portalCooldown--;
+        }
+        if (coolingDown || reentryBlocked) {
+            portalTicks = 0;
             inNetherPortal = false;
             return;
         }
@@ -231,8 +241,21 @@ public class EntityBaseComponentImpl implements EntityBaseComponent {
             portalTicks = 0;
         }
 
-        // Reset flag — will be set again by the portal block's onEntityInside next tick
+        // The block collision pass will update this flag for the next tick.
         inNetherPortal = false;
+    }
+
+    protected void beginNetherPortalTransfer() {
+        netherPortalReentryGuard.beginTransfer();
+        portalCooldown = PORTAL_COOLDOWN_TICKS;
+        portalTicks = 0;
+    }
+
+    protected void finishNetherPortalTransfer(boolean success) {
+        netherPortalReentryGuard.finishTransfer(success);
+        if (!success) {
+            portalCooldown = 0;
+        }
     }
 
     protected void performNetherPortalTeleport() {
@@ -240,30 +263,23 @@ public class EntityBaseComponentImpl implements EntityBaseComponent {
             return;
         }
 
-        // Set cooldown immediately to prevent re-entry while async teleport is in progress
-        portalCooldown = PORTAL_COOLDOWN_TICKS;
-        portalTicks = 0;
+        beginNetherPortalTransfer();
 
-        // Run teleport in a virtual thread to avoid blocking the dimension tick thread
-        // while loading chunks in the target dimension
+        // Loading must not block the dimension tick, and a failed future must
+        // always unlock the guard on the entity's owning scheduler.
         Server.getInstance().getVirtualThreadPool().submit(() -> {
             try {
-                NetherPortalHelper.teleport(thisEntity).whenComplete((success, error) -> {
-                    if (error != null) {
-                        log.error("Nether portal transfer failed while loading destination chunks; " +
-                                "keeping entity in its original dimension", error);
-                    }
-                    if (error != null || !Boolean.TRUE.equals(success)) {
-                        // Callback can run on an IO thread when chunk reads fail.
-                        // Keep entity state mutations on its owning scheduler.
-                        thisEntity.getScheduler().runLater(thisEntity, () -> portalCooldown = 0);
-                    }
-                });
+                NetherPortalHelper.teleport(thisEntity).whenComplete((success, error) ->
+                        thisEntity.getScheduler().runLater(thisEntity, () -> {
+                            if (error != null) {
+                                log.error("Nether portal transfer failed while loading destination chunks", error);
+                            }
+                            finishNetherPortalTransfer(error == null && Boolean.TRUE.equals(success));
+                        })
+                );
             } catch (RuntimeException error) {
-                // The initial destination chunk loads use join() and may throw
-                // before teleport() can return its CompletableFuture.
                 log.error("Nether portal cannot load destination; teleport aborted", error);
-                thisEntity.getScheduler().runLater(thisEntity, () -> portalCooldown = 0);
+                thisEntity.getScheduler().runLater(thisEntity, () -> finishNetherPortalTransfer(false));
             }
         });
     }
