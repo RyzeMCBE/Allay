@@ -97,6 +97,16 @@ public final class EndArrivalHelper {
         return Optional.of(arrival(dimension, x, y, z));
     }
 
+    /**
+     * Strict standing check for configured End -> Overworld return points.
+     * Unlike End arrival, this never creates blocks in the player's HCF spawn.
+     * Call on the target dimension thread after loading its chunk.
+     */
+    public static boolean isSafeConfiguredArrival(Dimension dimension, Location3d destination) {
+        return isSafeStanding(dimension, (int) Math.floor(destination.x()),
+                (int) Math.floor(destination.y()), (int) Math.floor(destination.z()));
+    }
+
     private static Location3d arrival(Dimension dimension, int x, int y, int z) {
         return new Location3d(x + 0.5, y, z + 0.5, dimension);
     }
