@@ -26,40 +26,104 @@
 Este repositorio contiene un **fork de trabajo de [AllayMC/Allay](https://github.com/AllayMC/Allay)** bajo la organización **RyzeMCBE Development Studio**. Lo utilizamos como base para estudiar, integrar y mantener funcionalidades relacionadas con protocolos, compatibilidad, mundos, dimensiones y rendimiento.
 
 > [!IMPORTANT]
-> **Estado de este fork: desarrollo y validación.** El código está disponible en la rama principal, y la compilación anterior falló cuando aún faltaba el submódulo del protocolo; este ya fue enlazado y la compilación debe volver a verificarse. No afirmamos que esta revisión esté lista para producción. Comprueba el [estado actual de GitHub Actions](https://github.com/RyzeMCBE/Allay/actions) antes de utilizarla.
+> **Estado: desarrollo activo y validación.** El código integrado en `main` superó compilación y pruebas automatizadas. Eso **no garantiza que todos los mundos personalizados y clientes hayan sido probados dentro de Minecraft**. Verifica el [workflow de compilación](https://github.com/RyzeMCBE/Allay/actions/workflows/gradle.yml) de la revisión que vayas a utilizar.
 
 ## 🚀 Características y áreas de trabajo
 
 | Área | Descripción |
 | --- | --- |
-| 🌐 **Multiversión** | Arquitectura para gestionar familias de protocolos Bedrock. La compatibilidad real depende de las implementaciones y pruebas de cada versión. |
+| 🌐 **Multiversión** | Protocolos Bedrock internacionales específicos desde 1.21.90 (818) hasta 1.26.52 (2193) y variantes NetEase. |
 | ⚡ **Rendimiento** | Herramientas y diseño orientados a un servidor eficiente sobre la JVM. |
 | 🧩 **Plugins** | API para extensiones en Java y otros lenguajes compatibles con la JVM. |
-| 🌍 **Mundos y dimensiones** | Sistemas de mundo con Overworld, Nether, End y soporte de tipos de dimensión personalizables. |
-| 🚪 **Portales** | Componentes y eventos relacionados con portales del Nether y del End. |
+| 🌍 **Mundos y dimensiones** | Overworld, Nether y End, LevelDB `SHARED`/`SEPARATE`, rutas configurables, conversiones y mapas personalizados. |
+| 🚪 **Portales** | Portales Nether/End, controles de reentrada, llegada segura y coordenadas configurables mediante API de plugins. |
 | 🧱 **Contenido de Bedrock** | Bloques, ítems, entidades, inventarios y serialización vinculada a protocolos. |
-| 🧪 **Pruebas** | Tareas Gradle, pruebas automatizadas y pruebas de regresión. |
+| 🧪 **Pruebas** | Gradle y regresiones automatizadas para protocolos, mundos y transferencias; deben complementarse con pruebas dentro del juego. |
 
 La presencia de un componente en el código no garantiza que todas sus mecánicas estén verificadas en este fork.
 
 🔗 **Dependencias locales del fork:** [RyzeMCBE/Protocol](https://github.com/RyzeMCBE/Protocol) (`protocol-local`) y [RyzeMCBE/StateUpdater](https://github.com/RyzeMCBE/StateUpdater) (`stateupdater-local`). Ambos repositorios están enlazados mediante submódulos Git y builds compuestos de Gradle.
 
-## Compatibilidad de esta rama
+## 🌐 Multiversión: versiones soportadas por el código
 
-Esta rama integra Minecraft Bedrock **1.26.50–1.26.52 (protocolo 2193)**, con paletas de bloques específicas por protocolo para conservar las versiones anteriores registradas. Incluye los datos de juego 1.26.50 y mantiene las dependencias locales de RyzeMCBE. Los JAR publicados antes de esta integración conservan su compatibilidad original.
+Allay utiliza un registro de **protocolos exactos**, separados por variante de cliente. Las versiones internacionales registradas en [`ProtocolRegistry.java`](server/src/main/java/org/allaymc/server/network/protocol/ProtocolRegistry.java), contrastadas con los codecs de [RyzeMCBE/Protocol](https://github.com/RyzeMCBE/Protocol), son:
 
-## 🆕 Novedades documentadas
+| Minecraft Bedrock internacional | Protocolo |
+| --- | ---: |
+| 1.21.90 | 818 |
+| 1.21.93 | 819 |
+| 1.21.100 | 827 |
+| 1.21.111 | 844 |
+| 1.21.120 | 859 |
+| 1.21.124 | 860 |
+| 1.21.130 | 898 |
+| 1.26.0 | 924 |
+| 1.26.10 | 944 |
+| 1.26.20 | 975 |
+| 1.26.30 | 1001 |
+| 1.26.40 | 2168 |
+| 1.26.45 | 2169 |
+| **1.26.50–1.26.52** | **2193** |
 
-El archivo [CHANGELOG.md](CHANGELOG.md) identifica la línea **Allay 0.14.1 / API 0.30.0** como *no publicada* y enumera, entre otros cambios:
+**Versión más reciente integrada: Minecraft Bedrock 1.26.52 (protocolo 2193).** El codec v2193 identifica 1.26.52 y la implementación contempla 1.26.50–1.26.52, que comparten el protocolo. **Versión internacional más antigua registrada: 1.21.90 (818).** No debe interpretarse esta tabla como garantía de compatibilidad con todas las revisiones intermedias o versiones anteriores a las registradas.
 
-- Incorporación de soporte para **Minecraft Bedrock 1.26.40** (protocolo **v2168**).
-- Soporte para **NetEase 1.21.124** (protocolo **v860**).
-- Nueva arquitectura multiversión **mvv2**.
-- Corrección de recogida de flechas con efectos y encantamiento Infinity.
+Se incluyen por separado los codecs **NetEase 766, 819 y 860**. El servidor identifica la variante y el protocolo en el proceso de conexión; NetEase no equivale a la misma versión del cliente internacional.
 
-Las versiones anteriores del historial también documentan APIs para dimensiones y biomas personalizados, sistemas de portales, cambios de inventarios y otras mecánicas.
+La compatibilidad de protocolo **no significa que todos los bloques, mundos, plugins y transferencias estén certificados en juego**. Para reproducir problemas, anota versión exacta del cliente y protocolo.
 
-**Importante:** estas son funcionalidades descritas en el código importado, **no una lista de versiones certificadas** por RyzeMCBE. No se garantiza compatibilidad con todas las versiones de Bedrock ni con versiones posteriores a las que aparecen en el historial.
+## 🌍 Dimensiones, mundos y almacenamiento
+
+El núcleo incluye **Overworld** (`minecraft:overworld`), **Nether** (`minecraft:nether`) y **The End** (`minecraft:the_end`), más las interfaces para tipos de dimensión personalizados.
+
+- **`SHARED` (valor predeterminado):** las tres dimensiones pueden almacenarse en el mismo LevelDB del mundo.
+- **`SEPARATE`:** usa directorios y bases LevelDB independientes; `world-settings.yml` permite asignar una ruta `path` a cada dimensión y habilitar/deshabilitar dimensiones.
+- **Importación:** reconoce determinadas disposiciones de datos Bedrock y LevelDB heredado de PocketMine, paletas NBT y subchunks, y puede leer el spawn guardado de un Nether o End personalizado.
+- **Protección del almacenamiento:** verificación de rutas para evitar solapamientos, preparación de conversiones, copias de seguridad, manifiestos y recuperación frente a cambios interrumpidos. Una incompatibilidad no debe provocar que se cargue silenciosamente un mundo vacío donde había datos existentes.
+
+Ejemplo de `world-settings.yml` con carpetas independientes para un mundo llamado `world`:
+
+```yaml
+worlds:
+  world:
+    storage-type: LEVELDB
+    use-virtual-thread: false
+    dimension-storage-mode: SEPARATE
+    dimensions:
+      minecraft:overworld:
+        path: world
+        generator-type: FLAT
+        generator-preset: ''
+      minecraft:nether:
+        path: world-nether
+        generator-type: NETHER
+        generator-preset: ''
+      minecraft:the_end:
+        path: world-end
+        generator-type: THE_END
+        generator-preset: ''
+```
+
+Las rutas son relativas a la carpeta de mundos y deben corresponder a la estructura real de tus mapas. **Detén el servidor y guarda una copia completa de los mundos antes de importar un mapa o alternar entre `SHARED` y `SEPARATE`.** La verificación final de un mapa importado debe realizarse dentro del juego.
+
+## 🚪 Portales Nether y End
+
+- **Nether ↔ Overworld:** búsqueda de portales existentes, generación cuando el destino es seguro, escala de coordenadas predeterminada y preparación de chunks sin bloquear el hilo principal.
+- **Prevención de reentrada:** evita que el jugador vuelva a atravesar inmediatamente el portal cuando permanece dentro tras un cambio de dimensión.
+- **Sincronización Bedrock:** se resuelve la coordenada final antes de transmitir el cambio; las colas de chunks de dimensiones anteriores se descartan y la confirmación se envía en el orden previsto.
+- **End personalizado:** prioriza el spawn importado, busca una superficie segura y solo construye una plataforma de obsidiana cuando no hay terreno existente que deba preservarse.
+- **API de destinos configurables:** un plugin puede usar `EntityPortalEnterEvent#setDestinationOverride(Location3d)`. Sin destino indicado, se conserva la lógica normal. Las coordenadas se validan antes de teletransportar o crear un portal.
+
+## 🛡️ Inmunidad durante la carga de dimensiones
+
+Al iniciarse una transferencia, el jugador obtiene **inmunidad temporal a daños**. Mientras esté protegido, tampoco puede atacar; esto evita ventajas injustas en PvP. El sistema no congela físicamente al jugador y **no fuerza el cierre** de la pantalla de carga de Bedrock.
+
+La protección termina cuando el cliente comunica `END_LOADING_SCREEN` y el servidor valida un primer movimiento real. Por seguridad también expira tras **3 segundos desde el aviso** si el jugador no se mueve, o tras **65 segundos desde el inicio del cambio** si el aviso nunca llega.
+
+Las pruebas unitarias cubren la inmunidad durante una pantalla de carga de 30 segundos, el fin de la carga, los límites de tiempo y las transiciones repetidas.
+
+## 📌 Versiones de la API y del servidor
+
+La configuración actual ([`gradle.properties`](gradle.properties)) declara `server.version=0.14.1`, `api.version=0.30.0` y `allay.is-dev-build=true`. Estas son las versiones del proyecto; la versión de **Minecraft Bedrock** es independiente. Consulta el [historial de cambios](CHANGELOG.md) para antecedentes de versiones anteriores.
 
 ## 🏗️ Estructura del repositorio
 
@@ -98,7 +162,7 @@ Además, <code>settings.gradle.kts</code> requiere que exista un archivo de prue
 protocol-local/bedrock-codec/src/test/java/org/cloudburstmc/protocol/bedrock/codec/v2168/serializer/ItemStackResponseSerializer_v2168Test.java
 ~~~
 
-**Actualización:** el submódulo `protocol-local` ya está conectado a [RyzeMCBE/Protocol](https://github.com/RyzeMCBE/Protocol), y el repositorio de protocolo incluye el archivo de regresión indicado. Para descargarlo debes clonar con `--recurse-submodules` o ejecutar los comandos de sincronización siguientes. La compilación y el funcionamiento del servidor todavía requieren validación; no recomendamos desactivar esta comprobación.
+**Actualización:** ambos submódulos están enlazados a los repositorios de RyzeMCBE y `main` ha superado la compilación y las pruebas automatizadas. Utiliza `--recurse-submodules` al clonar y conserva las comprobaciones de regresión del protocolo.
 
 ## 📥 Clonar y compilar
 
