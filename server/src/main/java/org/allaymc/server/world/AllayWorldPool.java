@@ -28,6 +28,11 @@ import org.allaymc.api.world.generator.WorldGenerator;
 import org.allaymc.server.world.dimension.BuiltinDimensionSettings;
 import org.allaymc.server.world.dimension.DimensionId;
 import org.allaymc.server.world.light.NoLightEngine;
+import org.allaymc.server.world.storage.DimensionWorldStorage;
+import org.allaymc.server.world.storage.DimensionStorageInspector;
+import org.allaymc.server.world.storage.DimensionConversionPromotion;
+import org.allaymc.server.world.storage.DimensionStorageAutoConverter;
+import org.allaymc.server.world.storage.DimensionLayoutTransition;
 
 import java.nio.file.Path;
 import java.util.Collections;
@@ -65,6 +70,10 @@ public final class AllayWorldPool implements WorldPool {
     }
 
     public void loadWorlds() {
+        // Every configured world reserves its three dimension paths, including
+        // disabled dimensions whose data must be preserved during mode changes.
+        // Never let two logical worlds open or convert the same LevelDB folder.
+        validateConfiguredWorldPaths();
         this.worldConfig.worlds().forEach((name, setting) -> {
             try {
                 loadWorld(name, setting);
@@ -74,21 +83,72 @@ public final class AllayWorldPool implements WorldPool {
         });
     }
 
+    private void validateConfiguredWorldPaths() {
+        var root = worldFolder.toAbsolutePath().normalize();
+        var reservations = new LinkedHashMap<Path, String>();
+        for (var worldEntry : worldConfig.worlds().entrySet()) {
+            var worldName = worldEntry.getKey();
+            if (!worldName.matches("[A-Za-z0-9_.-]+") ||
+                    worldName.equals(".") || worldName.equals("..")) {
+                throw new IllegalStateException("Unsafe logical world name: " + worldName);
+            }
+            var dimensions = worldEntry.getValue().normalizedDimensions();
+            for (var id : DimensionId.values()) {
+                var config = dimensions.get(id.getIdentifier());
+                var configuredPath = config == null ? null : config.path();
+                var defaultFolder = id == DimensionId.OVERWORLD
+                        ? worldName : worldName + (id == DimensionId.NETHER ? "-nether" : "-end");
+                var path = root.resolve(configuredPath == null || configuredPath.isBlank()
+                        ? defaultFolder : configuredPath).normalize();
+                if (!path.startsWith(root) || path.equals(root)) {
+                    throw new IllegalStateException("Unsafe dimension path: " + path);
+                }
+                for (var previous : reservations.entrySet()) {
+                    if (path.startsWith(previous.getKey()) || previous.getKey().startsWith(path)) {
+                        throw new IllegalStateException("World storage overlap: " + worldName + "/" +
+                                id + " at " + path + " conflicts with " + previous.getValue());
+                    }
+                }
+                reservations.put(path, worldName + "/" + id);
+            }
+        }
+    }
+
     public void shutdown() {
         this.worlds.values().forEach(AllayWorld::shutdown);
 
-        // Waiting for all worlds to fully shutdown
-        while (this.worlds.values().stream().anyMatch(world -> world.getState() != WorldState.STOPPED)) {
-            Thread.onSpinWait();
+        // Wait for a finite time; never spin forever if a world tick thread
+        // crashes during shutdown and leaves its LevelDB handle open.
+        for (var world : this.worlds.values()) {
+            try {
+                world.getWorldThread().join(30_000L);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new IllegalStateException("Interrupted while waiting for world shutdown", e);
+            }
+            if (world.getState() != WorldState.STOPPED) {
+                throw new IllegalStateException("World " + world.getName() +
+                        " failed to stop cleanly; settings and LevelDB are left untouched");
+            }
         }
 
-        // Save world settings
-        this.worldConfig.worlds().clear();
+        // Preserve configured worlds even if they were unloaded before shutdown.
+        // Their definitions must not disappear from world-settings.yml.
+        var persistedWorlds = new LinkedHashMap<>(this.worldConfig.worlds());
         this.worlds.forEach((name, world) -> {
             if (!world.isRuntimeOnly()) {
-                this.worldConfig.worlds().put(name, toWorldSetting(world));
+                var configured = persistedWorlds.get(name);
+                // Keep the configured storage layout and disabled dimensions intact.
+                // Runtime generator changes can be persisted for legacy shared worlds only.
+                if (configured == null) {
+                    persistedWorlds.put(name, toWorldSetting(world));
+                }
+                // Existing configured worlds retain their exact definitions, including
+                // dimensions disabled for maintenance and future storage paths.
             }
         });
+        this.worldConfig.worlds().clear();
+        this.worldConfig.worlds().putAll(persistedWorlds);
         applyBuiltinDimensionSettings(BuiltinDimensionSettings.get());
         this.worldConfig.save();
     }
@@ -124,29 +184,45 @@ public final class AllayWorldPool implements WorldPool {
         try {
             world = new AllayWorld(name, worldSetting.storage(), useVirtualThread);
         } catch (Throwable t) {
+            try {
+                worldSetting.storage().shutdown();
+            } catch (RuntimeException cleanup) {
+                t.addSuppressed(cleanup);
+            }
             log.error("Error while initializing world {}", name, t);
             return;
         }
 
-        var overworldSetting = Preconditions.checkNotNull(
-                validatedDimensionSettings.get(DimensionTypes.OVERWORLD.getIdentifier()),
-                "World must have the overworld dimension"
-        );
-        loadDimension(world, overworldSetting, useVirtualThread);
-        for (var setting : validatedDimensionSettings.values()) {
-            if (setting.dimensionType() == DimensionTypes.OVERWORLD) {
-                continue;
+        try {
+            var overworldSetting = Preconditions.checkNotNull(
+                    validatedDimensionSettings.get(DimensionTypes.OVERWORLD.getIdentifier()),
+                    "World must have the overworld dimension"
+            );
+            loadDimension(world, overworldSetting, useVirtualThread);
+            for (var setting : validatedDimensionSettings.values()) {
+                if (setting.dimensionType() != DimensionTypes.OVERWORLD) {
+                    loadDimension(world, setting, useVirtualThread);
+                }
             }
-            loadDimension(world, setting, useVirtualThread);
-        }
 
-        var event = new WorldLoadEvent(world);
-        if (!event.call()) {
-            return;
+            if (!new WorldLoadEvent(world).call()) {
+                world.abortStartup();
+                log.warn("Loading of world {} was cancelled; storage has been closed", name);
+                return;
+            }
+            this.worlds.put(world.getName(), world);
+            world.startTick();
+        } catch (RuntimeException | Error failure) {
+            if (world.getState() == WorldState.STARTING && !world.getWorldThread().isAlive()) {
+                try {
+                    world.abortStartup();
+                } catch (RuntimeException cleanup) {
+                    failure.addSuppressed(cleanup);
+                }
+            }
+            this.worlds.remove(world.getName(), world);
+            throw failure;
         }
-
-        this.worlds.put(world.getName(), world);
-        world.startTick();
         log.info(I18n.get().tr(TrKeys.ALLAY_WORLD_LOADED, name));
     }
 
@@ -165,8 +241,22 @@ public final class AllayWorldPool implements WorldPool {
             return;
         }
 
+        if (Thread.currentThread() == world.getWorldThread()) {
+            throw new IllegalStateException("Cannot block waiting to unload a world from its own tick thread");
+        }
         world.shutdown();
-        this.worlds.remove(name);
+        // Never expose an unloaded name while its LevelDB handles are still
+        // open: reloading during async shutdown would race the DB file lock.
+        try {
+            world.getWorldThread().join(30_000L);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Interrupted while unloading world " + name, e);
+        }
+        if (world.getState() != WorldState.STOPPED) {
+            throw new IllegalStateException("World " + name + " did not finish shutdown; refusing unsafe reload");
+        }
+        this.worlds.remove(name, world);
     }
 
     @Override
@@ -186,14 +276,131 @@ public final class AllayWorldPool implements WorldPool {
     }
 
     private void loadWorld(String name, WorldSettings.WorldSetting setting) {
-        var storage = Registries.WORLD_STORAGE_FACTORIES.get(setting.storageType()).apply(this.worldFolder.resolve(name));
-        if (storage == null) {
-            log.error("Cannot find world storage type {}", setting.storageType());
-            storage = Registries.WORLD_STORAGE_FACTORIES.get("LEVELDB").apply(this.worldFolder.resolve(name));
+        // A separate layout must never silently fall back to shared storage: this could
+        // create or overwrite chunks in the wrong database before conversion is ready.
+        var separate = "SEPARATE".equalsIgnoreCase(setting.dimensionStorageMode());
+        Preconditions.checkArgument(
+                separate || "SHARED".equalsIgnoreCase(setting.dimensionStorageMode()),
+                "Unknown dimension storage mode %s for world %s", setting.dimensionStorageMode(), name
+        );
+        var storageFactory = Registries.WORLD_STORAGE_FACTORIES.get(setting.storageType());
+        if (storageFactory == null) {
+            log.warn("Unknown world storage type {} for {}, falling back to LEVELDB", setting.storageType(), name);
+            storageFactory = Preconditions.checkNotNull(Registries.WORLD_STORAGE_FACTORIES.get("LEVELDB"), "LEVELDB storage factory unavailable");
+        }
+        // Preflight every configured path *before* opening any DB. Opening LevelDB
+        // with createIfMissing=true could otherwise silently generate empty chunks.
+        var perDimension = new LinkedHashMap<DimensionType, org.allaymc.api.world.storage.WorldStorage>();
+        var importedSpawnPoints = new LinkedHashMap<DimensionType, org.joml.Vector3ic>();
+        var uniquePaths = new java.util.HashSet<Path>();
+        var configuredDimensions = setting.normalizedDimensions();
+        var root = this.worldFolder.toAbsolutePath().normalize();
+        // A mode switch is an offline multi-directory transaction. This call
+        // also rolls back an interrupted switch before opening any LevelDB.
+        var layoutPaths = new LinkedHashMap<Integer, Path>();
+        for (var dimensionId : DimensionId.values()) {
+            var dimensionConfig = configuredDimensions.get(dimensionId.getIdentifier());
+            var configuredPath = dimensionConfig == null ? null : dimensionConfig.path();
+            var defaultFolder = dimensionId == DimensionId.OVERWORLD
+                    ? name : name + (dimensionId == DimensionId.NETHER ? "-nether" : "-end");
+            layoutPaths.put(dimensionId.getId(), root.resolve(
+                    configuredPath == null || configuredPath.isBlank() ? defaultFolder : configuredPath
+            ).normalize());
+        }
+        DimensionLayoutTransition.ensureLayout(root, name, setting.dimensionStorageMode(), layoutPaths);
+        if (!separate) {
+            // Switching from SEPARATE to SHARED without merging first would
+            // silently load an empty Nether/End from the Overworld LevelDB.
+            // Never accept this data-loss scenario.
+            for (var entry : configuredDimensions.entrySet()) {
+                if (!entry.getValue().enabled()) continue;
+                var type = Registries.DIMENSIONS.getByK2(entry.getKey());
+                if (type == null || type == DimensionTypes.OVERWORLD) continue;
+                var configuredPath = entry.getValue().path();
+                var folderName = configuredPath == null || configuredPath.isBlank()
+                        ? name + (type == DimensionTypes.NETHER ? "-nether" : "-end")
+                        : configuredPath;
+                var otherFolder = root.resolve(folderName).normalize();
+                if (otherFolder.equals(root.resolve(name).normalize())) continue;
+                if (java.nio.file.Files.isDirectory(otherFolder.resolve("db")) &&
+                        (!DimensionStorageInspector.detectDimensionIds(otherFolder).isEmpty() ||
+                                java.nio.file.Files.exists(otherFolder.resolve("level.dat")))) {
+                    throw new IllegalStateException("World " + name + " has SEPARATE data for " +
+                            type.getIdentifier() + " at " + otherFolder +
+                            ". Prepare and verify SHARED layout migration before switching modes.");
+                }
+            }
+        }
+        if (separate) {
+            for (var entry : configuredDimensions.entrySet()) {
+                if (!entry.getValue().enabled()) continue;
+                var type = Preconditions.checkNotNull(Registries.DIMENSIONS.getByK2(entry.getKey()), "Unknown dimension %s", entry.getKey());
+                var configuredPath = entry.getValue().path();
+                var folderName = configuredPath == null || configuredPath.isBlank()
+                        ? (type == DimensionTypes.OVERWORLD ? name : name + (type == DimensionTypes.NETHER ? "-nether" : "-end"))
+                        : configuredPath;
+                var path = root.resolve(folderName).normalize();
+                Preconditions.checkArgument(path.startsWith(root) && !path.equals(root), "Unsafe dimension path: %s", folderName);
+                Preconditions.checkArgument(uniquePaths.add(path), "Duplicate dimension path %s", path);
+                Preconditions.checkArgument(setting.storageType().equalsIgnoreCase("LEVELDB"), "SEPARATE requires LEVELDB storage");
+                Preconditions.checkArgument(!java.nio.file.Files.isSymbolicLink(path), "Symbolic links are not supported for dimension paths: %s", path);
+                DimensionConversionPromotion.recoverIfInterrupted(path);
+                if (type != DimensionTypes.OVERWORLD) {
+                    boolean converted = DimensionStorageAutoConverter.ensureNativeLayout(
+                            root, name, path, type.getId(), type.getMinHeight(), type.getMaxHeight()
+                    );
+                    if (converted) {
+                        log.info("Imported custom dimension {} in world {} with verified backup and recovery journal",
+                                type.getIdentifier(), name);
+                    }
+                } else {
+                    // SEPARATE's Overworld backend only reads ID 0 keys.
+                    // It must not reject older world.db files that still
+                    // contain unused legacy Nether/End records. Nor should it
+                    // examine those records to decide where dimensions load.
+                    if (java.nio.file.Files.exists(path.resolve("level.dat")) &&
+                            !java.nio.file.Files.isDirectory(path.resolve("db"))) {
+                        throw new IllegalStateException("Existing Overworld has no LevelDB database: " + path);
+                    }
+                    Preconditions.checkArgument(!java.nio.file.Files.isSymbolicLink(path.resolve("db")),
+                            "Unsafe Overworld LevelDB symlink: %s", path.resolve("db"));
+                }
+            }
+        }
+        var storage = separate ? null : Preconditions.checkNotNull(storageFactory.apply(this.worldFolder.resolve(name)), "Failed to create storage for %s", name);
+        try {
+            if (separate) {
+                for (var entry : configuredDimensions.entrySet()) {
+                    if (!entry.getValue().enabled()) continue;
+                    var type = Registries.DIMENSIONS.getByK2(entry.getKey());
+                    var configuredPath = entry.getValue().path();
+                    var folderName = configuredPath == null || configuredPath.isBlank()
+                            ? (type == DimensionTypes.OVERWORLD ? name : name + (type == DimensionTypes.NETHER ? "-nether" : "-end"))
+                            : configuredPath;
+                    var dimensionPath = root.resolve(folderName).normalize();
+                    var backend = Preconditions.checkNotNull(storageFactory.apply(dimensionPath), "Missing LevelDB backend for %s", type);
+                    perDimension.put(type, backend);
+                    // Some custom End/Nether maps contain their own level.dat. Read
+                    // their saved spawn before world initialization, and never confuse
+                    // its coordinates with the Overworld's global level.dat.
+                    if (type != DimensionTypes.OVERWORLD &&
+                            java.nio.file.Files.isRegularFile(dimensionPath.resolve("level.dat"))) {
+                        importedSpawnPoints.put(type, new org.joml.Vector3i(backend.readWorldData().getSpawnPoint()));
+                    }
+                }
+                var primary = Preconditions.checkNotNull(perDimension.get(DimensionTypes.OVERWORLD), "Overworld must be enabled");
+                storage = new DimensionWorldStorage(primary, perDimension, importedSpawnPoints);
+            }
+        } catch (RuntimeException e) {
+            perDimension.values().forEach(open -> {
+                try { open.shutdown(); } catch (RuntimeException cleanup) { e.addSuppressed(cleanup); }
+            });
+            throw e;
         }
 
         var dimensionSettings = new LinkedHashMap<Identifier, DimensionSetting>();
         for (var entry : setting.normalizedDimensions().entrySet()) {
+            if (!entry.getValue().enabled()) continue;
             var dimensionType = Registries.DIMENSIONS.getByK2(entry.getKey());
             Preconditions.checkArgument(dimensionType != null, "Dimension type %s is not registered", entry.getKey());
             dimensionSettings.put(
@@ -206,10 +413,15 @@ public final class AllayWorldPool implements WorldPool {
             );
         }
 
-        loadWorld(
-                new WorldSetting(name, storage, setting.useVirtualThread),
-                dimensionSettings
-        );
+        try {
+            loadWorld(
+                    new WorldSetting(name, storage, setting.useVirtualThread),
+                    dimensionSettings
+            );
+        } catch (RuntimeException | Error e) {
+            try { storage.shutdown(); } catch (RuntimeException cleanup) { e.addSuppressed(cleanup); }
+            throw e;
+        }
     }
 
     private WorldGenerator tryCreateWorldGenerator(WorldSettings.WorldSetting.DimensionSetting settings) {
@@ -403,6 +615,11 @@ public final class AllayWorldPool implements WorldPool {
             @CustomKey("use-virtual-thread")
             private boolean useVirtualThread;
 
+            @Setter
+            @CustomKey("dimension-storage-mode")
+            @Comment("SHARED keeps all dimensions in the same LevelDB. SEPARATE requires the conversion engine before activation.")
+            private String dimensionStorageMode = "SHARED";
+
             private Map<String, DimensionSetting> dimensions;
 
             private DimensionSetting overworld;
@@ -464,12 +681,13 @@ public final class AllayWorldPool implements WorldPool {
             public WorldSetting normalized() {
                 var normalizedDimensions = new LinkedHashMap<String, DimensionSetting>();
                 normalizedDimensions().forEach((identifier, setting) -> normalizedDimensions.put(identifier.toString(), setting));
-                return new WorldSetting(storageType, useVirtualThread, normalizedDimensions);
+                var normalizedWorld = new WorldSetting(storageType, useVirtualThread, normalizedDimensions);
+                normalizedWorld.dimensionStorageMode(dimensionStorageMode == null ? "SHARED" : dimensionStorageMode.trim().toUpperCase(java.util.Locale.ROOT));
+                return normalizedWorld;
             }
 
             @Getter
             @Accessors(fluent = true)
-            @AllArgsConstructor
             public static class DimensionSetting extends OkaeriConfig {
                 @CustomKey("generator-type")
                 private String generatorType;
@@ -480,10 +698,23 @@ public final class AllayWorldPool implements WorldPool {
                 @Comment("If set to false, light calculation will be disabled for this dimension")
                 @Comment("All light queries will return max value (15)")
                 @CustomKey("enable-light-calculation")
-                private boolean enableLightCalculation;
+                private boolean enableLightCalculation = true;
+
+                @Setter
+                private boolean enabled = true;
+
+                @Setter
+                @CustomKey("path")
+                private String path;
 
                 public DimensionSetting(String generatorType, String generatorPreset) {
                     this(generatorType, generatorPreset, true);
+                }
+
+                public DimensionSetting(String generatorType, String generatorPreset, boolean enableLightCalculation) {
+                    this.generatorType = generatorType;
+                    this.generatorPreset = generatorPreset;
+                    this.enableLightCalculation = enableLightCalculation;
                 }
             }
         }

@@ -1,6 +1,7 @@
 package org.allaymc.server.block;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.allaymc.api.block.property.enums.PortalAxis;
 import org.allaymc.api.block.type.BlockTypes;
 import org.allaymc.api.entity.Entity;
@@ -26,6 +27,7 @@ import static org.allaymc.api.block.property.type.BlockPropertyTypes.PORTAL_AXIS
  *
  * @author daoge_cmd
  */
+@Slf4j
 public class NetherPortalHelper {
 
     // Nether portal interior size constraints (inclusive)
@@ -267,8 +269,12 @@ public class NetherPortalHelper {
             int bx = x + dx * i;
             int bz = z + dz * i;
             int floorY = y - 1;
-            dimension.setBlockState(bx + px, floorY, bz + pz, netherrack, 0, true, false);
-            dimension.setBlockState(bx - px, floorY, bz - pz, netherrack, 0, true, false);
+            if (dimension.getBlockState(bx + px, floorY, bz + pz).getBlockType() == BlockTypes.AIR) {
+                dimension.setBlockState(bx + px, floorY, bz + pz, netherrack, 0, true, false);
+            }
+            if (dimension.getBlockState(bx - px, floorY, bz - pz).getBlockType() == BlockTypes.AIR) {
+                dimension.setBlockState(bx - px, floorY, bz - pz, netherrack, 0, true, false);
+            }
         }
     }
 
@@ -282,6 +288,16 @@ public class NetherPortalHelper {
      * @return a future that completes with {@code true} if the teleport succeeded, {@code false} otherwise
      */
     public static CompletableFuture<Boolean> teleport(Entity entity) {
+        return teleport(entity, null);
+    }
+
+    /**
+     * @param override optional plugin-selected target coordinates. If supplied,
+     *                 bypass coordinate scaling and generate a paired portal
+     *                 only at that exact safe location. Normal behavior is unchanged
+     *                 when null.
+     */
+    public static CompletableFuture<Boolean> teleport(Entity entity, Location3d override) {
         var world = entity.getWorld();
         var currentDim = entity.getDimension();
         var currentDimType = currentDim.getDimensionType();
@@ -304,26 +320,63 @@ public class NetherPortalHelper {
 
         var loc = entity.getLocation();
         var targetDimType = targetDim.getDimensionType();
-        double targetX = scaleCoordinate(loc.x(), currentDimType, targetDimType);
-        double targetZ = scaleCoordinate(loc.z(), currentDimType, targetDimType);
-        int targetY = Math.clamp((int) loc.y(), targetDimType.getMinHeight(), targetDimType.getMaxHeight());
+        boolean forced = override != null;
+        if (forced) {
+            // A plugin cannot silently transfer the entity to an unrelated world,
+            // invalid dimension, or unrepresentable coordinate.
+            if (override.dimension() != targetDim
+                    || !Double.isFinite(override.x())
+                    || !Double.isFinite(override.y())
+                    || !Double.isFinite(override.z())
+                    || Math.abs(override.x()) > 29_999_984
+                    || Math.abs(override.z()) > 29_999_984
+                    || override.y() < targetDimType.getMinHeight() + 1
+                    || override.y() > targetDimType.getMaxHeight() - 4) {
+                log.warn("Rejected unsafe configured Nether destination for {}", entity.getRuntimeId());
+                return failOnDimensionThread(entity);
+            }
+            searchChunkRadius = 1;
+        }
+        double targetX = forced ? override.x() : scaleCoordinate(loc.x(), currentDimType, targetDimType);
+        double targetZ = forced ? override.z() : scaleCoordinate(loc.z(), currentDimType, targetDimType);
+        int targetY = forced ? (int) Math.floor(override.y())
+                : Math.clamp((int) loc.y(), targetDimType.getMinHeight(), targetDimType.getMaxHeight());
 
         // Use Math.floor to correctly handle negative coordinates (truncation rounds toward zero)
         int flooredX = (int) Math.floor(targetX);
         int flooredZ = (int) Math.floor(targetZ);
 
-        // Load all chunks within the search radius (already on virtual thread, .join() is fine)
+        // Keep the full portal search radius (so nearest portal selection is
+        // unchanged) but avoid serially waiting for up to 289 individual chunk
+        // reads. A bounded group of 8 concurrent loads improves cold
+        // Nether->Overworld preparation without overwhelming the LevelDB store.
+        // This runs in the virtual thread supplied by the portal caller.
+        long preloadStarted = System.nanoTime();
         int cx = flooredX >> 4;
         int cz = flooredZ >> 4;
+        var pendingLoads = new ArrayList<CompletableFuture<?>>(8);
         for (int dx = -searchChunkRadius; dx <= searchChunkRadius; dx++) {
             for (int dz = -searchChunkRadius; dz <= searchChunkRadius; dz++) {
-                targetDim.getChunkManager().getOrLoadChunk(cx + dx, cz + dz).join();
+                pendingLoads.add(targetDim.getChunkManager().getOrLoadChunk(cx + dx, cz + dz));
+                if (pendingLoads.size() == 8) {
+                    CompletableFuture.allOf(pendingLoads.toArray(CompletableFuture[]::new)).join();
+                    pendingLoads.clear();
+                }
             }
         }
+        if (!pendingLoads.isEmpty()) {
+            CompletableFuture.allOf(pendingLoads.toArray(CompletableFuture[]::new)).join();
+        }
 
-        // Search for existing portal using POI index
+        // Search for existing portal using the complete POI index.
         var poiPos = targetDim.findNearestPoi(PoiTypes.NETHER_PORTAL, flooredX, targetY, flooredZ, searchChunkRadius);
-        if (poiPos != null) {
+        log.debug("Nether portal destination prepared in {} ms: target={}, searchRadius={}, matchedExistingPortal={}",
+                (System.nanoTime() - preloadStarted) / 1_000_000,
+                targetDimType.getIdentifier(), searchChunkRadius, poiPos != null);
+        if (poiPos != null && (!forced ||
+                (Math.abs(poiPos.x() - flooredX) <= 2 &&
+                 Math.abs(poiPos.y() - targetY) <= 3 &&
+                 Math.abs(poiPos.z() - flooredZ) <= 2))) {
             // Find the bottom of the portal column
             int bottomY = poiPos.y();
             int minY = targetDim.getDimensionType().getMinHeight();
@@ -338,7 +391,14 @@ public class NetherPortalHelper {
         }
 
         // No portal found — create one
-        int safeY = findSafeY(targetDim, flooredX, targetY, flooredZ);
+        int safeY = forced
+                ? (isSuitableForPortal(targetDim, flooredX, targetY, flooredZ) ? targetY : -1)
+                : findSafeY(targetDim, flooredX, targetY, flooredZ);
+        if (safeY < 0) {
+            // The destination contains no appropriate free area for a portal.
+            // Do not carve into custom terrain or suffocate the arriving entity.
+            return failOnDimensionThread(entity);
+        }
         var createPos = new Vector3i(flooredX, safeY, flooredZ);
 
         // Compute portal interior positions and fire event before mutating the world
@@ -410,8 +470,8 @@ public class NetherPortalHelper {
             }
         }
 
-        // Fallback: just use the original Y
-        return Math.clamp(y, minY, maxY);
+        // No safe spot was found. An arbitrary fallback would overwrite terrain.
+        return -1;
     }
 
     private static boolean isSuitableForPortal(Dimension dimension, int x, int y, int z) {
@@ -419,16 +479,14 @@ public class NetherPortalHelper {
         for (int dx = -1; dx <= 2; dx++) {
             for (int dy = -1; dy <= 3; dy++) {
                 var type = dimension.getBlockState(x + dx, y + dy, z).getBlockType();
-                if (dy == -1) {
-                    // Bottom row: needs solid ground or we can place obsidian
+                if (dy == -1 || dx == -1 || dx == 2 || dy == 3) {
+                    // Only replace natural Nether terrain or air/old obsidian
+                    // with the new frame, never an arbitrary custom structure.
+                    if (type != BlockTypes.AIR && type != BlockTypes.OBSIDIAN &&
+                            type != BlockTypes.NETHERRACK) return false;
                     continue;
                 }
-                if (dx == -1 || dx == 2 || dy == 3) {
-                    // Frame edges: we'll replace these anyway
-                    continue;
-                }
-                // Interior should be air
-                if (type != BlockTypes.AIR) {
+                if (type != BlockTypes.AIR && type != BlockTypes.FIRE && type != BlockTypes.PORTAL) {
                     return false;
                 }
             }

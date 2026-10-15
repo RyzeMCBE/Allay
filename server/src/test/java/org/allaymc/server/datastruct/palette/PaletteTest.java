@@ -87,6 +87,54 @@ class PaletteTest {
         assertArrayEquals(bytes0, bytes1);
     }
 
+    @Test
+    void readsPocketMine4CustomItemApiZeroBitPaletteWithExtraLength() {
+        var defaultEntry = new Entry(47);
+        var written = new Palette<>(defaultEntry, BitArrayVersion.V0);
+        var vanilla = ByteBufAllocator.DEFAULT.buffer();
+        try {
+            written.writeToStorage(vanilla, PDSerializerImpl.INSTANCE);
+            assertEquals(0, vanilla.getUnsignedByte(0) >> 1);
+            assertEquals(10, vanilla.getUnsignedByte(1)); // NBT Compound
+            var legacy = ByteBufAllocator.DEFAULT.buffer();
+            try {
+                legacy.writeByte(vanilla.getUnsignedByte(0));
+                legacy.writeIntLE(1); // Illegal in vanilla, accepted in PM4.
+                legacy.writeBytes(vanilla, 1, vanilla.writerIndex() - 1);
+                // The next palette begins immediately after the legacy one.
+                // Reading the first must not consume even one byte of it.
+                written.writeToStorage(legacy, PDSerializerImpl.INSTANCE);
+
+                var recovered = new Palette<>(new Entry(0));
+                recovered.readFromStorage(legacy, PDDeserializerImpl.INSTANCE);
+                assertEquals(defaultEntry, recovered.get(0));
+                var second = new Palette<>(new Entry(0));
+                second.readFromStorage(legacy, PDDeserializerImpl.INSTANCE);
+                assertEquals(defaultEntry, second.get(0));
+                assertFalse(legacy.isReadable());
+            } finally {
+                legacy.release();
+            }
+        } finally {
+            vanilla.release();
+        }
+    }
+
+    @Test
+    void rejectsIncorrectSingleStateSizeInsteadOfSkippingUnrecognizedBytes() {
+        var input = ByteBufAllocator.DEFAULT.buffer();
+        try {
+            input.writeByte(0);
+            input.writeIntLE(2); // Not a supported legacy size.
+            input.writeByte(10);
+            var palette = new Palette<>(new Entry(0));
+            assertThrows(PaletteException.class,
+                    () -> palette.readFromStorage(input, PDDeserializerImpl.INSTANCE));
+        } finally {
+            input.release();
+        }
+    }
+
     record Entry(int id) {
     }
 

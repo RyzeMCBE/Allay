@@ -26,6 +26,8 @@ public final class Palette<V> {
 
     private static final int SECTION_SIZE = 16 * 16 * 16;
     private static final BitArrayVersion INITIAL_VERSION = BitArrayVersion.V0;
+    private static final java.util.concurrent.atomic.AtomicBoolean LOGGED_LEGACY_ZERO_BIT_PALETTE =
+            new java.util.concurrent.atomic.AtomicBoolean();
 
     private List<V> palette;
     private BitArray bitArray;
@@ -176,6 +178,26 @@ public final class Palette<V> {
         var version = getVersionFromPaletteHeader(header);
         readWords(byteBuf, version);
         if (version == BitArrayVersion.V0) {
+            // PocketMine-MP 4 accepted a malformed 0-bits palette written by
+            // CustomItemAPI: a four-byte LE size (always 1) precedes the single
+            // block-state NBT tag. Bedrock/modern PocketMine omit that size.
+            // Only recognize the exact legacy signature. Anything else stays
+            // untouched and is handled by the normal NBT reader.
+            if (byteBuf.readableBytes() >= 5 &&
+                    byteBuf.getUnsignedByte(byteBuf.readerIndex()) != 10 &&
+                    byteBuf.getIntLE(byteBuf.readerIndex()) == 1 &&
+                    byteBuf.getUnsignedByte(byteBuf.readerIndex() + Integer.BYTES) == 10) {
+                byteBuf.skipBytes(Integer.BYTES);
+                if (LOGGED_LEGACY_ZERO_BIT_PALETTE.compareAndSet(false, true)) {
+                    log.warn("Reading legacy PocketMine-MP 4 / CustomItemAPI single-state " +
+                            "palette with an unexpected 4-byte length prefix; " +
+                            "the original LevelDB data is preserved until normal chunk save");
+                }
+            }
+            if (!byteBuf.isReadable() || byteBuf.getUnsignedByte(byteBuf.readerIndex()) != 10) {
+                throw new PaletteException("Block palette is missing its NBT Compound after " +
+                        "the singleton header (or has an unsupported legacy length prefix)");
+            }
             this.palette.add(deserializer.deserialize(byteBuf));
             return;
         }

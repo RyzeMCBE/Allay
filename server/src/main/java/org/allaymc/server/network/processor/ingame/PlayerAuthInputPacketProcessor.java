@@ -470,6 +470,16 @@ public class PlayerAuthInputPacketProcessor extends PacketProcessor<PlayerAuthIn
         }
 
         if (isLocationChanged(player, packet.getPosition(), packet.getRotation())) {
+            // Only verified physical displacement after the client's loading
+            // screen ended should release portal protection. Rotation alone
+            // is not proof that the player has regained movement control.
+            var location = player.getControlledEntity().getLocation();
+            double dx = packet.getPosition().getX() - location.x();
+            double dy = packet.getPosition().getY() - PLAYER_NETWORK_OFFSET - location.y();
+            double dz = packet.getPosition().getZ() - location.z();
+            if (dx * dx + dy * dy + dz * dz > 0.0025) {
+                ((AllayPlayer) player).onValidatedDimensionMovement();
+            }
             // The pos which the client sends to the server is higher than the actual coordinates (one base offset)
             handleMovement(player, packet.getPosition().sub(0, PLAYER_NETWORK_OFFSET, 0), packet.getRotation());
         }

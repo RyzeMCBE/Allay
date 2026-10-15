@@ -23,6 +23,7 @@ import org.allaymc.api.math.location.Location3ic;
 import org.allaymc.api.message.TrContainer;
 import org.allaymc.api.player.GameMode;
 import org.allaymc.api.player.Player;
+import org.allaymc.api.player.ClientState;
 import org.allaymc.api.player.PlayerAbility;
 import org.allaymc.api.player.Skin;
 import org.allaymc.api.primitiveshape.PrimitiveShape;
@@ -603,13 +604,29 @@ public class EntityPlayerBaseComponentImpl extends EntityBaseComponentImpl imple
     }
 
     @Override
+    protected void tickPortal() {
+        // The entity can tick while the client is only SPAWNED. Starting a
+        // ChangeDimensionPacket then overlaps the initial login screen and
+        // SetLocalPlayerAsInitializedPacket. Never start a portal transition
+        // until the real client has finished joining.
+        if (!PortalEntryGate.mayTickPortal(
+                isActualPlayer(),
+                controller == null ? null : controller.getClientState(),
+                controller != null && controller.isChangingDimension())) {
+            portalTicks = 0;
+            inNetherPortal = false;
+            return;
+        }
+        super.tickPortal();
+    }
+
+    @Override
     protected void performNetherPortalTeleport() {
         if (!isActualPlayer()) {
             super.performNetherPortalTeleport();
             return;
         }
 
-        // Determine target dimension to show loading screen early
         var world = thisEntity.getWorld();
         var currentDimType = thisEntity.getDimension().getDimensionType();
         Dimension targetDim;
@@ -622,28 +639,59 @@ public class EntityPlayerBaseComponentImpl extends EntityBaseComponentImpl imple
         }
         if (targetDim == null) return;
 
-        if (!new EntityPortalEnterEvent(thisEntity, EntityPortalEnterEvent.PortalType.NETHER).call()) {
+        var portalEvent = new EntityPortalEnterEvent(thisEntity, EntityPortalEnterEvent.PortalType.NETHER);
+        if (!portalEvent.call()) {
             return;
         }
+        // Resolve plugin configuration on the owning dimension thread, before
+        // async chunk loading. Never fire HCF callbacks from the worker.
+        var requestedDestination = portalEvent.getDestinationOverride() == null
+                ? null : new org.allaymc.api.math.location.Location3d(portalEvent.getDestinationOverride());
 
-        portalCooldown = PORTAL_COOLDOWN_TICKS;
-        portalTicks = 0;
+        // The guard outlives the 300-tick cooldown: another transfer is
+        // impossible until the previous one finishes AND the portal is exited.
+        beginNetherPortalTransfer();
 
-        // Send dimension change screen immediately so the client shows the loading UI
-        // while chunks are being loaded asynchronously in the target dimension
-        var loc = thisEntity.getLocation();
-        var targetDimType = targetDim.getDimensionType();
-        double targetX = NetherPortalHelper.scaleCoordinate(loc.x(), currentDimType, targetDimType);
-        double targetZ = NetherPortalHelper.scaleCoordinate(loc.z(), currentDimType, targetDimType);
-        this.controller.beginDimensionChange(targetDimType, targetX, loc.y(), targetZ);
-
+        // Do NOT announce a dimension change at the scaled *approximate* position.
+        // NetherPortalHelper may find a real portal several blocks away, create
+        // one at a safer Y, or a teleport event may change its destination.
+        // Announcing one position and later sending MovePlayerPacket to another
+        // desynchronizes Bedrock's transfer/loading handshake (observed when
+        // returning from Nether to Overworld).
+        //
+        // Load and resolve the destination asynchronously first. The existing
+        // teleportOverDimension() sends ChangeDimensionPacket with the final
+        // event-adjusted location, before publishing destination chunks.
         Server.getInstance().getVirtualThreadPool().submit(() -> {
-            NetherPortalHelper.teleport(thisEntity).thenAccept(success -> {
-                if (!success) {
-                    portalCooldown = 0;
-                    this.controller.completeDimensionChange();
-                }
-            });
+            try {
+                NetherPortalHelper.teleport(thisEntity, requestedDestination).whenComplete((success, error) -> {
+                    if (error == null && Boolean.TRUE.equals(success)) {
+                        // The entity is temporarily DESPAWNED_LATER/DESPAWNED
+                        // while transferring between dimensions. Tasks created
+                        // by a despawned entity are cancelled by AllayScheduler,
+                        // so NEVER defer a successful guard release with runLater.
+                        // The synchronized guard can safely finish on this thread.
+                        finishNetherPortalTransfer(true);
+                        log.debug("Nether portal transfer finished for {}", thisPlayer.getDisplayName());
+                        return;
+                    }
+                    // The entity never left the source dimension on failure;
+                    // schedule the cooldown reset on its owning tick thread.
+                    thisEntity.getScheduler().runLater(thisEntity, () -> {
+                        if (error != null) {
+                            log.error("Player Nether portal transfer failed", error);
+                        }
+                        finishNetherPortalTransfer(false);
+                        ((AllayPlayer) this.controller).abortDimensionChange();
+                    });
+                });
+            } catch (RuntimeException error) {
+                log.error("Player Nether portal destination could not be loaded", error);
+                thisEntity.getScheduler().runLater(thisEntity, () -> {
+                    finishNetherPortalTransfer(false);
+                    ((AllayPlayer) this.controller).abortDimensionChange();
+                });
+            }
         });
     }
 
@@ -668,13 +716,19 @@ public class EntityPlayerBaseComponentImpl extends EntityBaseComponentImpl imple
                     // ChangeDimensionPacket was not sent early — send it now
                     this.controller.beginDimensionChange(targetDim.getDimensionType(), target.x(), target.y(), target.z());
                 }
-                targetDim.addPlayer(this.controller, () -> {
+                Runnable afterSpawn = () -> {
                     if (dimensionChanged) {
-                        // As of v1.19.50, the dimension ack is sent by the server after dimension transfer completes
+                        // After the player is registered in the destination, but
+                        // before the target dimension starts publishing chunks.
                         this.controller.completeDimensionChange();
                     }
                     this.controller.viewEntityLocation(thisPlayer, location, true);
-                });
+                };
+                if (dimensionChanged) {
+                    targetDim.addPlayerForDimensionChange(this.controller, afterSpawn);
+                } else {
+                    targetDim.addPlayer(this.controller, afterSpawn);
+                }
             });
         } else {
             super.teleportOverDimension(target);

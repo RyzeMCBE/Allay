@@ -24,6 +24,7 @@ import org.allaymc.api.entity.effect.EffectType;
 import org.allaymc.api.entity.effect.EffectTypes;
 import org.allaymc.api.entity.interfaces.EntityLiving;
 import org.allaymc.api.entity.interfaces.EntityPlayer;
+import org.allaymc.server.player.AllayPlayer;
 import org.allaymc.api.eventbus.EventHandler;
 import org.allaymc.api.eventbus.event.entity.*;
 import org.allaymc.api.item.ItemStack;
@@ -141,6 +142,14 @@ public class EntityLivingComponentImpl implements EntityLivingComponent {
 
     @Override
     public boolean attack(DamageContainer damage, boolean ignoreCoolDown) {
+        // A player protected by the loading-screen immunity must not gain a
+        // PvP advantage by attacking while their own character is invulnerable.
+        if (damage.getAttacker() instanceof EntityPlayer attacker
+                && attacker.isActualPlayer()
+                && attacker.getController() instanceof AllayPlayer controller
+                && controller.isDimensionTransferDamageProtected()) {
+            return false;
+        }
         if (!thisEntity.isAlive() ||
             !canBeAttacked(damage) ||
             !checkAndUpdateCoolDown(damage, ignoreCoolDown)) {

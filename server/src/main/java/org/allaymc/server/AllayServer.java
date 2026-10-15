@@ -190,6 +190,16 @@ public final class AllayServer implements Server {
 
         this.pluginManager.loadPlugins();
         this.worldPool.loadWorlds();
+        // A server with no default world must not advertise a working network
+        // endpoint or enable plugins that require a valid Overworld.
+        if (this.worldPool.getDefaultWorld() == null ||
+                this.worldPool.getDefaultWorld().getOverWorld() == null) {
+            throw new IllegalStateException(
+                    "The configured default world could not be loaded. " +
+                    "Check the preceding world storage errors and resolve conflicting " +
+                    "SHARED/SEPARATE dimension data before starting the server."
+            );
+        }
         this.scoreboardManager.read();
         this.pluginManager.enablePlugins();
 

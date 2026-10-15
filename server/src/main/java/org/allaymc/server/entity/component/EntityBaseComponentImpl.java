@@ -140,6 +140,9 @@ public class EntityBaseComponentImpl implements EntityBaseComponent {
     @Getter
     protected long tick;
 
+    // A timer alone does not prevent looping when the destination is also a portal.
+    protected final NetherPortalReentryGuard netherPortalReentryGuard = new NetherPortalReentryGuard();
+
     public EntityBaseComponentImpl(EntityInitInfo info) {
         this.location = new Location3d(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, info.dimension());
         this.lastLocation = new Location3d(this.location);
@@ -205,8 +208,15 @@ public class EntityBaseComponentImpl implements EntityBaseComponent {
     }
 
     protected void tickPortal() {
-        if (portalCooldown > 0) {
+        // Observe portal contact even while cooling down. Otherwise, we cannot
+        // distinguish remaining in the destination portal from leaving it.
+        boolean reentryBlocked = netherPortalReentryGuard.blocksEntry(inNetherPortal);
+        boolean coolingDown = portalCooldown > 0;
+        if (coolingDown) {
             portalCooldown--;
+        }
+        if (coolingDown || reentryBlocked) {
+            portalTicks = 0;
             inNetherPortal = false;
             return;
         }
@@ -231,28 +241,59 @@ public class EntityBaseComponentImpl implements EntityBaseComponent {
             portalTicks = 0;
         }
 
-        // Reset flag — will be set again by the portal block's onEntityInside next tick
+        // The block collision pass will update this flag for the next tick.
         inNetherPortal = false;
     }
 
-    protected void performNetherPortalTeleport() {
-        if (!new EntityPortalEnterEvent(thisEntity, EntityPortalEnterEvent.PortalType.NETHER).call()) {
-            return;
-        }
-
-        // Set cooldown immediately to prevent re-entry while async teleport is in progress
+    protected void beginNetherPortalTransfer() {
+        netherPortalReentryGuard.beginTransfer();
         portalCooldown = PORTAL_COOLDOWN_TICKS;
         portalTicks = 0;
+    }
 
-        // Run teleport in a virtual thread to avoid blocking the dimension tick thread
-        // while loading chunks in the target dimension
+    protected void finishNetherPortalTransfer(boolean success) {
+        netherPortalReentryGuard.finishTransfer(success);
+        if (!success) {
+            portalCooldown = 0;
+        }
+    }
+
+    protected void performNetherPortalTeleport() {
+        var portalEvent = new EntityPortalEnterEvent(thisEntity, EntityPortalEnterEvent.PortalType.NETHER);
+        if (!portalEvent.call()) {
+            return;
+        }
+        // Snapshot on the owning dimension thread; plugins must not be
+        // accessed from the virtual thread that performs chunk I/O.
+        var requestedDestination = portalEvent.getDestinationOverride() == null
+                ? null : new Location3d(portalEvent.getDestinationOverride());
+
+        beginNetherPortalTransfer();
+
+        // Loading must not block the dimension tick, and a failed future must
+        // always unlock the guard on the entity's owning scheduler.
         Server.getInstance().getVirtualThreadPool().submit(() -> {
-            NetherPortalHelper.teleport(thisEntity).thenAccept(success -> {
-                if (!success) {
-                    // Teleport failed, reset cooldown so entity can try again
-                    portalCooldown = 0;
-                }
-            });
+            try {
+                NetherPortalHelper.teleport(thisEntity, requestedDestination).whenComplete((success, error) -> {
+                    if (error == null && Boolean.TRUE.equals(success)) {
+                        // A successful teleport may despawn the entity during
+                        // its dimension handoff. Entity-owned scheduled tasks
+                        // are invalid at that point and would leave the reentry
+                        // guard permanently pending. The guard is synchronized.
+                        finishNetherPortalTransfer(true);
+                        return;
+                    }
+                    thisEntity.getScheduler().runLater(thisEntity, () -> {
+                        if (error != null) {
+                            log.error("Nether portal transfer failed while loading destination chunks", error);
+                        }
+                        finishNetherPortalTransfer(false);
+                    });
+                });
+            } catch (RuntimeException error) {
+                log.error("Nether portal cannot load destination; teleport aborted", error);
+                thisEntity.getScheduler().runLater(thisEntity, () -> finishNetherPortalTransfer(false));
+            }
         });
     }
 
