@@ -11,6 +11,11 @@ on:
         required: true
         default: 'v0.14.2-beta.1'
         type: string
+      publish_existing_release:
+        description: 'Completar un release existente con JAR y SHA-256 sin sobrescribir archivos'
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: write
@@ -26,11 +31,13 @@ jobs:
     timeout-minutes: 40
     env:
       RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.version_tag || github.ref_name }}
+      REPAIR_EXISTING: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_existing_release || false }}
 
     steps:
       - name: Descargar código con Protocol y StateUpdater
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_existing_release && inputs.version_tag || github.ref }}
           submodules: recursive
           fetch-depth: 0
 
@@ -61,13 +68,20 @@ jobs:
             exit 1
           fi
 
-          if [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
-            git fetch origin main
-            if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+          source_sha="$(git rev-parse HEAD)"
+          if [[ "$GITHUB_EVENT_NAME" == "push" || "$REPAIR_EXISTING" == "true" ]]; then
+            git fetch origin main --tags
+            tagged_sha="$(git rev-parse "refs/tags/${tag}^{commit}")"
+            if [[ "$source_sha" != "$tagged_sha" ]]; then
+              echo "::error::La revisión compilada debe ser exactamente la del tag $tag."
+              exit 1
+            fi
+            if ! git merge-base --is-ancestor "$source_sha" FETCH_HEAD; then
               echo "::error::El tag debe apuntar a un commit integrado en main."
               exit 1
             fi
           fi
+          echo "RELEASE_SOURCE_SHA=$source_sha" >> "$GITHUB_ENV"
 
           if [[ "$version" == *-beta.* ]]; then
             channel=beta
@@ -115,7 +129,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: allay-tests-${{ github.sha }}
+          name: allay-tests-${{ env.RELEASE_SOURCE_SHA }}
           path: |
             server/build/test-results/test/**
             server/build/reports/tests/test/**
@@ -124,27 +138,43 @@ jobs:
       - name: Adjuntar JAR al workflow
         uses: actions/upload-artifact@v6
         with:
-          name: allay-${{ env.RELEASE_VERSION }}-${{ github.sha }}
+          name: allay-${{ env.RELEASE_VERSION }}-${{ env.RELEASE_SOURCE_SHA }}
           path: |
             dist/Allay-*.jar
             dist/Allay-*.sha256
           if-no-files-found: error
           retention-days: 90
 
-      - name: Crear GitHub Release con el JAR
-        if: github.event_name == 'push'
+      - name: Crear o completar GitHub Release con el JAR
+        if: github.event_name == 'push' || inputs.publish_existing_release
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
+          assets=("Allay-${RELEASE_VERSION}.jar" "Allay-${RELEASE_VERSION}.jar.sha256")
+
           if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
-            echo "::error::Este release ya existe. No se sobreescriben versiones publicadas."
+            echo "El release $RELEASE_TAG ya existe. Se conservarán su descripción y los archivos publicados."
+            mapfile -t uploaded < <(gh release view "$RELEASE_TAG" --json assets --jq '.assets[].name')
+            for asset in "${assets[@]}"; do
+              if printf '%s\n' "${uploaded[@]}" | grep -Fxq "$asset"; then
+                echo "Ya existe $asset; no se modifica."
+                continue
+              fi
+              gh release upload "$RELEASE_TAG" "dist/$asset"
+              echo "Archivo adjuntado: $asset"
+            done
+            exit 0
+          fi
+
+          if [[ "$GITHUB_EVENT_NAME" != "push" ]]; then
+            echo "::error::La recuperación manual solo completa releases existentes; no crea etiquetas ni releases nuevos."
             exit 1
           fi
 
-          args=(--verify-tag --target "$GITHUB_SHA" \
+          args=(--verify-tag --target "$RELEASE_SOURCE_SHA" \
             --title "RyzeMCBE Allay $RELEASE_VERSION")
           notes_file="docs/releases/${RELEASE_TAG}.md"
           if [[ -f "$notes_file" ]]; then
@@ -157,6 +187,6 @@ jobs:
           fi
 
           gh release create "$RELEASE_TAG" \
-            "dist/Allay-${RELEASE_VERSION}.jar" \
-            "dist/Allay-${RELEASE_VERSION}.jar.sha256" \
+            "dist/${assets[0]}" \
+            "dist/${assets[1]}" \
             "${args[@]}"
