@@ -95,15 +95,15 @@ worlds:
         generator-preset: ''
       minecraft:nether:
         path: world-nether
-        generator-type: NETHER
+        generator-type: VOID
         generator-preset: ''
       minecraft:the_end:
         path: world-end
-        generator-type: THE_END
+        generator-type: VOID
         generator-preset: ''
 ```
 
-Las rutas son relativas a la carpeta de mundos y deben corresponder a la estructura real de tus mapas. **Detén el servidor y guarda una copia completa de los mundos antes de importar un mapa o alternar entre `SHARED` y `SEPARATE`.** La verificación final de un mapa importado debe realizarse dentro del juego.
+Las rutas son relativas a la carpeta de mundos y deben corresponder a la estructura real de tus mapas. Para mapas personalizados ya construidos, el ejemplo usa `VOID` en Nether y End para no generar terreno adicional; **el registro de generadores de este núcleo contiene actualmente `VOID` y `FLAT`, no generadores llamados `NETHER` o `THE_END`**. **Detén el servidor y guarda una copia completa de los mundos antes de importar un mapa o alternar entre `SHARED` y `SEPARATE`.** La verificación final de un mapa importado debe realizarse dentro del juego.
 
 ## 🚪 Portales Nether y End
 
