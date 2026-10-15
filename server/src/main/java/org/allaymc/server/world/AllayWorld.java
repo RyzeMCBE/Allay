@@ -266,14 +266,8 @@ public class AllayWorld implements World {
         var dimensions = dimensionMap.values();
         if (TICK_DIMENSION_IN_PARALLEL && dimensions.size() > 1) {
             var server = Server.getInstance();
-            // Dimension ticks must not occupy compute workers: inside each dimension,
-            // entity AI and physics submit additional jobs to that same compute pool
-            // and wait for them. With a small pool this nests blocking joins and can
-            // stall the world tick (including all inbound chat and inventory handling).
-            // Using the existing virtual-thread executor only for the outer dimension
-            // tasks leaves compute workers available for the nested physics jobs.
             Utils.forEachInParallel(
-                    dimensions, server.getVirtualThreadPool(),
+                    dimensions, virtualTickingThread ? server.getVirtualThreadPool() : server.getComputeThreadPool(),
                     dimension -> ((AllayDimension) dimension).tick(currentTick)
             ).join();
         } else {
