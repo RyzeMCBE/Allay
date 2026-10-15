@@ -123,7 +123,7 @@ Las pruebas unitarias cubren la inmunidad durante una pantalla de carga de 30 se
 
 ## 📌 Versiones de la API y del servidor
 
-La configuración actual ([`gradle.properties`](gradle.properties)) declara `server.version=0.14.1`, `api.version=0.30.0` y `allay.is-dev-build=true`. Estas son las versiones del proyecto; la versión de **Minecraft Bedrock** es independiente. Consulta el [historial de cambios](CHANGELOG.md) para antecedentes de versiones anteriores.
+La configuración actual ([`gradle.properties`](gradle.properties)) declara `server.version=0.14.2`, `api.version=0.30.0` y `allay.is-dev-build=true`. Estas son las versiones del proyecto; la versión de **Minecraft Bedrock** es independiente. Consulta el [historial de cambios](CHANGELOG.md) y las [notas de v0.14.2](docs/releases/v0.14.2.md), que detallan los cambios y las revisiones de Protocol/StateUpdater fijadas para esta versión.
 
 ## 🏗️ Estructura del repositorio
 

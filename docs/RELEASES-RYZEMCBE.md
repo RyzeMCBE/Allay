@@ -8,13 +8,12 @@ La publicación automática está configurada en
 
 | Canal | Etiqueta | Resultado |
 | --- | --- | --- |
-| Beta | `v0.14.1-beta.1` | GitHub Release marcado como **Pre-release**, con `Allay-0.14.1-beta.1.jar` |
-| Beta siguiente | `v0.14.1-beta.2` | Nueva pre-release con su JAR propio |
-| Oficial | `v0.14.1` | GitHub Release **estable** con `Allay-0.14.1.jar` |
+| Beta | `v0.14.2-beta.1` | GitHub Release marcado como **Pre-release**, con `Allay-0.14.2-beta.1.jar` |
+| Beta siguiente | `v0.14.2-beta.2` | Nueva pre-release con su JAR propio |
+| Oficial | `v0.14.2` | GitHub Release **estable** con `Allay-0.14.2.jar` |
 
 La versión base debe coincidir con `server.version` en `gradle.properties`
-del commit etiquetado (actualmente `0.14.1`). Para la versión `0.14.2`,
-modifica primero esa propiedad en `main` y verifica su compilación.
+del commit etiquetado (actualmente `0.14.2`). Para una versión posterior, actualiza primero esa propiedad en `main` y verifica su compilación.
 
 No se usa `api-v...` para publicar el servidor. Ese formato sigue reservado
 para publicar versiones de la API Maven mediante `publish-api.yml`.
@@ -23,8 +22,8 @@ para publicar versiones de la API Maven mediante `publish-api.yml`.
 
 1. En [RyzeMCBE/Allay](https://github.com/RyzeMCBE/Allay), entra a
    **Releases → Draft a new release**.
-2. En **Choose a tag**, escribe `v0.14.1-beta.1` para beta o
-   `v0.14.1` para oficial.
+2. En **Choose a tag**, escribe `v0.14.2-beta.1` para beta o
+   `v0.14.2` para oficial.
 3. Crea la etiqueta apuntando al commit deseado de `main`. **No marques
    una release manual sin artefactos**: el flujo de Actions necesita crearla
    tras probar el software.
@@ -40,8 +39,8 @@ git clone --recurse-submodules https://github.com/RyzeMCBE/Allay.git
 cd Allay
 git switch main
 git pull --ff-only
-git tag v0.14.1-beta.1
-git push origin v0.14.1-beta.1
+git tag v0.14.2-beta.1
+git push origin v0.14.2-beta.1
 ```
 
 Para la versión oficial, una vez verificada la beta:
@@ -69,7 +68,7 @@ Al recibir un tag `vX.Y.Z` o `vX.Y.Z-beta.N`:
    `Allay-<versión>.jar.sha256` al run de Actions.
 6. Crea un [GitHub Release](https://github.com/RyzeMCBE/Allay/releases),
    marcado como preliminar para las betas y oficial para las estables,
-   con los mismos dos archivos descargables.
+   con los mismos dos archivos descargables y las notas de `docs/releases/<tag>.md` si existen.
 
 **Nunca publica JAR si la compilación o las pruebas fallan.**
 La versión oficial se compila con `allay.is-dev-build=false` sin cambiar
@@ -79,7 +78,7 @@ se conservan en Actions para diagnósticos.
 ## Probar el workflow sin publicar una release
 
 Desde **Actions → Allay · Beta y versión oficial → Run workflow**,
-selecciona `main` e ingresa `v0.14.1-beta.1` como `version_tag`.
+selecciona `main` e ingresa `v0.14.2-beta.1` como `version_tag`.
 La ejecución manual realiza las validaciones, pruebas y genera el JAR
 en **Artifacts**, pero **no publica una GitHub Release** ni crea una etiqueta.
 Es recomendable ejecutar primero esta prueba antes de publicar tags reales.
@@ -89,8 +88,8 @@ Es recomendable ejecutar primero esta prueba antes de publicar tags reales.
 Tras descargar el JAR y el archivo SHA-256 del mismo lanzamiento:
 
 ```bash
-sha256sum -c Allay-0.14.1-beta.1.jar.sha256
-java -jar Allay-0.14.1-beta.1.jar
+sha256sum -c Allay-0.14.2-beta.1.jar.sha256
+java -jar Allay-0.14.2-beta.1.jar
 ```
 
 La suma SHA-256 valida la integridad de la descarga, pero una compilación
@@ -109,5 +108,5 @@ El versionado de la API es independiente del servidor:
 `api.version` se mantiene en `gradle.properties` y su publicación
 Maven se gestiona mediante
 [`publish-api.yml`](../.github/workflows/publish-api.yml).
-Un tag de servidor `v0.14.1` **no publica** por sí solo una versión
+Un tag de servidor `v0.14.2` **no publica** por sí solo una versión
 nueva de la API.

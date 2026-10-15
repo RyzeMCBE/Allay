@@ -8,7 +8,32 @@ Each release is associated with a specific API version, and any changes to API w
 
 Unless otherwise specified, any version comparison below is the comparison of the server version, not the API version.
 
-# 0.14.1 (API 0.30.0) - Unreleased
+# 0.14.2 (API 0.30.0) - Unreleased
+
+<small>[Cambios desde v0.14.1](https://github.com/RyzeMCBE/Allay/compare/v0.14.1...main)</small>
+
+### Added
+
+- Soporte de Bedrock internacional hasta 1.26.52 (protocolo 2193), con versiones anteriores registradas y paletas específicas.
+- Almacenamiento de dimensiones `SHARED`/`SEPARATE` en LevelDB, importaciones/conversiones y rutas independientes para mapas personalizados.
+- Destinos configurables por plugins para portales Nether y End con `EntityPortalEnterEvent#setDestinationOverride`.
+- Inmunidad temporal durante pantallas de carga entre dimensiones; protege de daño y evita atacar mientras se mantiene la inmunidad.
+
+### Fixed
+
+- Sincronización de portales Nether/End, selección de llegada, control de reentrada y orden de los chunks del destino.
+- Llegada segura a mapas End personalizados y compatibilidad con paletas/subchunks heredados de PocketMine.
+- Retirada de registros de diagnóstico temporales de dimensiones, carga y rotura de bloques, conservando los errores relevantes.
+
+### Dependencies and release
+
+- `protocol-local` actualizado al commit verificado de `RyzeMCBE/Protocol` `4e8dd8a` (solo regresiones del protocolo 2193, sin serializers experimentales).
+- `stateupdater-local` se mantiene en `RyzeMCBE/StateUpdater` `3236cc0`.
+- Publicación automatizada con JAR, SHA-256 y notas específicas de versión.
+
+> La compilación no sustituye pruebas en juego para todas las combinaciones de mapas, versiones Bedrock y plugins.
+
+# 0.14.1 (API 0.30.0) - 2026/10/09
 
 <small>[Compare with 0.14.0](https://github.com/AllayMC/Allay/compare/0.14.0...HEAD)</small>
 

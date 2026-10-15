@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       version_tag:
-        description: 'Versión para simular sin publicar (v0.14.1-beta.1 o v0.14.1)'
+        description: 'Versión para simular sin publicar (v0.14.2-beta.1 o v0.14.2)'
         required: true
-        default: 'v0.14.1-beta.1'
+        default: 'v0.14.2-beta.1'
         type: string
 
 permissions:
@@ -145,7 +145,13 @@ jobs:
           fi
 
           args=(--verify-tag --target "$GITHUB_SHA" \
-            --title "RyzeMCBE Allay $RELEASE_VERSION" --generate-notes)
+            --title "RyzeMCBE Allay $RELEASE_VERSION")
+          notes_file="docs/releases/${RELEASE_TAG}.md"
+          if [[ -f "$notes_file" ]]; then
+            args+=(--notes-file "$notes_file")
+          else
+            args+=(--generate-notes)
+          fi
           if [[ "$RELEASE_CHANNEL" == "beta" ]]; then
             args+=(--prerelease)
           fi
