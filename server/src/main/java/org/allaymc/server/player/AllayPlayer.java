@@ -125,6 +125,7 @@ public class AllayPlayer implements Player {
     private final Object protocolLifecycleLock = new Object();
     private final Object chunkPublisherLock = new Object();
     private NetworkChunkPublisherUpdatePacket lastChunkPublisherUpdate;
+    private final DimensionTransferProtection dimensionTransferProtection = new DimensionTransferProtection();
     private volatile long lastDimensionChangeStartedNanos;
     @Getter
     protected volatile ProtocolSession protocolSession;
@@ -1280,9 +1281,32 @@ public class AllayPlayer implements Player {
         sendPacket(getProtocol().getEncoder().encodeFogStack(fogStack));
     }
 
+    /**
+     * Observes the client's loading screen. The packet is client-to-server;
+     * it is never used to forcibly close the UI.
+     */
+    public void onTransferLoadingScreenEnded() {
+        dimensionTransferProtection.screenEnded(System.nanoTime());
+    }
+
+    /**
+     * A movement packet has passed teleport-position and location validation.
+     * Only actual position displacement (not a head turn) counts as movement.
+     */
+    public void onValidatedDimensionMovement() {
+        if (dimensionTransferProtection.movementAccepted(System.nanoTime())) {
+            log.debug("Player {} regained control after dimension loading", getOriginName());
+        }
+    }
+
+    public boolean isDimensionTransferDamageProtected() {
+        return dimensionTransferProtection.isProtected(System.nanoTime());
+    }
+
     @Override
     public void beginDimensionChange(DimensionType targetDimType, double x, double y, double z) {
         synchronized (chunkPublisherLock) {
+            dimensionTransferProtection.begin(System.nanoTime());
             lastChunkPublisherUpdate = null;
             pendingChunkDimension = targetDimType;
             changingDimension = true;
@@ -1328,6 +1352,9 @@ public class AllayPlayer implements Player {
             var loc = this.controlledEntity.getLocation();
             var actual = this.controlledEntity.getDimension().getDimensionType();
             lastChunkPublisherUpdate = null;
+            // A failed transfer restores the original dimension but the client
+            // still needs to process its recovery loading screen.
+            dimensionTransferProtection.begin(System.nanoTime());
             sendPacket(getProtocol().getEncoder().encodeDimensionChange(actual, loc.x(), loc.y(), loc.z()));
             sendPacket(getProtocol().getEncoder().encodeDimensionChangeSuccess(
                     this.controlledEntity.getRuntimeId()
