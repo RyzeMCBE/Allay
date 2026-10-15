@@ -29,8 +29,8 @@ para publicar versiones de la API Maven mediante `publish-api.yml`.
    tras probar el software.
 4. En vez de publicar manualmente la release desde el formulario, puedes crear
    solo la etiqueta mediante **Git**, como se muestra a continuación.
-   Crear o publicar una release manual antes de que finalice Actions puede
-   provocar que la publicación automatizada se rechace porque ya existe.
+   Si ya publicaste una release sin adjuntar el JAR, ahora puedes recuperarla
+   sin cambiar el tag mediante la ejecución manual descrita más abajo.
 
 **Procedimiento recomendado (Git):**
 
@@ -48,12 +48,14 @@ Para la versión oficial, una vez verificada la beta:
 ```bash
 git switch main
 git pull --ff-only
-git tag v0.14.1
-git push origin v0.14.1
+git tag v0.14.2
+git push origin v0.14.2
 ```
 
-**No recrees ni muevas etiquetas ya publicadas.** Utiliza una beta nueva o
-incrementa la versión para una nueva versión estable.
+**No recrees ni muevas etiquetas ya publicadas.** Los ejemplos anteriores
+solo se usan si la etiqueta todavía no existe. Si `v0.14.2` ya existe, no vuelvas
+a crearla: usa la recuperación descrita abajo. Para una versión futura utiliza
+una etiqueta y versión nuevas.
 
 ## Qué realiza GitHub Actions
 
@@ -69,6 +71,8 @@ Al recibir un tag `vX.Y.Z` o `vX.Y.Z-beta.N`:
 6. Crea un [GitHub Release](https://github.com/RyzeMCBE/Allay/releases),
    marcado como preliminar para las betas y oficial para las estables,
    con los mismos dos archivos descargables y las notas de `docs/releases/<tag>.md` si existen.
+   Si el release ya existe, **adjunta solo los archivos que faltan** sin
+   reemplazar su contenido, sus notas ni sus archivos publicados.
 
 **Nunca publica JAR si la compilación o las pruebas fallan.**
 La versión oficial se compila con `allay.is-dev-build=false` sin cambiar
@@ -82,6 +86,35 @@ selecciona `main` e ingresa `v0.14.2-beta.1` como `version_tag`.
 La ejecución manual realiza las validaciones, pruebas y genera el JAR
 en **Artifacts**, pero **no publica una GitHub Release** ni crea una etiqueta.
 Es recomendable ejecutar primero esta prueba antes de publicar tags reales.
+
+## Recuperar un release ya publicado sin JAR
+
+Si el tag `v0.14.2` ya existe y la publicación manual dejó una release sin
+archivos, **no borres ni muevas la etiqueta ni vuelvas a publicar el release**.
+La compilación de la etiqueta puede haber terminado correctamente aunque el paso
+de publicación haya fallado al detectar que ya existía una release.
+
+En GitHub:
+
+1. Abre [Actions → Allay · Beta y versión oficial](https://github.com/RyzeMCBE/Allay/actions/workflows/release.yml).
+2. Selecciona **Run workflow** y elige la rama **`main`**, porque allí está la
+   corrección del procedimiento de publicación.
+3. En **version_tag**, escribe **`v0.14.2`**.
+4. Marca **`publish_existing_release`** como **true**.
+5. Ejecuta el workflow. Este comprueba que el tag existe, descarga exactamente
+   el commit etiquetado con sus submódulos, compila, ejecuta pruebas, genera
+   `Allay-0.14.2.jar` y el SHA-256, y adjunta únicamente los archivos ausentes
+   de la release existente.
+
+La recuperación **no sobrescribe** los assets ya publicados ni altera las
+notas manuales del release. Si seleccionas `publish_existing_release=false`,
+el workflow solo compila y conserva los artefactos en Actions, sin publicarlos.
+La recuperación manual nunca crea automáticamente un release que no existe.
+
+**Importante:** si el workflow había fallado en un tag antes de incorporar
+esta corrección, **reintentar aquel workflow antiguo reutilizará su definición
+original**. Para recuperar `v0.14.2`, usa **Run workflow en `main`** y la
+opción `publish_existing_release=true`.
 
 ## Verificar el archivo
 
