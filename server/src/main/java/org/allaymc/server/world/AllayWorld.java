@@ -68,6 +68,11 @@ public class AllayWorld implements World {
     @Getter
     protected final Thread worldThread;
 
+    // Diagnostic branch only: the watchdog runs independently from the world tick and
+    // the compute pool, so it can capture blocked thread stacks without waiting for them.
+    private volatile long parallelTickStartedNanos;
+    private volatile boolean parallelTickStackCaptured;
+
     protected long nextTimeSendTick;
 
     @Getter
@@ -114,6 +119,63 @@ public class AllayWorld implements World {
 
     protected void onWorldStart() {
         this.state.set(WorldState.RUNNING);
+        if (TICK_DIMENSION_IN_PARALLEL && !virtualTickingThread) {
+            Thread.ofVirtual().name("Allay parallel tick watchdog #" + name).start(this::watchParallelTick);
+        }
+    }
+
+    /**
+     * Temporary diagnostics for the reported Nether->Overworld freeze with
+     * tick-dimension-in-parallel enabled. A blocked world thread cannot emit
+     * an error itself, so a separate virtual thread captures the platform
+     * thread stacks after an eight-second stall. Never changes game state.
+     */
+    private void watchParallelTick() {
+        while (state.get() == WorldState.RUNNING) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+
+            long started = parallelTickStartedNanos;
+            if (started == 0 || parallelTickStackCaptured ||
+                System.nanoTime() - started < 8_000_000_000L) {
+                continue;
+            }
+
+            parallelTickStackCaptured = true;
+            try {
+                var mx = java.lang.management.ManagementFactory.getThreadMXBean();
+                var deadlocked = mx.findDeadlockedThreads();
+                log.error("PARALLEL_DIMENSION_STALL world={} elapsedSeconds={} jvmDeadlockedThreadIds={}",
+                        name, (System.nanoTime() - started) / 1_000_000_000L,
+                        java.util.Arrays.toString(deadlocked));
+
+                for (var info : mx.dumpAllThreads(true, true)) {
+                    if (info == null) continue;
+                    var threadName = info.getThreadName();
+                    if (!threadName.equals(worldThread.getName()) &&
+                        !threadName.startsWith("AllayComputeThread-")) {
+                        continue;
+                    }
+
+                    var stack = new StringBuilder();
+                    stack.append(threadName)
+                            .append(" state=").append(info.getThreadState())
+                            .append(" lock=").append(info.getLockName())
+                            .append(" owner=").append(info.getLockOwnerName());
+                    var frames = info.getStackTrace();
+                    for (int i = 0; i < Math.min(64, frames.length); i++) {
+                        stack.append("\n  at ").append(frames[i]);
+                    }
+                    log.error("PARALLEL_DIMENSION_STALL thread: {}", stack);
+                }
+            } catch (Throwable failure) {
+                log.error("Could not capture parallel dimension stall diagnostics", failure);
+            }
+        }
     }
 
     private void worldThreadMain(GameLoop gameLoop) {
@@ -123,10 +185,16 @@ public class AllayWorld implements World {
             return;
         }
 
+        if (TICK_DIMENSION_IN_PARALLEL && dimensionMap.size() > 1 && !virtualTickingThread) {
+            parallelTickStackCaptured = false;
+            parallelTickStartedNanos = System.nanoTime();
+        }
         try {
             tick(gameLoop.getTick());
         } catch (Throwable throwable) {
             log.error("Error while ticking world {}", name, throwable);
+        } finally {
+            parallelTickStartedNanos = 0;
         }
     }
 
