@@ -146,10 +146,16 @@ public class BlockEndPortalBaseComponentImpl extends BlockBaseComponentImpl {
                         int cx = ((int) Math.floor(configuredArrival.x())) >> 4;
                         int cz = ((int) Math.floor(configuredArrival.z())) >> 4;
                         overworld.getChunkManager().getOrLoadChunk(cx, cz).join();
-                        entity.getScheduler().runLater(entity, () -> {
-                            if (!entity.teleport(configuredArrival, EntityTeleportEvent.Reason.END_PORTAL)) {
-                                entity.setPortalCooldown(0);
-                            }
+                        // Do not teleport into solid blocks in custom spawn
+                        // terrain. Read blocks on the target dimension thread,
+                        // then perform the teleport on the entity's own thread.
+                        overworld.getScheduler().runLater(entity, () -> {
+                            boolean safe = EndArrivalHelper.isSafeConfiguredArrival(overworld, configuredArrival);
+                            entity.getScheduler().runLater(entity, () -> {
+                                if (!safe || !entity.teleport(configuredArrival, EntityTeleportEvent.Reason.END_PORTAL)) {
+                                    entity.setPortalCooldown(0);
+                                }
+                            });
                         });
                     } catch (RuntimeException exception) {
                         org.slf4j.LoggerFactory.getLogger(BlockEndPortalBaseComponentImpl.class)
