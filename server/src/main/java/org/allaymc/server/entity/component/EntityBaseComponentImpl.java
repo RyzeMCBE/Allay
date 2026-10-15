@@ -259,9 +259,14 @@ public class EntityBaseComponentImpl implements EntityBaseComponent {
     }
 
     protected void performNetherPortalTeleport() {
-        if (!new EntityPortalEnterEvent(thisEntity, EntityPortalEnterEvent.PortalType.NETHER).call()) {
+        var portalEvent = new EntityPortalEnterEvent(thisEntity, EntityPortalEnterEvent.PortalType.NETHER);
+        if (!portalEvent.call()) {
             return;
         }
+        // Snapshot on the owning dimension thread; plugins must not be
+        // accessed from the virtual thread that performs chunk I/O.
+        var requestedDestination = portalEvent.getDestinationOverride() == null
+                ? null : new Location3d(portalEvent.getDestinationOverride());
 
         beginNetherPortalTransfer();
 
@@ -269,7 +274,7 @@ public class EntityBaseComponentImpl implements EntityBaseComponent {
         // always unlock the guard on the entity's owning scheduler.
         Server.getInstance().getVirtualThreadPool().submit(() -> {
             try {
-                NetherPortalHelper.teleport(thisEntity).whenComplete((success, error) -> {
+                NetherPortalHelper.teleport(thisEntity, requestedDestination).whenComplete((success, error) -> {
                     if (error == null && Boolean.TRUE.equals(success)) {
                         // A successful teleport may despawn the entity during
                         // its dimension handoff. Entity-owned scheduled tasks
