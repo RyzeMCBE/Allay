@@ -288,6 +288,16 @@ public class NetherPortalHelper {
      * @return a future that completes with {@code true} if the teleport succeeded, {@code false} otherwise
      */
     public static CompletableFuture<Boolean> teleport(Entity entity) {
+        return teleport(entity, null);
+    }
+
+    /**
+     * @param override optional plugin-selected target coordinates. If supplied,
+     *                 bypass coordinate scaling and generate a paired portal
+     *                 only at that exact safe location. Normal behavior is unchanged
+     *                 when null.
+     */
+    public static CompletableFuture<Boolean> teleport(Entity entity, Location3d override) {
         var world = entity.getWorld();
         var currentDim = entity.getDimension();
         var currentDimType = currentDim.getDimensionType();
@@ -310,9 +320,27 @@ public class NetherPortalHelper {
 
         var loc = entity.getLocation();
         var targetDimType = targetDim.getDimensionType();
-        double targetX = scaleCoordinate(loc.x(), currentDimType, targetDimType);
-        double targetZ = scaleCoordinate(loc.z(), currentDimType, targetDimType);
-        int targetY = Math.clamp((int) loc.y(), targetDimType.getMinHeight(), targetDimType.getMaxHeight());
+        boolean forced = override != null;
+        if (forced) {
+            // A plugin cannot silently transfer the entity to an unrelated world,
+            // invalid dimension, or unrepresentable coordinate.
+            if (override.dimension() != targetDim
+                    || !Double.isFinite(override.x())
+                    || !Double.isFinite(override.y())
+                    || !Double.isFinite(override.z())
+                    || Math.abs(override.x()) > 29_999_984
+                    || Math.abs(override.z()) > 29_999_984
+                    || override.y() < targetDimType.getMinHeight() + 1
+                    || override.y() > targetDimType.getMaxHeight() - 4) {
+                log.warn("Rejected unsafe configured Nether destination for {}", entity.getRuntimeId());
+                return failOnDimensionThread(entity);
+            }
+            searchChunkRadius = 1;
+        }
+        double targetX = forced ? override.x() : scaleCoordinate(loc.x(), currentDimType, targetDimType);
+        double targetZ = forced ? override.z() : scaleCoordinate(loc.z(), currentDimType, targetDimType);
+        int targetY = forced ? (int) Math.floor(override.y())
+                : Math.clamp((int) loc.y(), targetDimType.getMinHeight(), targetDimType.getMaxHeight());
 
         // Use Math.floor to correctly handle negative coordinates (truncation rounds toward zero)
         int flooredX = (int) Math.floor(targetX);
@@ -345,7 +373,10 @@ public class NetherPortalHelper {
         log.debug("Nether portal destination prepared in {} ms: target={}, searchRadius={}, matchedExistingPortal={}",
                 (System.nanoTime() - preloadStarted) / 1_000_000,
                 targetDimType.getIdentifier(), searchChunkRadius, poiPos != null);
-        if (poiPos != null) {
+        if (poiPos != null && (!forced ||
+                (Math.abs(poiPos.x() - flooredX) <= 2 &&
+                 Math.abs(poiPos.y() - targetY) <= 3 &&
+                 Math.abs(poiPos.z() - flooredZ) <= 2))) {
             // Find the bottom of the portal column
             int bottomY = poiPos.y();
             int minY = targetDim.getDimensionType().getMinHeight();
@@ -360,7 +391,9 @@ public class NetherPortalHelper {
         }
 
         // No portal found — create one
-        int safeY = findSafeY(targetDim, flooredX, targetY, flooredZ);
+        int safeY = forced
+                ? (isSuitableForPortal(targetDim, flooredX, targetY, flooredZ) ? targetY : -1)
+                : findSafeY(targetDim, flooredX, targetY, flooredZ);
         if (safeY < 0) {
             // The destination contains no appropriate free area for a portal.
             // Do not carve into custom terrain or suffocate the arriving entity.

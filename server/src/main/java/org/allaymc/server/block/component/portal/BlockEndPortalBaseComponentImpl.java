@@ -12,6 +12,8 @@ import org.allaymc.api.entity.interfaces.EntityPlayer;
 import org.allaymc.api.eventbus.event.entity.EntityPortalEnterEvent;
 import org.allaymc.api.eventbus.event.entity.EntityTeleportEvent;
 import org.allaymc.api.item.ItemStack;
+import org.allaymc.api.math.location.Location3d;
+import org.joml.Vector3i;
 import org.allaymc.api.server.Server;
 import org.allaymc.api.world.Dimension;
 import org.allaymc.api.world.dimension.DimensionTypes;
@@ -57,9 +59,13 @@ public class BlockEndPortalBaseComponentImpl extends BlockBaseComponentImpl {
             return;
         }
 
-        if (!new EntityPortalEnterEvent(entity, EntityPortalEnterEvent.PortalType.END).call()) {
+        var portalEvent = new EntityPortalEnterEvent(entity, EntityPortalEnterEvent.PortalType.END);
+        if (!portalEvent.call()) {
             return;
         }
+        // Capture the plugin's requested arrival point before async loading.
+        var configuredArrival = portalEvent.getDestinationOverride() == null
+                ? null : new Location3d(portalEvent.getDestinationOverride());
 
         // Set cooldown immediately to prevent re-entry while async teleport is in progress
         entity.setPortalCooldown(EntityBaseComponent.PORTAL_COOLDOWN_TICKS);
@@ -75,7 +81,15 @@ public class BlockEndPortalBaseComponentImpl extends BlockBaseComponentImpl {
             }
             org.joml.Vector3ic preferred;
             try {
-                preferred = EndArrivalHelper.preferredSpawn(world, theEnd);
+                if (configuredArrival != null && !validArrival(configuredArrival, theEnd)) {
+                    entity.setPortalCooldown(0);
+                    return;
+                }
+                preferred = configuredArrival == null
+                        ? EndArrivalHelper.preferredSpawn(world, theEnd)
+                        : new Vector3i((int) Math.floor(configuredArrival.x()),
+                                       (int) Math.floor(configuredArrival.y()),
+                                       (int) Math.floor(configuredArrival.z()));
             } catch (RuntimeException e) {
                 org.slf4j.LoggerFactory.getLogger(BlockEndPortalBaseComponentImpl.class)
                         .error("Could not read custom End spawn metadata; refusing unsafe teleport", e);
@@ -83,11 +97,9 @@ public class BlockEndPortalBaseComponentImpl extends BlockBaseComponentImpl {
                 return;
             }
 
-            if (entity instanceof EntityPlayer player && player.isActualPlayer()) {
-                player.getController().beginDimensionChange(theEnd.getDimensionType(),
-                        preferred.x() + 0.5, preferred.y(), preferred.z() + 0.5);
-            }
-
+            // Do not announce a speculative End landing point: the safe-arrival
+            // search can select another floor location in custom worlds.
+            // teleportOverDimension() will send the final event-adjusted target.
             // Chunk loading can block; keep it off the server tick thread.
             Server.getInstance().getVirtualThreadPool().submit(() -> {
                 try {
@@ -107,9 +119,6 @@ public class BlockEndPortalBaseComponentImpl extends BlockBaseComponentImpl {
                             if (arrival.isEmpty() ||
                                     !entity.teleport(arrival.orElseThrow(), EntityTeleportEvent.Reason.END_PORTAL)) {
                                 entity.setPortalCooldown(0);
-                                if (entity instanceof EntityPlayer player && player.isActualPlayer()) {
-                                    player.getController().completeDimensionChange();
-                                }
                             }
                         });
                     });
@@ -118,19 +127,58 @@ public class BlockEndPortalBaseComponentImpl extends BlockBaseComponentImpl {
                             .error("Cannot load custom End spawn chunks", e);
                     entity.getScheduler().runLater(entity, () -> {
                         entity.setPortalCooldown(0);
-                        if (entity instanceof EntityPlayer player && player.isActualPlayer()) {
-                            player.getController().completeDimensionChange();
-                        }
                     });
                 }
             });
         } else {
-            // Teleport back to overworld spawn
-            var spawnPoint = world.getSpawnPoint();
-            if (!entity.teleport(spawnPoint, EntityTeleportEvent.Reason.END_PORTAL)) {
+            // By default, return to the original world spawn. Custom HCF
+            // destinations first load their target chunk without blocking a tick.
+            var overworld = world.getOverWorld();
+            if (configuredArrival == null) {
+                if (!entity.teleport(world.getSpawnPoint(), EntityTeleportEvent.Reason.END_PORTAL)) {
+                    entity.setPortalCooldown(0);
+                }
+            } else if (!validArrival(configuredArrival, overworld)) {
                 entity.setPortalCooldown(0);
+            } else {
+                Server.getInstance().getVirtualThreadPool().submit(() -> {
+                    try {
+                        int cx = ((int) Math.floor(configuredArrival.x())) >> 4;
+                        int cz = ((int) Math.floor(configuredArrival.z())) >> 4;
+                        overworld.getChunkManager().getOrLoadChunk(cx, cz).join();
+                        // Do not teleport into solid blocks in custom spawn
+                        // terrain. Read blocks on the target dimension thread,
+                        // then perform the teleport on the entity's own thread.
+                        overworld.getScheduler().runLater(entity, () -> {
+                            boolean safe = EndArrivalHelper.isSafeConfiguredArrival(overworld, configuredArrival);
+                            entity.getScheduler().runLater(entity, () -> {
+                                if (!safe || !entity.teleport(configuredArrival, EntityTeleportEvent.Reason.END_PORTAL)) {
+                                    entity.setPortalCooldown(0);
+                                }
+                            });
+                        });
+                    } catch (RuntimeException exception) {
+                        org.slf4j.LoggerFactory.getLogger(BlockEndPortalBaseComponentImpl.class)
+                                .error("Could not load custom End exit destination", exception);
+                        entity.getScheduler().runLater(entity, () -> entity.setPortalCooldown(0));
+                    }
+                });
             }
         }
+    }
+
+    /**
+     * Prevent invalid plugin coordinates from causing unsafe cross-world transfers
+     * or integer overflows during chunk lookup.
+     */
+    private static boolean validArrival(Location3d location, Dimension expected) {
+        return expected != null && location.dimension() == expected
+                && Double.isFinite(location.x()) && Double.isFinite(location.y())
+                && Double.isFinite(location.z())
+                && Math.abs(location.x()) <= 29_999_984
+                && Math.abs(location.z()) <= 29_999_984
+                && location.y() >= expected.getDimensionType().getMinHeight() + 1
+                && location.y() <= expected.getDimensionType().getMaxHeight() - 2;
     }
 
     /**
