@@ -639,9 +639,14 @@ public class EntityPlayerBaseComponentImpl extends EntityBaseComponentImpl imple
         }
         if (targetDim == null) return;
 
-        if (!new EntityPortalEnterEvent(thisEntity, EntityPortalEnterEvent.PortalType.NETHER).call()) {
+        var portalEvent = new EntityPortalEnterEvent(thisEntity, EntityPortalEnterEvent.PortalType.NETHER);
+        if (!portalEvent.call()) {
             return;
         }
+        // Resolve plugin configuration on the owning dimension thread, before
+        // async chunk loading. Never fire HCF callbacks from the worker.
+        var requestedDestination = portalEvent.getDestinationOverride() == null
+                ? null : new org.allaymc.api.math.location.Location3d(portalEvent.getDestinationOverride());
 
         // The guard outlives the 300-tick cooldown: another transfer is
         // impossible until the previous one finishes AND the portal is exited.
@@ -659,7 +664,7 @@ public class EntityPlayerBaseComponentImpl extends EntityBaseComponentImpl imple
         // event-adjusted location, before publishing destination chunks.
         Server.getInstance().getVirtualThreadPool().submit(() -> {
             try {
-                NetherPortalHelper.teleport(thisEntity).whenComplete((success, error) -> {
+                NetherPortalHelper.teleport(thisEntity, requestedDestination).whenComplete((success, error) -> {
                     if (error == null && Boolean.TRUE.equals(success)) {
                         // The entity is temporarily DESPAWNED_LATER/DESPAWNED
                         // while transferring between dimensions. Tasks created
