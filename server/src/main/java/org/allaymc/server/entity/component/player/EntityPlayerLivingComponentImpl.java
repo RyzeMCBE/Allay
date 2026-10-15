@@ -22,6 +22,7 @@ import org.allaymc.api.world.gamerule.GameRule;
 import org.allaymc.api.world.sound.SimpleSound;
 import org.allaymc.server.component.annotation.ComponentObject;
 import org.allaymc.server.entity.component.EntityLivingComponentImpl;
+import org.allaymc.server.player.AllayPlayer;
 import org.joml.Vector3d;
 
 /**
@@ -33,6 +34,14 @@ public class EntityPlayerLivingComponentImpl extends EntityLivingComponentImpl {
 
     @Override
     public boolean canBeAttacked(DamageContainer damage) {
+        // Cancel before the damage event, health loss and knockback. A player
+        // receiving destination chunks cannot defend themselves while Bedrock
+        // displays its dimension loading screen.
+        if (thisPlayer.isActualPlayer()
+                && thisPlayer.getController() instanceof AllayPlayer controller
+                && controller.isDimensionTransferDamageProtected()) {
+            return false;
+        }
         if (thisPlayer.isPhantom()) {
             return damage.getDamageType() == DamageType.API;
         }
