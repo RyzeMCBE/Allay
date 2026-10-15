@@ -126,7 +126,6 @@ public class AllayPlayer implements Player {
     private final Object chunkPublisherLock = new Object();
     private NetworkChunkPublisherUpdatePacket lastChunkPublisherUpdate;
     private final DimensionTransferProtection dimensionTransferProtection = new DimensionTransferProtection();
-    private volatile long lastDimensionChangeStartedNanos;
     @Getter
     protected volatile ProtocolSession protocolSession;
     protected final AtomicInteger fullyJoinChunkThreshold;
@@ -269,15 +268,6 @@ public class AllayPlayer implements Player {
     }
 
     public void handlePacketSync(BedrockPacket packet, long receiveTime) {
-        // The client, not the server, controls END_LOADING_SCREEN. Record its
-        // real delay without altering the protocol or forcing UI dismissal.
-        if (packet instanceof ServerboundLoadingScreenPacket loading && lastDimensionChangeStartedNanos > 0) {
-            long elapsedMs = TimeUnit.NANOSECONDS.toMillis(
-                    System.nanoTime() - lastDimensionChangeStartedNanos
-            );
-            log.debug("Bedrock loading screen {} for {} after {} ms since dimension change",
-                    loading.getType(), getOriginName(), elapsedMs);
-        }
         var selectedSession = protocolSession;
         if (selectedSession == null) {
             log.debug("Ignoring sync packet before protocol negotiation: {}", packet);
@@ -1294,9 +1284,7 @@ public class AllayPlayer implements Player {
      * Only actual position displacement (not a head turn) counts as movement.
      */
     public void onValidatedDimensionMovement() {
-        if (dimensionTransferProtection.movementAccepted(System.nanoTime())) {
-            log.debug("Player {} regained control after dimension loading", getOriginName());
-        }
+        dimensionTransferProtection.movementAccepted(System.nanoTime());
     }
 
     public boolean isDimensionTransferDamageProtected() {
@@ -1310,10 +1298,7 @@ public class AllayPlayer implements Player {
             lastChunkPublisherUpdate = null;
             pendingChunkDimension = targetDimType;
             changingDimension = true;
-            lastDimensionChangeStartedNanos = System.nanoTime();
             sendPacket(getProtocol().getEncoder().encodeDimensionChange(targetDimType, x, y, z));
-            log.debug("Dimension transition BEGIN player={} target={} position=({},{},{})",
-                    getOriginName(), targetDimType.getIdentifier(), x, y, z);
         }
     }
 
@@ -1330,8 +1315,6 @@ public class AllayPlayer implements Player {
             sendPacket(getProtocol().getEncoder().encodeDimensionChangeSuccess(
                     this.controlledEntity.getRuntimeId()
             ));
-            log.debug("Dimension transition ACK player={} dimension={}",
-                    getOriginName(), this.controlledEntity.getDimension().getDimensionType().getIdentifier());
             pendingChunkDimension = null;
             changingDimension = false;
         }

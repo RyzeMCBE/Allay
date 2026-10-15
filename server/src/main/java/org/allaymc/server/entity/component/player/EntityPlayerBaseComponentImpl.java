@@ -672,7 +672,6 @@ public class EntityPlayerBaseComponentImpl extends EntityBaseComponentImpl imple
                         // so NEVER defer a successful guard release with runLater.
                         // The synchronized guard can safely finish on this thread.
                         finishNetherPortalTransfer(true);
-                        log.debug("Nether portal transfer finished for {}", thisPlayer.getDisplayName());
                         return;
                     }
                     // The entity never left the source dimension on failure;

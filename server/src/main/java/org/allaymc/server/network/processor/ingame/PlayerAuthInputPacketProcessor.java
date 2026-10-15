@@ -50,15 +50,6 @@ public class PlayerAuthInputPacketProcessor extends PacketProcessor<PlayerAuthIn
     // Minimum progress (0-1) required to allow client's BLOCK_PREDICT_DESTROY for vanilla blocks
     // Similar to Geyser's approach, we're tolerant to account for timing differences
     protected static final float BLOCK_BREAKING_PROGRESS_TOLERANCE = 0.65f;
-    /** Enable with -Dryzemc.debugBlockBreak=true to trace Bedrock mining without spamming normal logs. */
-    private static final boolean TRACE_BREAK = Boolean.getBoolean("ryzemc.debugBlockBreak");
-    private void traceBreak(Player player, String stage, int x, int y, int z, String reason) {
-        if (!TRACE_BREAK) return;
-        log.info("[BlockBreakTrace] player={} stage={} pos={},{},{} mode={} canBreak={} op={} {}",
-                player.getOriginName(), stage, x, y, z,
-                player.getControlledEntity().getGameMode(), player.canBreakBlocks(),
-                org.allaymc.api.server.Server.getInstance().getPlayerManager().isOperator(player), reason);
-    }
     /**
      * Creative Bedrock clients can send a predicted instant break without the
      * matching START_BREAK (e.g. when moving the reticle quickly).
@@ -141,7 +132,6 @@ public class PlayerAuthInputPacketProcessor extends PacketProcessor<PlayerAuthIn
                 }
                 case BLOCK_PREDICT_DESTROY -> {
                     if (isInvalidGameType(player) || !player.canBreakBlocks()) {
-                        traceBreak(player, "NATIVE_DENIED", pos.getX(), pos.getY(), pos.getZ(), "predicted destroy");
                         revertClientBlockPrediction(player, pos.getX(), pos.getY(), pos.getZ());
                         continue;
                     }
@@ -153,11 +143,9 @@ public class PlayerAuthInputPacketProcessor extends PacketProcessor<PlayerAuthIn
                         // Apply reach, PlayerPunchBlockEvent and BlockBreakEvent
                         // checks exactly as for a regular START_BREAK.
                         if (!player.getControlledEntity().canReachBlock(NetworkHelper.fromNetwork(pos))) {
-                            traceBreak(player, "OUT_OF_REACH", pos.getX(), pos.getY(), pos.getZ(), "creative predict");
                             revertClientBlockPrediction(player, pos.getX(), pos.getY(), pos.getZ());
                             continue;
                         }
-                        traceBreak(player, "CREATIVE_PREDICT_INIT", pos.getX(), pos.getY(), pos.getZ(), "no matching START_BREAK");
                         startBreak(player, pos.getX(), pos.getY(), pos.getZ(), action.getFace());
                     }
                     completeBreak(player, pos.getX(), pos.getY(), pos.getZ());
@@ -220,7 +208,6 @@ public class PlayerAuthInputPacketProcessor extends PacketProcessor<PlayerAuthIn
         var block = new Block(blockToBreak, new Position3i(x, y, z, dimension));
         var event = new PlayerPunchBlockEvent(entity, block, faceToBreak);
         if (!event.call()) {
-            traceBreak(player, "PUNCH_CANCELLED", x, y, z, "PlayerPunchBlockEvent");
             // The claim plugin (or another protection) denied START_BREAK.
             // Do not send StartBreakAction, ContinueBreakAction or particles.
             // Remove the active break and make both Bedrock block layers
@@ -230,7 +217,6 @@ public class PlayerAuthInputPacketProcessor extends PacketProcessor<PlayerAuthIn
             return;
         }
         this.blockToBreak.getBlockType().getBlockBehavior().onPunch(block, faceToBreak, entity.getItemInHand(), entity);
-        traceBreak(player, "PUNCH_ALLOWED", x, y, z, "");
 
         double breakTimeSeconds;
         if (entity.getGameMode() != GameMode.CREATIVE) {
@@ -281,8 +267,6 @@ public class PlayerAuthInputPacketProcessor extends PacketProcessor<PlayerAuthIn
     protected void completeBreak(Player player, int x, int y, int z) {
         if (this.breakingPosX != x || this.breakingPosY != y || this.breakingPosZ != z) {
             log.debug("Player {} tried to complete breaking a different block", player.getOriginName());
-            traceBreak(player, "PREDICT_MISMATCH", x, y, z,
-                    "active=" + breakingPosX + "," + breakingPosY + "," + breakingPosZ);
             // The client already predicted AIR for this position. Restore it
             // even when no server-side break exists (or the position differs).
             revertClientBlockPrediction(player, x, y, z);
@@ -326,8 +310,6 @@ public class PlayerAuthInputPacketProcessor extends PacketProcessor<PlayerAuthIn
         var dimension = entity.getDimension();
         var itemInHand = entity.getItemInHand();
         boolean broken = dimension.breakBlock(this.breakingPosX, this.breakingPosY, this.breakingPosZ, itemInHand, entity);
-        traceBreak(player, broken ? "BREAK_COMMITTED" : "BREAK_REJECTED",
-                breakingPosX, breakingPosY, breakingPosZ, "");
         if (broken) {
             itemInHand.onBreakBlock(this.blockToBreak, entity);
             if (itemInHand.isBroken()) {

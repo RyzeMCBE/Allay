@@ -351,7 +351,6 @@ public class NetherPortalHelper {
         // reads. A bounded group of 8 concurrent loads improves cold
         // Nether->Overworld preparation without overwhelming the LevelDB store.
         // This runs in the virtual thread supplied by the portal caller.
-        long preloadStarted = System.nanoTime();
         int cx = flooredX >> 4;
         int cz = flooredZ >> 4;
         var pendingLoads = new ArrayList<CompletableFuture<?>>(8);
@@ -370,9 +369,6 @@ public class NetherPortalHelper {
 
         // Search for existing portal using the complete POI index.
         var poiPos = targetDim.findNearestPoi(PoiTypes.NETHER_PORTAL, flooredX, targetY, flooredZ, searchChunkRadius);
-        log.debug("Nether portal destination prepared in {} ms: target={}, searchRadius={}, matchedExistingPortal={}",
-                (System.nanoTime() - preloadStarted) / 1_000_000,
-                targetDimType.getIdentifier(), searchChunkRadius, poiPos != null);
         if (poiPos != null && (!forced ||
                 (Math.abs(poiPos.x() - flooredX) <= 2 &&
                  Math.abs(poiPos.y() - targetY) <= 3 &&

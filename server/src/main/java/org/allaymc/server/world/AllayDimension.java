@@ -56,7 +56,6 @@ import static org.allaymc.api.block.type.BlockTypes.*;
 @Slf4j
 @Getter
 public class AllayDimension implements Dimension {
-    private static final boolean TRACE_BREAK = Boolean.getBoolean("ryzemc.debugBlockBreak");
 
     /**
      * The probability of lightning striking per chunk per tick during a thunderstorm.
@@ -334,14 +333,8 @@ public class AllayDimension implements Dimension {
                 usedItem, entity
         );
         if (!event.call()) {
-            if (TRACE_BREAK)
-                log.info("[BlockBreakTrace] stage=BLOCK_EVENT_CANCELLED pos={},{},{} block={}",
-                        x, y, z, block.getBlockType());
             return false;
         }
-        if (TRACE_BREAK)
-            log.info("[BlockBreakTrace] stage=BLOCK_EVENT_ALLOWED pos={},{},{} block={}",
-                    x, y, z, block.getBlockType());
 
         if (sendParticle) {
             addParticle(x + 0.5f, y + 0.5f, z + 0.5f, new BlockBreakParticle(block));
@@ -352,10 +345,7 @@ public class AllayDimension implements Dimension {
                 usedItem, entity
         );
 
-        boolean updated = setBlockState(x, y, z, AIR.getDefaultState());
-        if (TRACE_BREAK)
-            log.info("[BlockBreakTrace] stage=DIMENSION_WRITE pos={},{},{} updated={} resulting={}",
-                    x, y, z, updated, getBlockState(x, y, z).getBlockType());
+        setBlockState(x, y, z, AIR.getDefaultState());
 
         if (entity instanceof EntityPlayer player) {
             player.exhaust(0.005f);
