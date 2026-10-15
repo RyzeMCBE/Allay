@@ -97,11 +97,9 @@ public class BlockEndPortalBaseComponentImpl extends BlockBaseComponentImpl {
                 return;
             }
 
-            if (entity instanceof EntityPlayer player && player.isActualPlayer()) {
-                player.getController().beginDimensionChange(theEnd.getDimensionType(),
-                        preferred.x() + 0.5, preferred.y(), preferred.z() + 0.5);
-            }
-
+            // Do not announce a speculative End landing point: the safe-arrival
+            // search can select another floor location in custom worlds.
+            // teleportOverDimension() will send the final event-adjusted target.
             // Chunk loading can block; keep it off the server tick thread.
             Server.getInstance().getVirtualThreadPool().submit(() -> {
                 try {
@@ -121,9 +119,6 @@ public class BlockEndPortalBaseComponentImpl extends BlockBaseComponentImpl {
                             if (arrival.isEmpty() ||
                                     !entity.teleport(arrival.orElseThrow(), EntityTeleportEvent.Reason.END_PORTAL)) {
                                 entity.setPortalCooldown(0);
-                                if (entity instanceof EntityPlayer player && player.isActualPlayer()) {
-                                    player.getController().completeDimensionChange();
-                                }
                             }
                         });
                     });
@@ -132,9 +127,6 @@ public class BlockEndPortalBaseComponentImpl extends BlockBaseComponentImpl {
                             .error("Cannot load custom End spawn chunks", e);
                     entity.getScheduler().runLater(entity, () -> {
                         entity.setPortalCooldown(0);
-                        if (entity instanceof EntityPlayer player && player.isActualPlayer()) {
-                            player.getController().completeDimensionChange();
-                        }
                     });
                 }
             });
