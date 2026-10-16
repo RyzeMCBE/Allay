@@ -127,7 +127,7 @@ jobs:
 
       - name: Conservar informes de pruebas
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: allay-tests-${{ env.RELEASE_SOURCE_SHA }}
           path: |
@@ -136,7 +136,7 @@ jobs:
           if-no-files-found: ignore
 
       - name: Adjuntar JAR al workflow
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: allay-${{ env.RELEASE_VERSION }}-${{ env.RELEASE_SOURCE_SHA }}
           path: |
