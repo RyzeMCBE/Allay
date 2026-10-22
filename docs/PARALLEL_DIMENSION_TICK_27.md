@@ -37,8 +37,9 @@ registra **una sola captura por tick** con prefijo
 
 - mundo, número de tick y duración transcurrida;
 - última fase vista por cada dimensión: `queued`, `started`, `lightning`,
-  `scheduler`, `entities-and-physics`, `chunk-manager`, `block-updates`,
-  `chunk-tasks` o `finished`;
+  `scheduler`, `entities-and-physics`, `entity-auto-save`, `entity-queue`,
+  `entity-ai-and-base-tick`, `entity-physics`, `chunk-manager`,
+  `block-updates`, `chunk-tasks` o `finished`;
 - paralelismo, hilos activos y tareas pendientes del `ForkJoinPool` de cálculo;
 - IDs de hilos bloqueados reconocidos por `ThreadMXBean` y stacks acotados de
   hilo de mundo, workers de dimensión y trabajadores `AllayComputeThread-*`.
