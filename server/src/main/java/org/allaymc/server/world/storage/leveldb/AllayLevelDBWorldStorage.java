@@ -256,9 +256,10 @@ public class AllayLevelDBWorldStorage implements WorldStorage {
         }
         return CompletableFuture
                 .runAsync(() -> writeChunkSync(chunk), Server.getInstance().getVirtualThreadPool())
-                .exceptionally(t -> {
-                    log.error("Failed to write chunk ({}, {})", chunk.getX(), chunk.getZ(), t);
-                    return null;
+                .whenComplete((ignored, error) -> {
+                    if (error != null) {
+                        log.error("Failed to write chunk ({}, {})", chunk.getX(), chunk.getZ(), error);
+                    }
                 });
     }
 

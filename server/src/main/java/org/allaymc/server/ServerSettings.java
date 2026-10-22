@@ -237,9 +237,10 @@ public class ServerSettings extends OkaeriConfig {
         @CustomKey("spawn-point-chunk-radius")
         private int spawnPointChunkRadius = 3;
 
-        @Comment("If set to true, dimensions in the same world will be ticked in parallel during world tick")
+        @Comment("Experimental: parallel dimension ticking may stall world ticks during dimension transfers")
+        @Comment("Disabled by default until the reported parallel tick issue is fixed")
         @CustomKey("tick-dimension-in-parallel")
-        private boolean tickDimensionInParallel = true;
+        private boolean tickDimensionInParallel = false;
 
         @Comment("Indicate the max light update count per dimension, if the count is exceeded, light in")
         @Comment("newly loaded chunks won't be calculated immediately to avoid taking too much memory")

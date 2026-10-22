@@ -22,9 +22,12 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.CompletionException;
 
 import static org.allaymc.api.block.type.BlockTypes.OAK_WOOD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Cool_Loong
@@ -115,5 +118,24 @@ class AllayLevelDBWorldStorageTest {
         assertEquals(OAK_WOOD.getDefaultState(), chunk.getBlockState(0, 55, 0));
         assertEquals(BiomeTypes.FOREST, chunk.getBiome(0, 55, 0));
         assertEquals(319, chunk.getHeight(0, 0));
+    }
+    @Test
+    void asyncChunkWriteFailurePropagatesToCaller() {
+        var failingStorage = new AllayLevelDBWorldStorage(tempDir.resolve("failingworld")) {
+            @Override
+            public void writeChunkSync(Chunk chunk) {
+                throw new IllegalStateException("simulated LevelDB write failure");
+            }
+        };
+
+        try {
+            Chunk chunk = Mockito.mock(Chunk.class);
+            var failure = assertThrows(CompletionException.class,
+                    () -> failingStorage.writeChunk(chunk).join());
+            assertInstanceOf(IllegalStateException.class, failure.getCause());
+            assertEquals("simulated LevelDB write failure", failure.getCause().getMessage());
+        } finally {
+            failingStorage.shutdown();
+        }
     }
 }
