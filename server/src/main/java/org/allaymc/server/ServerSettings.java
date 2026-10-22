@@ -210,6 +210,10 @@ public class ServerSettings extends OkaeriConfig {
         @CustomKey("use-sub-chunk-sending-system")
         private boolean useSubChunkSendingSystem = false;
 
+        @Comment("Log observed dimension loading-screen and arrival-chunk timing; never forces the screen closed")
+        @CustomKey("dimension-transition-diagnostics")
+        private boolean dimensionTransitionDiagnostics = false;
+
         @Comment("Possible values: ASYNC, SYNC")
         @CustomKey("chunk-sending-strategy")
         private ChunkSendingStrategy chunkSendingStrategy = ChunkSendingStrategy.ASYNC;
