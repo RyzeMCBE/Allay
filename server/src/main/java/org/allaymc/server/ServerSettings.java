@@ -246,6 +246,11 @@ public class ServerSettings extends OkaeriConfig {
         @CustomKey("tick-dimension-in-parallel")
         private boolean tickDimensionInParallel = false;
 
+        @Comment("Issue #27 investigation only: emit a thread snapshot if a parallel dimension tick takes 8 seconds")
+        @Comment("Disabled by default; does not force-recover a stuck tick or change dimension execution")
+        @CustomKey("parallel-tick-diagnostics")
+        private boolean parallelTickDiagnostics = false;
+
         @Comment("Indicate the max light update count per dimension, if the count is exceeded, light in")
         @Comment("newly loaded chunks won't be calculated immediately to avoid taking too much memory")
         @CustomKey("max-light-update-count")
