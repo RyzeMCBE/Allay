@@ -25,6 +25,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+      - name: Verificar dependencias enlazadas
+        run: bash .github/scripts/check-linked-dependencies.sh
       - uses: actions/setup-java@v6
         with:
           distribution: temurin

@@ -41,6 +41,9 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
+      - name: Verificar dependencias enlazadas
+        run: bash .github/scripts/check-linked-dependencies.sh
+
       - name: Preparar Java 21
         uses: actions/setup-java@v6
         with:
