@@ -67,6 +67,8 @@ public class AllayWorld implements World {
     protected final GameLoop gameLoop;
     @Getter
     protected final Thread worldThread;
+    // Issue #27: observe stalled parallel ticks without changing their executor or ordering.
+    protected final ParallelDimensionTickDiagnostics parallelTickDiagnostics;
 
     protected long nextTimeSendTick;
 
@@ -106,6 +108,10 @@ public class AllayWorld implements World {
         this.worldThread = (virtualTickingThread ? Thread.ofVirtual() : Thread.ofPlatform())
                 .name("World Thread #" + this.getName())
                 .unstarted(gameLoop::startLoop);
+        this.parallelTickDiagnostics = TICK_DIMENSION_IN_PARALLEL &&
+                AllayServer.getSettings().worldSettings().parallelTickDiagnostics()
+                ? new ParallelDimensionTickDiagnostics(name, worldThread, Server.getInstance().getComputeThreadPool())
+                : null;
         this.weather = Weather.CLEAR;
         this.rainTimer = Weather.CLEAR.generateRandomTimeLength();
         this.thunderTimer = Weather.CLEAR.generateRandomTimeLength();
@@ -114,6 +120,9 @@ public class AllayWorld implements World {
 
     protected void onWorldStart() {
         this.state.set(WorldState.RUNNING);
+        if (parallelTickDiagnostics != null) {
+            parallelTickDiagnostics.start();
+        }
     }
 
     private void worldThreadMain(GameLoop gameLoop) {
@@ -198,10 +207,35 @@ public class AllayWorld implements World {
         var dimensions = dimensionMap.values();
         if (TICK_DIMENSION_IN_PARALLEL && dimensions.size() > 1) {
             var server = Server.getInstance();
-            Utils.forEachInParallel(
-                    dimensions, virtualTickingThread ? server.getVirtualThreadPool() : server.getComputeThreadPool(),
-                    dimension -> ((AllayDimension) dimension).tick(currentTick)
-            ).join();
+            var diagnostics = parallelTickDiagnostics;
+            var observedTick = diagnostics == null ? null : diagnostics.beginTick(currentTick, System.nanoTime());
+            if (diagnostics != null) {
+                // A "queued" stage with no worker yet identifies pool starvation,
+                // rather than wrongly attributing the stall to chunk or entity code.
+                dimensions.forEach(dimension -> diagnostics.dimensionPhase(
+                        dimension.getDimensionType().getIdentifier().toString(), "queued"));
+            }
+            try {
+                Utils.forEachInParallel(
+                        dimensions, virtualTickingThread ? server.getVirtualThreadPool() : server.getComputeThreadPool(),
+                        dimension -> {
+                            if (diagnostics != null) {
+                                diagnostics.dimensionPhase(dimension.getDimensionType().getIdentifier().toString(), "started");
+                            }
+                            try {
+                                ((AllayDimension) dimension).tick(currentTick);
+                            } finally {
+                                if (diagnostics != null) {
+                                    diagnostics.dimensionPhase(dimension.getDimensionType().getIdentifier().toString(), "finished");
+                                }
+                            }
+                        }
+                ).join();
+            } finally {
+                if (diagnostics != null) {
+                    diagnostics.completeTick(observedTick);
+                }
+            }
         } else {
             for (var dimension : dimensions) {
                 ((AllayDimension) dimension).tick(currentTick);
@@ -209,6 +243,16 @@ public class AllayWorld implements World {
         }
 
         worldStorage.tick(currentTick);
+    }
+
+    /**
+     * Observe the owning dimension worker's current stage without influencing
+     * scheduling. Called by the entity manager only when it already owns the tick.
+     */
+    public void recordParallelDimensionTickPhase(DimensionType dimensionType, String phase) {
+        if (parallelTickDiagnostics != null) {
+            parallelTickDiagnostics.dimensionPhase(dimensionType.getIdentifier().toString(), phase);
+        }
     }
 
     protected void checkFirstTick() {
@@ -469,6 +513,9 @@ public class AllayWorld implements World {
     }
 
     protected void shutdownReally() {
+        if (parallelTickDiagnostics != null) {
+            parallelTickDiagnostics.close();
+        }
         log.info(I18n.get().tr(TrKeys.ALLAY_WORLD_UNLOADING, name));
         getPlayers().forEach(Player::disconnect);
         this.scheduler.shutdown();

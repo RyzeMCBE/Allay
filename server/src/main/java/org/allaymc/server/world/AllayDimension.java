@@ -93,11 +93,22 @@ public class AllayDimension implements Dimension {
     }
 
     public void tick(long currentTick) {
+        // Mark the stage before entering each subsystem. The watchdog only
+        // reads this thread-safe metadata if parallel diagnostics are enabled.
+        var diagnostics = world.parallelTickDiagnostics;
+        var dimensionName = diagnostics == null ? null : dimensionType.getIdentifier().toString();
+
+        if (diagnostics != null) diagnostics.dimensionPhase(dimensionName, "lightning");
         tickLightning();
+        if (diagnostics != null) diagnostics.dimensionPhase(dimensionName, "scheduler");
         this.scheduler.tick();
+        if (diagnostics != null) diagnostics.dimensionPhase(dimensionName, "entities-and-physics");
         this.entityManager.tick(currentTick);
+        if (diagnostics != null) diagnostics.dimensionPhase(dimensionName, "chunk-manager");
         this.chunkManager.tick(currentTick);
+        if (diagnostics != null) diagnostics.dimensionPhase(dimensionName, "block-updates");
         this.blockUpdateManager.tick();
+        if (diagnostics != null) diagnostics.dimensionPhase(dimensionName, "chunk-tasks");
         this.chunkManager.forEachLoadedChunks(c -> {
             var chunk = (AllayUnsafeChunk) c.toUnsafeChunk();
             chunk.sendBlockUpdates();

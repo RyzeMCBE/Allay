@@ -55,10 +55,20 @@ public class AllayEntityManager implements EntityManager {
     public void tick(long currentTick) {
         // Check auto saving first, so that pending removed entities will be
         // removed this tick instead of remaining loading until the next tick.
+        recordParallelTickStage("entity-auto-save");
         checkAutoSave();
+        recordParallelTickStage("entity-queue");
         processQueue();
+        recordParallelTickStage("entity-ai-and-base-tick");
         tickEntities(currentTick);
+        recordParallelTickStage("entity-physics");
         this.physicsService.tick();
+    }
+
+    private void recordParallelTickStage(String phase) {
+        if (dimension.getWorld() instanceof AllayWorld world) {
+            world.recordParallelDimensionTickPhase(dimension.getDimensionType(), phase);
+        }
     }
 
     public void idle() {
