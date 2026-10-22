@@ -4,6 +4,8 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.Unpooled;
 import org.allaymc.api.block.property.type.BlockPropertyTypes;
+import org.allaymc.api.block.property.enums.MinecraftVerticalHalf;
+import org.allaymc.api.block.type.BlockTypes;
 import org.allaymc.api.world.biome.BiomeTypes;
 import org.allaymc.api.world.dimension.DimensionTypes;
 import org.allaymc.server.datastruct.palette.Palette;
@@ -55,6 +57,58 @@ class ChunkSectionCodecTest {
         assertEquals(OAK_WOOD.getDefaultState(), deserialized.getBlockState(0, 0, 0, 0));
         assertEquals(STONE.getDefaultState(), deserialized.getBlockState(1, 1, 1, 0));
         assertEquals(OAK_WOOD.getDefaultState(), deserialized.getBlockState(2, 2, 2, 1));
+    }
+
+    /**
+     * PocketMine/legacy palettes may contain INT top_slot_bit and old slab IDs.
+     * Decode both halves into real blocks and verify that saving the section
+     * writes canonical NBT instead of persisting an unknown-block placeholder.
+     */
+    @Test
+    void testLegacyStoneAndWoodSlabsLoadAndResaveWithCorrectHalf() {
+        var cases = new String[][]{
+                {"minecraft:stone_slab", "stone_slab_type", "smooth_stone"},
+                {"minecraft:double_stone_slab", "stone_slab_type", "smooth_stone"},
+                {"minecraft:wooden_slab", "wood_type", "oak"},
+                {"minecraft:double_wooden_slab", "wood_type", "oak"}
+        };
+        var expectedTypes = new org.allaymc.api.block.type.BlockType<?>[]{
+                BlockTypes.SMOOTH_STONE_SLAB, BlockTypes.SMOOTH_STONE_DOUBLE_SLAB,
+                BlockTypes.OAK_SLAB, BlockTypes.OAK_DOUBLE_SLAB
+        };
+        var palette = new Palette<>(AIR.getDefaultState().getBlockStateNBT());
+        for (int i = 0; i < cases.length; i++) {
+            for (int half = 0; half <= 1; half++) {
+                palette.set(hashChunkSectionXYZ(i, half, 0), NbtMap.builder()
+                        .putString("name", cases[i][0])
+                        .putCompound("states", NbtMap.builder()
+                                .putString(cases[i][1], cases[i][2])
+                                .putInt("top_slot_bit", half)
+                                .build())
+                        .putInt("version", 0)
+                        .build());
+            }
+        }
+        var emptyLayer = new Palette<>(AIR.getDefaultState().getBlockStateNBT());
+        var raw = LevelDBUtils.withByteBufToArray(buffer -> {
+            buffer.writeByte(AllayChunkSection.CURRENT_CHUNK_SECTION_VERSION);
+            buffer.writeByte(AllayChunkSection.LAYER_COUNT);
+            buffer.writeByte(0);
+            palette.writeToStorage(buffer, tag -> tag);
+            emptyLayer.writeToStorage(buffer, tag -> tag);
+        });
+        var decoded = ChunkSectionCodec.deserialize(raw, 0, 0, 0);
+        assertNotNull(decoded);
+        var rewritten = readRawLayer0(ChunkSectionCodec.serialize(decoded, 0));
+        for (int i = 0; i < expectedTypes.length; i++) {
+            for (int half = 0; half <= 1; half++) {
+                var expected = expectedTypes[i].getDefaultState().setPropertyValue(
+                        BlockPropertyTypes.MINECRAFT_VERTICAL_HALF,
+                        half == 0 ? MinecraftVerticalHalf.BOTTOM : MinecraftVerticalHalf.TOP);
+                assertEquals(expected, decoded.getBlockState(i, half, 0, 0));
+                assertEquals(expected.getBlockStateNBT(), rewritten.get(hashChunkSectionXYZ(i, half, 0)));
+            }
+        }
     }
 
     /**
