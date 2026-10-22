@@ -17,11 +17,28 @@ import java.util.List;
 @CallerThread(ThreadType.DIMENSION)
 public final class PlayerInventoryRequestEvent extends PlayerEvent implements CancellableEvent {
     private final List<Slot> slots;
+    private final List<Action> actions;
 
     /** Creates a request guard with the explicitly referenced native container slots. */
     public PlayerInventoryRequestEvent(EntityPlayer player, List<Slot> slots) {
+        this(player, slots, List.of());
+    }
+
+    /** Creates a read-only guard containing each requested action in client order. */
+    public PlayerInventoryRequestEvent(EntityPlayer player, List<Slot> slots, List<Action> actions) {
         super(player);
         this.slots = List.copyOf(slots);
+        this.actions = List.copyOf(actions);
+    }
+
+    /**
+     * Returns untrusted client intent before native validation or execution.
+     * An empty list indicates a legacy event constructor. OTHER entries preserve unsupported
+     * projection boundaries, such as recipes; they must not be interpreted as item transfers.
+     * Plugins replacing a cancelled request must validate the entire ordered batch themselves.
+     */
+    public List<Action> getActions() {
+        return actions;
     }
 
     /**
@@ -42,4 +59,40 @@ public final class PlayerInventoryRequestEvent extends PlayerEvent implements Ca
             }
         }
     }
+    /** Describes an action without exposing protocol implementation types. */
+    public enum Kind {
+        /** Moves count items from source to destination. */
+        TRANSFER,
+        /** Exchanges both complete stacks; count is zero. */
+        SWAP,
+        /** Drops count items from source into the world. */
+        DROP,
+        /** Destroys count items from source. */
+        DESTROY,
+        /** Consumes count items from source, usually as part of a recipe. */
+        CONSUME,
+        /** Indicates an action whose effects are not represented by explicit slot transfers. */
+        OTHER
+    }
+
+    /**
+     * Describes client intent. Source is null only for OTHER; destination is present only for
+     * TRANSFER and SWAP. Stack IDs are untrusted client values, including negative references
+     * to an earlier action in the same request. This record does not grant mutation authority.
+     */
+    public record Action(Kind kind, int count, Slot source, Slot destination,
+                         int sourceStackId, int destinationStackId) {
+        /** Rejects inconsistent action shapes; native processors still validate item semantics. */
+        public Action {
+            java.util.Objects.requireNonNull(kind);
+            if (kind == Kind.OTHER) {
+                if (source != null || destination != null || count != 0) throw new IllegalArgumentException("Invalid opaque action");
+            } else {
+                java.util.Objects.requireNonNull(source);
+                if ((kind == Kind.TRANSFER || kind == Kind.SWAP) != (destination != null)) throw new IllegalArgumentException("Invalid destination");
+                if (kind == Kind.SWAP ? count != 0 : count <= 0) throw new IllegalArgumentException("Invalid item count");
+            }
+        }
+    }
+
 }
