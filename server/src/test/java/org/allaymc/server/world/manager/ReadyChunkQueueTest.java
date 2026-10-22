@@ -57,4 +57,20 @@ class ReadyChunkQueueTest {
                 id -> { throw new AssertionError("Must not read chunks"); }, id -> true).isEmpty());
         assertEquals(7L, queue.dequeueLong());
     }
+
+    @Test
+    void doesNotScanAnUnboundedViewDistanceQueue() {
+        var queue = new LongArrayFIFOQueue();
+        for (long hash = 1; hash <= 100; hash++) {
+            queue.enqueue(hash);
+        }
+        var attempts = new java.util.concurrent.atomic.AtomicInteger();
+        var selected = ReadyChunkQueue.takeReady(queue, 1,
+                id -> { attempts.incrementAndGet(); return null; }, id -> true);
+
+        assertTrue(selected.isEmpty());
+        assertEquals(9, attempts.get(), "The one-chunk budget should scan at most nine entries");
+        assertEquals(100, queue.size());
+        assertEquals(1L, queue.dequeueLong(), "Unavailable nearby chunk retains priority");
+    }
 }
