@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       version_tag:
-        description: 'Versión para simular sin publicar (v0.14.2-beta.1 o v0.14.2)'
+        description: 'Versión oficial, revisión o beta (v0.14.3, v0.14.3.1 o v0.14.3-beta.1)'
         required: true
-        default: 'v0.14.2-beta.1'
+        default: 'v0.14.3.1'
         type: string
       publish_existing_release:
         description: 'Completar un release existente con JAR y SHA-256 sin sobrescribir archivos'
@@ -58,15 +58,16 @@ jobs:
         run: |
           set -euo pipefail
           tag="$RELEASE_TAG"
-          if [[ ! "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-beta\.[1-9][0-9]*)?$ ]]; then
-            echo "::error::Usa vX.Y.Z (oficial) o vX.Y.Z-beta.N (beta, N >= 1)."
+          if [[ ! "$tag" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)(\.[1-9][0-9]*)?(-beta\.[1-9][0-9]*)?$ ]]; then
+            echo "::error::Usa vX.Y.Z, vX.Y.Z.N o sus variantes -beta.N (N >= 1)."
             exit 1
           fi
 
+          series="${BASH_REMATCH[1]}"
           version="${tag#v}"
           base="${version%%-beta.*}"
           configured="$(sed -n 's/^server.version=//p' gradle.properties | tr -d '\r')"
-          if [[ "$base" != "$configured" ]]; then
+          if [[ "$base" != "$configured" && "$series" != "$configured" ]]; then
             echo "::error::El tag requiere server.version=$base, pero se encontró $configured."
             exit 1
           fi
