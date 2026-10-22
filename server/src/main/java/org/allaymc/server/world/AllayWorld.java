@@ -209,6 +209,12 @@ public class AllayWorld implements World {
             var server = Server.getInstance();
             var diagnostics = parallelTickDiagnostics;
             var observedTick = diagnostics == null ? null : diagnostics.beginTick(currentTick, System.nanoTime());
+            if (diagnostics != null) {
+                // A "queued" stage with no worker yet identifies pool starvation,
+                // rather than wrongly attributing the stall to chunk or entity code.
+                dimensions.forEach(dimension -> diagnostics.dimensionPhase(
+                        dimension.getDimensionType().getIdentifier().toString(), "queued"));
+            }
             try {
                 Utils.forEachInParallel(
                         dimensions, virtualTickingThread ? server.getVirtualThreadPool() : server.getComputeThreadPool(),
