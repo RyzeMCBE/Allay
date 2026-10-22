@@ -150,11 +150,9 @@ public class AllayNBTIO implements NBTIO {
         }
         if (value instanceof Byte || value instanceof Short ||
                 value instanceof Integer || value instanceof Long) {
-            return switch (((Number) value).longValue()) {
-                case 0 -> "bottom";
-                case 1 -> "top";
-                default -> value;
-            };
+            long half = ((Number) value).longValue();
+            if (half == 0) return "bottom";
+            if (half == 1) return "top";
         }
         return value;
     }
