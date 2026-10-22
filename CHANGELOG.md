@@ -10,6 +10,9 @@ Unless otherwise specified, any version comparison below is the comparison of th
 
 # Unreleased (after 0.14.2)
 
+### Added
+- Faster dimension arrival: the native chunk sender advances past unavailable chunks, prioritizes the already requested 3×3 destination footprint for a bounded window, and tracks client loading-screen IDs without changing the existing server ACK/chunk ordering. Optional timing diagnostics are disabled by default; see `docs/DIMENSION_LOADING.md`.
+
 ### Fixed
 - An asynchronous LevelDB chunk write failure now completes the returned future exceptionally instead of reporting success, while preserving error logging.
 - Parallel dimension ticks are opt-in by default for newly generated settings while the documented freeze/transfer issue remains unresolved; existing settings are not overwritten.
