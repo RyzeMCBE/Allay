@@ -68,7 +68,7 @@ public class AllayNBTIO implements NBTIO {
             }
 
             try {
-                var value = property.tryCreateValue(entry.getValue());
+                var value = property.tryCreateValue(normalizeLegacySlabHalf(name, entry.getKey(), entry.getValue()));
                 if (value == null) {
                     log.warn("Invalid value {} for block property {} on {}", entry.getValue(), entry.getKey(), name);
                     return BlockTypes.UNKNOWN.getDefaultState();
@@ -135,6 +135,26 @@ public class AllayNBTIO implements NBTIO {
         }
 
         return entityType.createEntity(EntityInitInfo.builder().dimension(dimension).nbt(nbt).build());
+    }
+
+    /**
+     * Some imported worlds store the post-1.20.20 vertical half enum as a
+     * numeric NBT tag even when their palette version is already up to date.
+     * Limit this compatibility path to vanilla slabs; all other values must
+     * still be rejected and preserved by the chunk codec if unrecognized.
+     */
+    private static Object normalizeLegacySlabHalf(String blockName, String propertyName, Object value) {
+        if (!blockName.startsWith("minecraft:") || !blockName.endsWith("_slab") ||
+                !"minecraft:vertical_half".equals(propertyName)) {
+            return value;
+        }
+        if (value instanceof Byte || value instanceof Short ||
+                value instanceof Integer || value instanceof Long) {
+            long half = ((Number) value).longValue();
+            if (half == 0) return "bottom";
+            if (half == 1) return "top";
+        }
+        return value;
     }
 
     private org.allaymc.api.block.type.BlockType<?> getBlockType(String name) {

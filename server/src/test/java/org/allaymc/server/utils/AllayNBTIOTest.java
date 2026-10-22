@@ -1,6 +1,8 @@
 package org.allaymc.server.utils;
 
 import org.allaymc.api.block.type.BlockTypes;
+import org.allaymc.api.block.property.enums.MinecraftVerticalHalf;
+import org.allaymc.api.block.property.type.BlockPropertyTypes;
 import org.allaymc.api.blockentity.BlockEntityInitInfo;
 import org.allaymc.api.blockentity.type.BlockEntityTypes;
 import org.allaymc.api.entity.EntityInitInfo;
@@ -86,6 +88,51 @@ class AllayNBTIOTest {
         var loaded = NBTIO.getAPI().fromBlockEntityNBT(dimension, nbt);
 
         assertEquals(unrecognizedPlant, loaded.saveNBT().getCompound("PlantBlock"));
+    }
+
+    /**
+     * A cross-server world may already have a current/newer palette version
+     * but still encode minecraft:vertical_half using a numeric NBT type.
+     * Only 0 and 1 are recognized; both top and bottom must remain intact.
+     */
+    @Test
+    void testNumericVerticalHalfInCurrentVersionSlabPalettes() {
+        for (var slab : List.of(BlockTypes.SMOOTH_STONE_SLAB, BlockTypes.SMOOTH_STONE_DOUBLE_SLAB,
+                BlockTypes.OAK_SLAB, BlockTypes.OAK_DOUBLE_SLAB)) {
+            for (int half = 0; half <= 1; half++) {
+                var expected = slab.getDefaultState().setPropertyValue(
+                        BlockPropertyTypes.MINECRAFT_VERTICAL_HALF,
+                        half == 0 ? MinecraftVerticalHalf.BOTTOM : MinecraftVerticalHalf.TOP);
+                for (int tagType = 0; tagType < 4; tagType++) {
+                    var states = expected.getBlockStateNBT().getCompound("states").toBuilder();
+                    switch (tagType) {
+                        case 0 -> states.putByte("minecraft:vertical_half", (byte) half);
+                        case 1 -> states.putShort("minecraft:vertical_half", (short) half);
+                        case 2 -> states.putInt("minecraft:vertical_half", half);
+                        case 3 -> states.putLong("minecraft:vertical_half", half);
+                        default -> throw new AssertionError("Unexpected NBT type");
+                    }
+                    var stored = expected.getBlockStateNBT().toBuilder()
+                            .putCompound("states", states.build())
+                            .putInt("version", ProtocolInfo.BLOCK_STATE_VERSION_NUM + 1)
+                            .build();
+                    assertEquals(expected, NBTIO.getAPI().fromBlockStateNBT(stored),
+                            slab.getIdentifier() + " half=" + half + " nbtType=" + tagType);
+                }
+            }
+        }
+    }
+
+    @Test
+    void testOutOfRangeSlabHalfRemainsUnknown() {
+        var slab = BlockTypes.SMOOTH_STONE_SLAB.getDefaultState();
+        var nbt = slab.getBlockStateNBT().toBuilder()
+                .putCompound("states", slab.getBlockStateNBT().getCompound("states").toBuilder()
+                        .putInt("minecraft:vertical_half", 2)
+                        .build())
+                .putInt("version", ProtocolInfo.BLOCK_STATE_VERSION_NUM + 1)
+                .build();
+        assertEquals(BlockTypes.UNKNOWN.getDefaultState(), NBTIO.getAPI().fromBlockStateNBT(nbt));
     }
 
     @Test
