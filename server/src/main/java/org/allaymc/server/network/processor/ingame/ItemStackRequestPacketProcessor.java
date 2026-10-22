@@ -146,14 +146,38 @@ public class ItemStackRequestPacketProcessor extends PacketProcessor<ItemStackRe
 
     boolean allowRequest(Player player, ItemStackRequestAction[] actions) {
         var slots = new ArrayList<PlayerInventoryRequestEvent.Slot>();
+        var intents = new ArrayList<PlayerInventoryRequestEvent.Action>();
         for (var action : actions) {
-            for (var slot : referencedSlots(action)) {
+            var referenced = referencedSlots(action);
+            var resolved = new ArrayList<PlayerInventoryRequestEvent.Slot>();
+            for (var slot : referenced) {
                 var container = ContainerActionProcessor.getContainerFrom(player, slot.containerName());
                 int index = ContainerActionProcessor.fromNetworkSlotIndex(container, slot.slot());
-                slots.add(new PlayerInventoryRequestEvent.Slot(container, index));
+                var nativeSlot = new PlayerInventoryRequestEvent.Slot(container, index);
+                slots.add(nativeSlot);
+                resolved.add(nativeSlot);
             }
+            var kind = switch (action) {
+                case TransferItemStackRequestAction ignored -> PlayerInventoryRequestEvent.Kind.TRANSFER;
+                case SwapAction ignored -> PlayerInventoryRequestEvent.Kind.SWAP;
+                case DropAction ignored -> PlayerInventoryRequestEvent.Kind.DROP;
+                case DestroyAction ignored -> PlayerInventoryRequestEvent.Kind.DESTROY;
+                case ConsumeAction ignored -> PlayerInventoryRequestEvent.Kind.CONSUME;
+                default -> PlayerInventoryRequestEvent.Kind.OTHER;
+            };
+            int count = switch (action) {
+                case TransferItemStackRequestAction transfer -> transfer.count();
+                case DropAction drop -> drop.count();
+                case DestroyAction destroy -> destroy.count();
+                case ConsumeAction consume -> consume.count();
+                default -> 0;
+            };
+            intents.add(new PlayerInventoryRequestEvent.Action(kind, count,
+                    resolved.isEmpty() ? null : resolved.getFirst(), resolved.size() < 2 ? null : resolved.get(1),
+                    referenced.isEmpty() ? 0 : referenced.getFirst().stackNetworkId(),
+                    referenced.size() < 2 ? 0 : referenced.get(1).stackNetworkId()));
         }
-        return new PlayerInventoryRequestEvent(player.getControlledEntity(), slots).call();
+        return new PlayerInventoryRequestEvent(player.getControlledEntity(), slots, intents).call();
     }
 
     static List<ItemStackRequestSlotData> referencedSlots(ItemStackRequestAction action) {

@@ -71,6 +71,62 @@ class ItemStackRequestPacketProcessorTest {
     }
 
     @Test
+    void exposesPartialTransfersSwapsAndOpaqueActionsInOrder() {
+        var player = mock(Player.class);
+        var entity = mock(EntityPlayer.class);
+        var container = mock(Container.class);
+        var server = mock(Server.class);
+        var bus = mock(EventBus.class);
+        var name = new FullContainerName(ContainerSlotType.INVENTORY, null);
+        var source = new ItemStackRequestSlotData(ContainerSlotType.INVENTORY, 2, 41, name);
+        var destination = new ItemStackRequestSlotData(ContainerSlotType.INVENTORY, 3, -7, name);
+        var opaque = mock(ItemStackRequestAction.class);
+        when(player.getControlledEntity()).thenReturn(entity);
+        when(container.getItemStackArray()).thenReturn(new ItemStack[36]);
+        when(server.getEventBus()).thenReturn(bus);
+        when(bus.callEvent(any())).thenAnswer(invocation -> {
+            PlayerInventoryRequestEvent event = invocation.getArgument(0);
+            var actions = event.getActions();
+            assertEquals(3, actions.size());
+            assertEquals(PlayerInventoryRequestEvent.Kind.TRANSFER, actions.getFirst().kind());
+            assertEquals(5, actions.getFirst().count());
+            assertEquals(new PlayerInventoryRequestEvent.Slot(container, 2), actions.getFirst().source());
+            assertEquals(new PlayerInventoryRequestEvent.Slot(container, 3), actions.getFirst().destination());
+            assertEquals(41, actions.getFirst().sourceStackId());
+            assertEquals(-7, actions.getFirst().destinationStackId());
+            assertEquals(PlayerInventoryRequestEvent.Kind.SWAP, actions.get(1).kind());
+            assertEquals(0, actions.get(1).count());
+            assertEquals(PlayerInventoryRequestEvent.Kind.OTHER, actions.get(2).kind());
+            assertThrows(UnsupportedOperationException.class, actions::clear);
+            event.cancel();
+            return event;
+        });
+        try (var servers = mockStatic(Server.class); var containers = mockStatic(ContainerActionProcessor.class)) {
+            servers.when(Server::getInstance).thenReturn(server);
+            containers.when(() -> ContainerActionProcessor.getContainerFrom(player, name)).thenReturn(container);
+            containers.when(() -> ContainerActionProcessor.fromNetworkSlotIndex(container, 2)).thenReturn(2);
+            containers.when(() -> ContainerActionProcessor.fromNetworkSlotIndex(container, 3)).thenReturn(3);
+            assertFalse(new ItemStackRequestPacketProcessor().allowRequest(player,
+                    new ItemStackRequestAction[]{new TakeAction(5, source, destination), new SwapAction(destination, source), opaque}));
+        }
+    }
+
+    @Test
+    void legacyConstructionRemainsCompatibleAndInvalidActionShapesFailClosed() {
+        var entity = mock(EntityPlayer.class);
+        var container = mock(Container.class);
+        when(container.getItemStackArray()).thenReturn(new ItemStack[1]);
+        var slot = new PlayerInventoryRequestEvent.Slot(container, 0);
+        assertTrue(new PlayerInventoryRequestEvent(entity, List.of(slot)).getActions().isEmpty());
+        assertThrows(IllegalArgumentException.class, () -> new PlayerInventoryRequestEvent.Action(
+                PlayerInventoryRequestEvent.Kind.TRANSFER, 0, slot, slot, 0, 0));
+        assertThrows(IllegalArgumentException.class, () -> new PlayerInventoryRequestEvent.Action(
+                PlayerInventoryRequestEvent.Kind.SWAP, 1, slot, slot, 0, 0));
+        assertThrows(IllegalArgumentException.class, () -> new PlayerInventoryRequestEvent.Action(
+                PlayerInventoryRequestEvent.Kind.DROP, 1, slot, slot, 0, 0));
+    }
+
+    @Test
     void policyRejectionSkipsEveryActionIncludingEarlierActionsInTheRequest() {
         var player = mock(AllayPlayer.class);
         var protocol = mock(Protocol.class);
