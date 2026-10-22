@@ -12,6 +12,7 @@ Unless otherwise specified, any version comparison below is the comparison of th
 
 ### Fixed
 - An asynchronous LevelDB chunk write failure now completes the returned future exceptionally instead of reporting success, while preserving error logging.
+- Parallel dimension ticks are opt-in by default for newly generated settings while the documented freeze/transfer issue remains unresolved; existing settings are not overwritten.
 
 ### Dependencies
 - Prepare integration of the verified RyzeMCBE/Protocol `f609afca` and RyzeMCBE/StateUpdater `257fb5e8` revisions through pinned Git submodules.
