@@ -9,5 +9,6 @@ class ServerSettingsTest {
     @Test
     void parallelDimensionTickingIsOptInForNewConfigurations() {
         assertFalse(new ServerSettings.WorldSettings().tickDimensionInParallel());
+        assertFalse(new ServerSettings.WorldSettings().dimensionTransitionDiagnostics());
     }
 }

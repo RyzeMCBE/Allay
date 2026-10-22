@@ -1,7 +1,6 @@
 package org.allaymc.server.world.manager;
 
 import com.google.common.collect.Sets;
-import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongArrayFIFOQueue;
 import it.unimi.dsi.fastutil.longs.LongComparator;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
@@ -172,23 +171,18 @@ public final class ChunkLoaderHolder {
 
         // Preserve the center-out order established by chunkSendingQueue. The async sender
         // consumes values directly, so a hash-order map can send the spawn chunk too late.
-        var chunkReadyToSend = new Long2ObjectLinkedOpenHashMap<Chunk>();
-        int sentChunkCount = 0;
-        do {
-            sentChunkCount++;
-            var chunkHash = chunkSendingQueue.dequeueLong();
-            var chunk = chunkManager.getChunk(chunkHash);
-            if (chunk == null) {
-                // Chunk is not loaded yet, so put it back at the head of the queue
-                chunkSendingQueue.enqueueFirst(chunkHash);
-                // Chunk must be sent from the middle to the outside, otherwise some chunks
-                // will not be shown client-side. So break here
-                break;
-            }
-
-            chunk.addChunkLoader(chunkLoader);
-            chunkReadyToSend.put(chunkHash, chunk);
-        } while (!chunkSendingQueue.isEmpty() && sentChunkCount < chunkLoader.getChunkMaxSendCountPerTick());
+        // During the first part of a dimension transfer, prioritize only the 3x3
+        // arrival footprint. Other queued chunks remain untouched until it is
+        // sent, or until the short priority window expires.
+        var transferringPlayer = player instanceof org.allaymc.server.player.AllayPlayer allayPlayer
+                && allayPlayer.isPrioritizingDimensionArrival() ? allayPlayer : null;
+        var chunkReadyToSend = ReadyChunkQueue.takeReady(
+                chunkSendingQueue,
+                chunkLoader.getChunkMaxSendCountPerTick(),
+                chunkManager::getChunk,
+                hash -> transferringPlayer == null || transferringPlayer.isDimensionArrivalChunk(hash)
+        );
+        chunkReadyToSend.values().forEach(chunk -> chunk.addChunkLoader(chunkLoader));
 
         if (!chunkReadyToSend.isEmpty()) {
             if (isActualPlayer()) {
