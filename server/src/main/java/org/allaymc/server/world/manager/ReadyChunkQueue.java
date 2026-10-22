@@ -29,8 +29,9 @@ final class ReadyChunkQueue {
             return result;
         }
 
-        // Snapshot count prevents re-scanning entries we defer in this tick.
-        int maxToScan = queue.size();
+        // Bound work per player/tick even if a large view-distance queue is unavailable.
+        // The snapshot also prevents re-scanning deferred chunks in this tick.
+        int maxToScan = (int) Math.min(queue.size(), Math.max(9L, 4L * maxReady));
         var deferred = new LongArrayList();
 
         for (int index = 0; index < maxToScan && result.size() < maxReady; index++) {
