@@ -245,6 +245,16 @@ public class AllayWorld implements World {
         worldStorage.tick(currentTick);
     }
 
+    /**
+     * Observe the owning dimension worker's current stage without influencing
+     * scheduling. Called by the entity manager only when it already owns the tick.
+     */
+    public void recordParallelDimensionTickPhase(DimensionType dimensionType, String phase) {
+        if (parallelTickDiagnostics != null) {
+            parallelTickDiagnostics.dimensionPhase(dimensionType.getIdentifier().toString(), phase);
+        }
+    }
+
     protected void checkFirstTick() {
         if (!this.firstTick) {
             return;
