@@ -8,9 +8,19 @@ Each release is associated with a specific API version, and any changes to API w
 
 Unless otherwise specified, any version comparison below is the comparison of the server version, not the API version.
 
-# 0.14.2 (API 0.30.0) - Unreleased
+# Unreleased (after 0.14.2)
 
-<small>[Cambios desde v0.14.1](https://github.com/RyzeMCBE/Allay/compare/v0.14.1...main)</small>
+### Fixed
+- An asynchronous LevelDB chunk write failure now completes the returned future exceptionally instead of reporting success, while preserving error logging.
+
+### Dependencies
+- Prepare integration of the verified RyzeMCBE/Protocol `f609afca` and RyzeMCBE/StateUpdater `257fb5e8` revisions through pinned Git submodules.
+- Refresh GitHub artifact uploading and selected Gradle dependencies after their CI checks.
+- Restore the LGPL-3.0 LICENSE file included in release v0.14.2.
+
+# 0.14.2 (API 0.30.0) - 2026/10/15
+
+<small>[Cambios desde v0.14.1](https://github.com/RyzeMCBE/Allay/compare/v0.14.1...v0.14.2)</small>
 
 ### Added
 
