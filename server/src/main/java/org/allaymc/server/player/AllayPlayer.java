@@ -126,6 +126,7 @@ public class AllayPlayer implements Player {
     private final Object chunkPublisherLock = new Object();
     private NetworkChunkPublisherUpdatePacket lastChunkPublisherUpdate;
     private final DimensionTransferProtection dimensionTransferProtection = new DimensionTransferProtection();
+    private final DimensionArrivalTracker dimensionArrivalTracker = new DimensionArrivalTracker();
     @Getter
     protected volatile ProtocolSession protocolSession;
     protected final AtomicInteger fullyJoinChunkThreshold;
@@ -248,6 +249,9 @@ public class AllayPlayer implements Player {
     }
 
     public void tick(long currentTick) {
+        if (currentTick % 20 == 0) {
+            logDimensionArrival(dimensionArrivalTracker.expire(System.nanoTime()));
+        }
         // Send commands only once in one second to prevent lagging the client
         if (this.shouldSendCommands && currentTick % 20 == 0) {
             this.sendCommands();
@@ -461,6 +465,8 @@ public class AllayPlayer implements Player {
             // DIMENSION_CHANGE_SUCCESS to preserve wire order.
             sendNetworkChunkPublisherUpdateIfNeeded();
             sendPacket(encoded);
+            // This observes a chunk queued on the normal send path, NOT transport receipt.
+            dimensionArrivalTracker.chunkQueued(chunk.getDimensionType().getId(), chunk.getX(), chunk.getZ());
         }
         // Async chunks are sent after the target entity is registered.
         this.controlledEntity.getDimension().getEntityManager().forEachEntitiesInChunk(chunk.getX(), chunk.getZ(), entity -> entity.spawnTo(this));
@@ -1272,11 +1278,45 @@ public class AllayPlayer implements Player {
     }
 
     /**
-     * Observes the client's loading screen. The packet is client-to-server;
-     * it is never used to forcibly close the UI.
+     * Observes client screen events only for the current transition's screen ID.
+     * Stale notifications must not end a newer transition's damage protection.
      */
-    public void onTransferLoadingScreenEnded() {
-        dimensionTransferProtection.screenEnded(System.nanoTime());
+    public void onTransferLoadingScreenPacket(
+            org.cloudburstmc.protocol.bedrock.data.ServerboundLoadingScreenPacketType type,
+            Integer screenId
+    ) {
+        boolean started = type == org.cloudburstmc.protocol.bedrock.data.ServerboundLoadingScreenPacketType.START_LOADING_SCREEN;
+        boolean ended = type == org.cloudburstmc.protocol.bedrock.data.ServerboundLoadingScreenPacketType.END_LOADING_SCREEN;
+        if (!started && !ended) {
+            return;
+        }
+        long now = System.nanoTime();
+        if (!dimensionArrivalTracker.screenSignal(started, screenId, now)) {
+            return;
+        }
+        if (ended) {
+            dimensionTransferProtection.screenEnded(now);
+            logDimensionArrival(dimensionArrivalTracker.completeIfReady(now));
+        }
+    }
+
+    /** During a brief window after the server's change acknowledgement, send arrival chunks first. */
+    public boolean isPrioritizingDimensionArrival() {
+        return dimensionArrivalTracker.isPrioritizing(System.nanoTime());
+    }
+
+    public boolean isDimensionArrivalChunk(long hash) {
+        return dimensionArrivalTracker.isArrivalChunk(hash);
+    }
+
+    private void logDimensionArrival(DimensionArrivalTracker.Summary summary) {
+        if (summary != null && AllayServer.getSettings().worldSettings().dimensionTransitionDiagnostics()) {
+            log.info("Dimension transition #{} player={} dimension={} result={} elapsedMs={} " +
+                            "arrivalChunksQueued={}/{} clientScreenStarted={} serverAckQueued={}",
+                    summary.sequence(), getOriginName(), summary.dimensionId(), summary.result(),
+                    summary.elapsedMillis(), summary.queuedChunks(), summary.expectedChunks(),
+                    summary.screenStarted(), summary.serverAcknowledged());
+        }
     }
 
     /**
@@ -1298,7 +1338,11 @@ public class AllayPlayer implements Player {
             lastChunkPublisherUpdate = null;
             pendingChunkDimension = targetDimType;
             changingDimension = true;
-            sendPacket(getProtocol().getEncoder().encodeDimensionChange(targetDimType, x, y, z));
+            var changePacket = getProtocol().getEncoder().encodeDimensionChange(targetDimType, x, y, z);
+            changePacket.setLoadingScreenId(dimensionArrivalTracker.begin(
+                    targetDimType.getId(), x, z, controlledEntity.getChunkLoadingRadius(),
+                    getProtocol().getProtocolVersion() >= 712, System.nanoTime()));
+            sendPacket(changePacket);
         }
     }
 
@@ -1315,6 +1359,8 @@ public class AllayPlayer implements Player {
             sendPacket(getProtocol().getEncoder().encodeDimensionChangeSuccess(
                     this.controlledEntity.getRuntimeId()
             ));
+            dimensionArrivalTracker.serverAcknowledged(System.nanoTime());
+            logDimensionArrival(dimensionArrivalTracker.completeIfReady(System.nanoTime()));
             pendingChunkDimension = null;
             changingDimension = false;
         }
@@ -1338,10 +1384,15 @@ public class AllayPlayer implements Player {
             // A failed transfer restores the original dimension but the client
             // still needs to process its recovery loading screen.
             dimensionTransferProtection.begin(System.nanoTime());
-            sendPacket(getProtocol().getEncoder().encodeDimensionChange(actual, loc.x(), loc.y(), loc.z()));
+            var recoveryPacket = getProtocol().getEncoder().encodeDimensionChange(actual, loc.x(), loc.y(), loc.z());
+            recoveryPacket.setLoadingScreenId(dimensionArrivalTracker.begin(
+                    actual.getId(), loc.x(), loc.z(), controlledEntity.getChunkLoadingRadius(),
+                    getProtocol().getProtocolVersion() >= 712, System.nanoTime()));
+            sendPacket(recoveryPacket);
             sendPacket(getProtocol().getEncoder().encodeDimensionChangeSuccess(
                     this.controlledEntity.getRuntimeId()
             ));
+            dimensionArrivalTracker.serverAcknowledged(System.nanoTime());
             pendingChunkDimension = null;
             changingDimension = false;
             log.warn("Dimension transition aborted player={} restored={}",
@@ -1610,6 +1661,7 @@ public class AllayPlayer implements Player {
     }
 
     protected void onDisconnect(String disconnectReason) {
+        dimensionArrivalTracker.clear();
         var activeScreen = removeActiveScreen();
         if (activeScreen instanceof AllayDDUIScreenSession session) {
             session.discard();
