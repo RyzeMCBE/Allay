@@ -30,6 +30,32 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(AllayTestExtension.class)
 class AllayNBTIOTest {
     @Test
+    void unsupportedTilesAreCountedByTypeAndTheirDataIsPreserved() {
+        var nbtio = new AllayNBTIO();
+        var dimension = Server.getInstance().getWorldPool().getDefaultWorld().getOverWorld();
+        var original = NbtMap.builder().putString("id","FutureTestTile")
+                .putInt("x",1).putInt("y",65).putInt("z",2).putInt("CustomData",42).build();
+        for (int i=0;i<3;i++) {
+            assertEquals(42,nbtio.fromBlockEntityNBT(dimension,original).saveNBT().getInt("CustomData"));
+        }
+        assertEquals(java.util.Map.of("FutureTestTile",3L),nbtio.unsupportedBlockEntityCounts());
+    }
+
+    @Test
+    void daylightDetectorIsRecognizedAndKeepsItsImportedData() {
+        var nbtio = new AllayNBTIO();
+        var dimension = Server.getInstance().getWorldPool().getDefaultWorld().getOverWorld();
+        var original = NbtMap.builder().putString("id","DaylightDetector")
+                .putInt("x",1).putInt("y",65).putInt("z",2)
+                .putCompound("ImportedData",NbtMap.builder().putInt("value",42).build()).build();
+        var tile = nbtio.fromBlockEntityNBT(dimension,original);
+        assertEquals(BlockEntityTypes.DAYLIGHT_DETECTOR,tile.getBlockEntityType());
+        assertEquals("DaylightDetector",tile.saveNBT().getString("id"));
+        assertEquals(original.getCompound("ImportedData"),tile.saveNBT().getCompound("ImportedData"));
+        assertTrue(nbtio.unsupportedBlockEntityCounts().isEmpty());
+    }
+
+    @Test
     void testFromBlockStateNBT() {
         var block1 = BlockTypes.BAMBOO.getDefaultState();
         var nbt = block1.getBlockStateNBT();

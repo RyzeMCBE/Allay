@@ -45,5 +45,7 @@ public final class BlockEntityTypes {
     public static BlockEntityType<BlockEntityMovingBlock> MOVING_BLOCK;
     public static BlockEntityType<BlockEntityCauldron> CAULDRON;
     public static BlockEntityType<BlockEntity> MOB_SPAWNER;
+    /** Stores native daylight detector tiles and preserves imported tile data. */
+    public static BlockEntityType<BlockEntity> DAYLIGHT_DETECTOR;
     public static BlockEntityType<BlockEntity> UNKNOWN;
 }

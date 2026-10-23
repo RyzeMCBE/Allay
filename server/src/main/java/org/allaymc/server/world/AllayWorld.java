@@ -69,6 +69,8 @@ public class AllayWorld implements World {
     protected final Thread worldThread;
     // Issue #27: observe stalled parallel ticks without changing their executor or ordering.
     protected final ParallelDimensionTickDiagnostics parallelTickDiagnostics;
+    @Getter
+    protected volatile Throwable shutdownFailure;
 
     protected long nextTimeSendTick;
 
@@ -513,15 +515,19 @@ public class AllayWorld implements World {
     }
 
     protected void shutdownReally() {
-        if (parallelTickDiagnostics != null) {
-            parallelTickDiagnostics.close();
-        }
         log.info(I18n.get().tr(TrKeys.ALLAY_WORLD_UNLOADING, name));
-        getPlayers().forEach(Player::disconnect);
-        this.scheduler.shutdown();
-        this.dimensionMap.values().forEach(dimension -> ((AllayDimension) dimension).shutdown());
-        saveWorldData();
-        this.worldStorage.shutdown();
+        var stages = new ArrayList<Runnable>();
+        if (parallelTickDiagnostics != null) stages.add(parallelTickDiagnostics::close);
+        stages.add(() -> getPlayers().forEach(Player::disconnect));
+        stages.add(this.scheduler::shutdown);
+        this.dimensionMap.values().forEach(dimension -> stages.add(((AllayDimension) dimension)::shutdown));
+        try {
+            WorldShutdownSequence.run(stages, this::saveWorldData, this.worldStorage::shutdown);
+        } catch (RuntimeException failure) {
+            shutdownFailure = failure;
+            log.error("Failed to shut down world {}", name, failure);
+            return;
+        }
         this.state.set(WorldState.STOPPED);
         log.info(I18n.get().tr(TrKeys.ALLAY_WORLD_UNLOADED, name));
     }
