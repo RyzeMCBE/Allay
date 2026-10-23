@@ -21,7 +21,10 @@ import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.BuildPlatform;
 import org.cloudburstmc.protocol.bedrock.data.PlayerPermission;
 import org.cloudburstmc.protocol.bedrock.data.command.CommandPermission;
+import org.cloudburstmc.protocol.bedrock.data.definitions.BlockDefinition;
+import org.cloudburstmc.protocol.bedrock.data.definitions.ItemDefinition;
 import org.cloudburstmc.protocol.bedrock.data.skin.SerializedSkin;
+import org.cloudburstmc.protocol.bedrock.definition.SimpleDefinitionRegistry;
 import org.cloudburstmc.protocol.bedrock.packet.*;
 import org.joml.primitives.AABBd;
 import org.junit.jupiter.api.Test;
@@ -267,8 +270,10 @@ class CapturedPlayerPacketReplayTest {
 
     private static BedrockCodecHelper helper(Protocol protocol) {
         var helper = protocol.getCodec().createHelper();
-        helper.setItemDefinitions(protocol.getItemDefinitionRegistry());
-        helper.setBlockDefinitions(protocol.getBlockDefinitionRegistry());
+        helper.setItemDefinitions(SimpleDefinitionRegistry.<ItemDefinition>builder()
+                .addAll(protocol.getData().itemDefinitions()).build());
+        helper.setBlockDefinitions(SimpleDefinitionRegistry.<BlockDefinition>builder()
+                .addAll(protocol.getData().blockDefinitions()).build());
         return helper;
     }
 
