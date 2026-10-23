@@ -3,12 +3,14 @@ package org.allaymc.server.network.protocol;
 import org.allaymc.api.entity.interfaces.EntityPlayer;
 import org.allaymc.api.player.ClientState;
 import org.allaymc.api.server.Server;
+import org.allaymc.server.ServerSettings;
 import org.allaymc.server.eventbus.event.network.PacketReceiveEvent;
 import org.allaymc.server.eventbus.event.network.PacketSendEvent;
 import org.allaymc.server.network.processor.PacketProcessor;
 import org.allaymc.server.network.processor.PacketProcessorHolder;
 import org.allaymc.server.network.processor.PacketProcessorRegistry;
 import org.allaymc.server.player.AllayPlayer;
+import org.allaymc.server.player.AllayLoginData;
 import org.allaymc.server.world.AllayWorld;
 import org.allaymc.testutils.AllayTestExtension;
 import org.cloudburstmc.protocol.bedrock.BedrockPeer;
@@ -30,6 +32,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -378,6 +381,46 @@ class ProtocolSessionTest {
         return processor;
     }
 
+    @Test
+    void diagnosticOmissionsApplyToQueuedImmediateAndReturningSendPaths() {
+        var source = UUID.fromString("00000000-0000-0000-0000-000000000001");
+        var session = diagnosticSession(source);
+        var packet = new PlayerSkinPacket();
+        packet.setUuid(source);
+        session.send(player, packet);
+        session.sendImmediately(player, packet);
+        assertNull(session.sendImmediatelyAndGet(player, packet));
+        verify(bedrockSession, never()).sendPacket(any());
+        verify(bedrockSession, never()).sendPacketImmediately(any());
+    }
+
+    @Test
+    void diagnosticsInspectThePostEventPacket() {
+        var source = UUID.fromString("00000000-0000-0000-0000-000000000001");
+        var session = diagnosticSession(source);
+        var replacement = new PlayerSkinPacket();
+        replacement.setUuid(source);
+        Consumer<PacketSendEvent> listener = event -> event.setPacket(replacement);
+        withPacketSendListener(listener, () -> session.send(player, new TextPacket()));
+        verify(bedrockSession, never()).sendPacket(any());
+    }
+
+    private ProtocolSession diagnosticSession(UUID source) {
+        var recipient = UUID.fromString("00000000-0000-0000-0000-000000000002");
+        var settings = new ServerSettings.PlayerPacketDiagnosticsSettings().enabled(true)
+                .sourceUuid(source.toString()).recipientUuid(recipient.toString())
+                .recipientProtocol(2193).excludedPackets(List.of("PLAYER_SKIN"));
+        var registry = new PacketProcessorRegistry();
+        registry.freeze();
+        when(protocol.createProcessorHolder()).thenReturn(new PacketProcessorHolder(registry));
+        when(protocol.getProtocolVersion()).thenReturn(2193);
+        when(bedrockSession.isConnected()).thenReturn(true);
+        var login = mock(AllayLoginData.class);
+        when(login.getUuid()).thenReturn(recipient);
+        when(player.getLoginData()).thenReturn(login);
+        return new ProtocolSession(protocol, bedrockSession, settings);
+    }
+
     private ProtocolSession sessionWithProcessors(
             Map<BedrockPacketType, PacketProcessor<BedrockPacket>> processors
     ) {
@@ -392,3 +435,4 @@ class ProtocolSessionTest {
         return new ProtocolSession(protocol, bedrockSession);
     }
 }
+

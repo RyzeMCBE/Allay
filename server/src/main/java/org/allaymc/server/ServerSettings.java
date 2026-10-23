@@ -10,6 +10,7 @@ import org.allaymc.api.message.LangCode;
 import org.allaymc.api.player.GameMode;
 import org.allaymc.api.world.data.Difficulty;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -118,6 +119,11 @@ public class ServerSettings extends OkaeriConfig {
         @CustomKey("debug-packets")
         private boolean debugPackets = false;
 
+        @Comment("Temporary, opt-in filtering of one player's entity packets for one recipient")
+        @Comment("Restart the server after changing this diagnostic configuration")
+        @CustomKey("player-packet-diagnostics")
+        private PlayerPacketDiagnosticsSettings playerPacketDiagnostics = new PlayerPacketDiagnosticsSettings();
+
         @Comment("The compression algorithm used for network data streams. Possible values: ZLIB, SNAPPY")
         @Comment("ZLIB has better compression ratios and SNAPPY has better compression performance")
         @CustomKey("compression-algorithm")
@@ -189,6 +195,25 @@ public class ServerSettings extends OkaeriConfig {
             ZLIB,
             SNAPPY
         }
+    }
+
+    @Getter
+    @Setter
+    @Accessors(fluent = true)
+    public static class PlayerPacketDiagnosticsSettings extends OkaeriConfig {
+        private boolean enabled = false;
+        @CustomKey("source-uuid")
+        private String sourceUuid = "";
+        @CustomKey("recipient-uuid")
+        private String recipientUuid = "";
+        @CustomKey("recipient-protocol")
+        private int recipientProtocol = 2193;
+        @Comment("BedrockPacketType names to omit; [] traces only, ['*'] hides the supported source packets")
+        @CustomKey("excluded-packets")
+        private List<String> excludedPackets = List.of();
+        @Comment("Limits diagnostic messages per recipient connection; filtering continues after this limit")
+        @CustomKey("max-log-packets")
+        private int maxLogPackets = 200;
     }
 
     @Getter
@@ -362,3 +387,4 @@ public class ServerSettings extends OkaeriConfig {
         private boolean logResponseStatusText = false;
     }
 }
+

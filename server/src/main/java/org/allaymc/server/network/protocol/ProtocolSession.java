@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.allaymc.api.player.ClientState;
 import org.allaymc.api.server.Server;
+import org.allaymc.server.ServerSettings;
 import org.allaymc.server.eventbus.event.network.PacketReceiveEvent;
 import org.allaymc.server.eventbus.event.network.PacketSendEvent;
 import org.allaymc.server.network.processor.PacketProcessorHolder;
@@ -32,6 +33,8 @@ public final class ProtocolSession {
     private final BedrockServerSession session;
     private final PacketProcessorHolder processorHolder;
     @Getter(AccessLevel.NONE)
+    private final PlayerPacketDiagnostics packetDiagnostics;
+    @Getter(AccessLevel.NONE)
     private boolean codecInstalled;
 
     /**
@@ -42,8 +45,21 @@ public final class ProtocolSession {
      * @throws IllegalArgumentException if the protocol is not initialized
      */
     public ProtocolSession(Protocol protocol, BedrockServerSession session) {
+        this(protocol, session, PlayerPacketDiagnostics.disabled());
+    }
+
+    /**
+     * Creates a connection with a snapshot of the optional player-packet diagnostic settings.
+     */
+    public ProtocolSession(Protocol protocol, BedrockServerSession session,
+                           ServerSettings.PlayerPacketDiagnosticsSettings settings) {
+        this(protocol, session, PlayerPacketDiagnostics.create(settings));
+    }
+
+    ProtocolSession(Protocol protocol, BedrockServerSession session, PlayerPacketDiagnostics packetDiagnostics) {
         this.protocol = Objects.requireNonNull(protocol, "protocol");
         this.session = Objects.requireNonNull(session, "session");
+        this.packetDiagnostics = Objects.requireNonNull(packetDiagnostics, "packetDiagnostics");
         if (!protocol.isInitialized()) {
             throw new IllegalArgumentException("Protocol must be initialized");
         }
@@ -282,6 +298,14 @@ public final class ProtocolSession {
             return null;
         }
 
+        if (packetDiagnostics.isEnabled() && player.getLoginData() != null) {
+            outgoingPacket = packetDiagnostics.filter(
+                    player.getLoginData().getUuid(), protocol.getProtocolVersion(), outgoingPacket);
+            if (outgoingPacket == null) {
+                return null;
+            }
+        }
+
         if (immediately) {
             session.sendPacketImmediately(outgoingPacket);
         } else {
@@ -329,3 +353,4 @@ public final class ProtocolSession {
         return processorHolder.setClientState(state, warnIfFailed);
     }
 }
+

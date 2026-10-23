@@ -1629,7 +1629,8 @@ public class AllayPlayer implements Player {
                 return false;
             }
 
-            var selectedSession = new ProtocolSession(protocol, session);
+            var selectedSession = new ProtocolSession(protocol, session,
+                    AllayServer.getSettings().networkSettings().playerPacketDiagnostics());
             selectedSession.installCodec();
             protocolSession = selectedSession;
             return true;
