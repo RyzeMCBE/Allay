@@ -6,6 +6,7 @@ import org.allaymc.api.entity.component.EntityContainerHolderComponent;
 import org.allaymc.api.entity.damage.DamageContainer;
 import org.allaymc.api.entity.interfaces.EntityPlayer;
 import org.allaymc.api.eventbus.EventHandler;
+import org.allaymc.api.eventbus.event.entity.EntityDamageEvent;
 import org.allaymc.api.item.interfaces.ItemAirStack;
 import org.allaymc.api.item.type.ItemTypes;
 import org.allaymc.api.player.GameMode;
@@ -29,6 +30,10 @@ public class EntityArmorStandLivingComponentImpl extends EntityLivingComponentIm
 
     @Override
     public boolean attack(DamageContainer damage, boolean ignoreCoolDown) {
+        // Armor stands have custom break logic, but must still honor protection listeners.
+        var event = new EntityDamageEvent(thisEntity, damage);
+        if (!event.call()) return false;
+        damage = event.getDamageContainer();
         var currentTime = baseComponent.getTick();
         var interval = currentTime - this.lastDamageTime;
         this.lastDamage = damage;
