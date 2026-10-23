@@ -119,7 +119,7 @@ public class ServerSettings extends OkaeriConfig {
         @CustomKey("debug-packets")
         private boolean debugPackets = false;
 
-        @Comment("Temporary, opt-in filtering of one player's entity packets for one recipient")
+        @Comment("Temporary, opt-in filtering of player entity packets between two client protocols")
         @Comment("Restart the server after changing this diagnostic configuration")
         @CustomKey("player-packet-diagnostics")
         private PlayerPacketDiagnosticsSettings playerPacketDiagnostics = new PlayerPacketDiagnosticsSettings();
@@ -202,10 +202,8 @@ public class ServerSettings extends OkaeriConfig {
     @Accessors(fluent = true)
     public static class PlayerPacketDiagnosticsSettings extends OkaeriConfig {
         private boolean enabled = false;
-        @CustomKey("source-uuid")
-        private String sourceUuid = "";
-        @CustomKey("recipient-uuid")
-        private String recipientUuid = "";
+        @CustomKey("source-protocol")
+        private int sourceProtocol = 844;
         @CustomKey("recipient-protocol")
         private int recipientProtocol = 2193;
         @Comment("BedrockPacketType names to omit; [] traces only, ['*'] hides the supported source packets")

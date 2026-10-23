@@ -405,11 +405,47 @@ class ProtocolSessionTest {
         verify(bedrockSession, never()).sendPacket(any());
     }
 
+    @Test
+    void sourceProtocolIsAvailableBeforeSpawnAndRemovedWhenItsConnectionCloses() {
+        var sourceId = UUID.fromString("00000000-0000-0000-0000-000000000001");
+        var recipient = UUID.fromString("00000000-0000-0000-0000-000000000002");
+        var sources = new PlayerPacketDiagnostics.SourceRegistry();
+        var settings = new ServerSettings.PlayerPacketDiagnosticsSettings().enabled(true)
+                .sourceProtocol(844).recipientProtocol(2193).excludedPackets(List.of("PLAYER_SKIN"));
+        var sourceProtocol = mock(Protocol.class);
+        var sourceRegistry = new PacketProcessorRegistry();
+        sourceRegistry.freeze();
+        when(sourceProtocol.isInitialized()).thenReturn(true);
+        when(sourceProtocol.createProcessorHolder()).thenReturn(new PacketProcessorHolder(sourceRegistry));
+        when(sourceProtocol.getProtocolVersion()).thenReturn(844);
+        var sourceSession = new ProtocolSession(sourceProtocol, mock(BedrockServerSession.class),
+                PlayerPacketDiagnostics.create(settings, sources));
+        var targetRegistry = new PacketProcessorRegistry();
+        targetRegistry.freeze();
+        when(protocol.createProcessorHolder()).thenReturn(new PacketProcessorHolder(targetRegistry));
+        when(protocol.getProtocolVersion()).thenReturn(2193);
+        when(bedrockSession.isConnected()).thenReturn(true);
+        var login = mock(AllayLoginData.class);
+        when(login.getUuid()).thenReturn(recipient);
+        when(player.getLoginData()).thenReturn(login);
+        var targetSession = new ProtocolSession(protocol, bedrockSession, PlayerPacketDiagnostics.create(settings, sources));
+        var packet = new PlayerSkinPacket();
+        packet.setUuid(sourceId);
+        sourceSession.registerDiagnosticSource(sourceId);
+        targetSession.send(player, packet);
+        verify(bedrockSession, never()).sendPacket(any());
+        sourceSession.clearDiagnosticSource();
+        targetSession.send(player, packet);
+        verify(bedrockSession).sendPacket(packet);
+        assertTrue(sourceSession.setClientState(ClientState.DISCONNECTED));
+        sourceSession.registerDiagnosticSource(sourceId);
+        assertEquals(0, sources.protocol(sourceId));
+    }
+
     private ProtocolSession diagnosticSession(UUID source) {
         var recipient = UUID.fromString("00000000-0000-0000-0000-000000000002");
         var settings = new ServerSettings.PlayerPacketDiagnosticsSettings().enabled(true)
-                .sourceUuid(source.toString()).recipientUuid(recipient.toString())
-                .recipientProtocol(2193).excludedPackets(List.of("PLAYER_SKIN"));
+                .sourceProtocol(844).recipientProtocol(2193).excludedPackets(List.of("PLAYER_SKIN"));
         var registry = new PacketProcessorRegistry();
         registry.freeze();
         when(protocol.createProcessorHolder()).thenReturn(new PacketProcessorHolder(registry));
@@ -418,7 +454,9 @@ class ProtocolSessionTest {
         var login = mock(AllayLoginData.class);
         when(login.getUuid()).thenReturn(recipient);
         when(player.getLoginData()).thenReturn(login);
-        return new ProtocolSession(protocol, bedrockSession, settings);
+        var sources = new PlayerPacketDiagnostics.SourceRegistry();
+        sources.register(source, 844, source);
+        return new ProtocolSession(protocol, bedrockSession, PlayerPacketDiagnostics.create(settings, sources));
     }
 
     private ProtocolSession sessionWithProcessors(

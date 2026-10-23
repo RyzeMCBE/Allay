@@ -19,6 +19,7 @@ import org.cloudburstmc.protocol.bedrock.packet.PacketSignal;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Binds an initialized protocol to one connection and owns its packet processors and client state.
@@ -34,6 +35,8 @@ public final class ProtocolSession {
     private final PacketProcessorHolder processorHolder;
     @Getter(AccessLevel.NONE)
     private final PlayerPacketDiagnostics packetDiagnostics;
+    @Getter(AccessLevel.NONE)
+    private UUID diagnosticSourceId;
     @Getter(AccessLevel.NONE)
     private boolean codecInstalled;
 
@@ -321,6 +324,25 @@ public final class ProtocolSession {
      */
     public ClientState getClientState() {
         return processorHolder.getClientState();
+    }
+
+    /**
+     * Records the decoded login identity before its first entity packets can reach other connections.
+     */
+    public synchronized void registerDiagnosticSource(UUID uuid) {
+        clearDiagnosticSource();
+        if (packetDiagnostics.isEnabled() && uuid != null && processorHolder.getClientState().canHandlePackets()) {
+            diagnosticSourceId = uuid;
+            packetDiagnostics.registerSource(uuid, protocol.getProtocolVersion(), this);
+        }
+    }
+
+    /** Removes only this connection's diagnostic registration, preserving any newer reconnect. */
+    public synchronized void clearDiagnosticSource() {
+        if (diagnosticSourceId != null) {
+            packetDiagnostics.unregisterSource(diagnosticSourceId, this);
+            diagnosticSourceId = null;
+        }
     }
 
     /**

@@ -138,7 +138,6 @@ public class AllayPlayer implements Player {
     @Getter
     protected EntityPlayer controlledEntity;
     @Getter
-    @Setter
     protected AllayLoginData loginData;
     @Getter
     @Setter
@@ -1633,6 +1632,9 @@ public class AllayPlayer implements Player {
                     AllayServer.getSettings().networkSettings().playerPacketDiagnostics());
             selectedSession.installCodec();
             protocolSession = selectedSession;
+            if (loginData != null) {
+                selectedSession.registerDiagnosticSource(loginData.getUuid());
+            }
             return true;
         }
     }
@@ -1661,7 +1663,22 @@ public class AllayPlayer implements Player {
         return this.session.getSocketAddress();
     }
 
+    /** Records login identity for protocol diagnostics before the first player spawn. */
+    public void setLoginData(AllayLoginData loginData) {
+        synchronized (protocolLifecycleLock) {
+            this.loginData = loginData;
+            var selectedSession = protocolSession;
+            if (selectedSession != null) {
+                selectedSession.registerDiagnosticSource(loginData == null ? null : loginData.getUuid());
+            }
+        }
+    }
+
     protected void onDisconnect(String disconnectReason) {
+        var selectedSession = protocolSession;
+        if (selectedSession != null) {
+            selectedSession.clearDiagnosticSource();
+        }
         dimensionArrivalTracker.clear();
         var activeScreen = removeActiveScreen();
         if (activeScreen instanceof AllayDDUIScreenSession session) {
@@ -2346,3 +2363,4 @@ public class AllayPlayer implements Player {
         }
     }
 }
+
