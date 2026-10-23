@@ -13,6 +13,14 @@ import org.cloudburstmc.nbt.NbtType;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityDataTypes;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityEventType;
 import org.cloudburstmc.protocol.bedrock.packet.EntityEventPacket;
+import org.cloudburstmc.protocol.bedrock.packet.LevelEventPacket;
+import org.cloudburstmc.protocol.bedrock.data.ParticleType;
+import org.cloudburstmc.protocol.bedrock.codec.v818.Bedrock_v818;
+import org.cloudburstmc.protocol.bedrock.codec.v2193.Bedrock_v2193;
+import org.allaymc.api.world.particle.DustParticle;
+import org.joml.Vector3d;
+import io.netty.buffer.Unpooled;
+import java.awt.Color;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -24,6 +32,28 @@ import static org.mockito.Mockito.mock;
 
 @ExtendWith(AllayTestExtension.class)
 class FireworkMetadataTest {
+    @Test
+    void actorIndependentOrangeParticlesSurviveOldAndNewWireCodecs() {
+        var encoder = new PacketEncoder_v2193(mock(ProtocolData.class));
+        var packet = (LevelEventPacket)encoder.encodeParticle(new DustParticle(new Color(255,136,0)),new Vector3d(2,78,4),0).iterator().next();
+        for (var codec : List.of(Bedrock_v818.CODEC,Bedrock_v2193.CODEC)) {
+            var helper = codec.createHelper();
+            var serializer = codec.getPacketDefinition(LevelEventPacket.class).getSerializer();
+            var buffer = Unpooled.buffer();
+            try {
+                serializer.serialize(buffer,helper,packet);
+                var decoded = new LevelEventPacket();
+                serializer.deserialize(buffer,helper,decoded);
+                assertEquals(ParticleType.FALLING_DUST,decoded.getType());
+                assertEquals(0xffff8800,decoded.getData());
+                assertEquals(78,decoded.getPosition().getY());
+                assertEquals(0,buffer.readableBytes());
+            } finally {
+                buffer.release();
+            }
+        }
+    }
+
     @Test
     void currentBedrockReceivesOrangeStarAndExplosionForTheSameActor() {
         var rocket = EntityTypes.FIREWORKS_ROCKET.createEntity(EntityInitInfo.builder()
