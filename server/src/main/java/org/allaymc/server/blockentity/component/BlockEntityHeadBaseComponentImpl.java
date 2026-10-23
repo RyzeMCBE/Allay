@@ -8,6 +8,8 @@ import org.allaymc.api.eventbus.EventHandler;
 import org.allaymc.server.block.component.event.CBlockOnPlaceEvent;
 import org.cloudburstmc.nbt.NbtMap;
 
+import java.util.Objects;
+
 /**
  * @author daoge_cmd
  */
@@ -18,7 +20,7 @@ public class BlockEntityHeadBaseComponentImpl extends BlockEntityBaseComponentIm
     protected static final String TAG_DOING_ANIMATION = "DoingAnimation";
     protected static final String TAG_MOUTH_TICK_COUNT = "MouthTickCount";
 
-    protected CompassRoseDirection direction;
+    protected CompassRoseDirection direction = CompassRoseDirection.SOUTH;
     protected boolean playingAnimation;
     protected int animationTicks;
 
@@ -37,7 +39,7 @@ public class BlockEntityHeadBaseComponentImpl extends BlockEntityBaseComponentIm
 
     @Override
     public void setDirection(CompassRoseDirection direction) {
-        this.direction = direction;
+        this.direction = Objects.requireNonNull(direction, "direction");
         sendBlockEntityToViewers();
     }
 
@@ -56,7 +58,13 @@ public class BlockEntityHeadBaseComponentImpl extends BlockEntityBaseComponentIm
     @Override
     public void loadNBT(NbtMap nbt) {
         super.loadNBT(nbt);
-        nbt.listenForFloat(TAG_ROTATION, value -> this.direction = CompassRoseDirection.getClosestFromYaw(value));
+        direction = CompassRoseDirection.SOUTH;
+        if (nbt.get(TAG_ROTATION) instanceof Number rotation && Double.isFinite(rotation.doubleValue())) {
+            direction = CompassRoseDirection.getClosestFromYaw(rotation.doubleValue());
+        } else if (nbt.get("Rot") instanceof Number rotation && rotation.intValue() >= 0 && rotation.intValue() < 16) {
+            // Imported PocketMine heads store the sixteen-way rotation as a byte index.
+            direction = CompassRoseDirection.from(rotation.intValue());
+        }
         nbt.listenForBoolean(TAG_DOING_ANIMATION, value -> this.playingAnimation = value);
         nbt.listenForInt(TAG_MOUTH_TICK_COUNT, value -> this.animationTicks = value);
     }
@@ -65,7 +73,7 @@ public class BlockEntityHeadBaseComponentImpl extends BlockEntityBaseComponentIm
     public NbtMap saveNBT() {
         return super.saveNBT()
                 .toBuilder()
-                .putFloat(TAG_ROTATION, this.direction.getYaw())
+                .putFloat(TAG_ROTATION, Objects.requireNonNullElse(this.direction, CompassRoseDirection.SOUTH).getYaw())
                 .putBoolean(TAG_DOING_ANIMATION, this.playingAnimation)
                 .putInt(TAG_MOUTH_TICK_COUNT, this.animationTicks)
                 .build();

@@ -30,6 +30,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(AllayTestExtension.class)
 class AllayNBTIOTest {
     @Test
+    void unsupportedTilesAreCountedByTypeAndTheirDataIsPreserved() {
+        var nbtio = new AllayNBTIO();
+        var dimension = Server.getInstance().getWorldPool().getDefaultWorld().getOverWorld();
+        var original = NbtMap.builder().putString("id","DaylightDetector")
+                .putInt("x",1).putInt("y",65).putInt("z",2).putInt("CustomData",42).build();
+        for (int i=0;i<3;i++) {
+            assertEquals(42,nbtio.fromBlockEntityNBT(dimension,original).saveNBT().getInt("CustomData"));
+        }
+        assertEquals(java.util.Map.of("DaylightDetector",3L),nbtio.unsupportedBlockEntityCounts());
+    }
+
+    @Test
     void testFromBlockStateNBT() {
         var block1 = BlockTypes.BAMBOO.getDefaultState();
         var nbt = block1.getBlockStateNBT();
