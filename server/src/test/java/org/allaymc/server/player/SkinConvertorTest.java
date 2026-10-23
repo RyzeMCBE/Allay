@@ -12,6 +12,31 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 class SkinConvertorTest {
 
     @Test
+    void profileHashSurvivesBothConversionsAndBuilderCopies() {
+        var skin = createSkin(new byte[]{1}, new byte[]{2}, new byte[]{3}, new ArrayList<>(List.of("#111111")))
+                .toBuilder().profileHash("appearance-cache-key").build();
+
+        var serialized = SkinConvertor.toSerializedSkin(skin);
+        assertEquals("appearance-cache-key", serialized.getProfileHash());
+        assertEquals("appearance-cache-key", SkinConvertor.fromSerializedSkin(serialized).profileHash());
+        assertEquals("appearance-cache-key", skin.toBuilder().skinId("updated-skin").build().profileHash());
+        assertEquals("", skin.toBuilder().profileHash(null).build().profileHash());
+    }
+
+    @Test
+    void existingPluginConstructorRemainsAvailableWithoutAProfileHash() {
+        var skin = createSkin(new byte[]{1}, new byte[]{2}, new byte[]{3}, new ArrayList<>(List.of("#111111")));
+        var legacy = new Skin(skin.skinId(), skin.playFabId(), skin.skinResourcePatch(), skin.skinData(), skin.animations(),
+                skin.capeData(), skin.skinGeometry(), skin.animationData(), skin.geometryDataEngineVersion(),
+                skin.premiumSkin(), skin.personaSkin(), skin.personaCapeOnClassicSkin(), skin.primaryUser(), skin.capeId(),
+                skin.fullId(), skin.skinColor(), skin.armSize(), skin.personaPieces(), skin.pieceTintColors(),
+                skin.overrideAppearance());
+
+        assertEquals("", legacy.profileHash());
+        assertEquals("", SkinConvertor.toSerializedSkin(legacy).getProfileHash());
+    }
+
+    @Test
     void conversionsDeepCopyMutableSkinPayloads() {
         byte[] skinPixels = {1, 2};
         byte[] capePixels = {3, 4};
@@ -113,3 +138,4 @@ class SkinConvertorTest {
                 .build();
     }
 }
+

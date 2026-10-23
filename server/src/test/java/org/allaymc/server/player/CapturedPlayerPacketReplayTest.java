@@ -41,9 +41,11 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Comparator;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
@@ -52,7 +54,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 /**
- * Replays captured appearance data through the real login decoder, packet encoder and v2193 codec.
+ * Replays captured appearance data through the real login decoder, packet encoder and all registered codecs.
  * This is not a Minecraft client, a RakNet replay, or an authentication test.
  */
 @ExtendWith(AllayTestExtension.class)
@@ -82,17 +84,22 @@ class CapturedPlayerPacketReplayTest {
     }
 
     static Stream<Arguments> replayCases() {
-        return Stream.of(7, 1).flatMap(device ->
+        return supportedProtocols().flatMap(protocol -> Stream.of(7, 1).flatMap(device ->
                 Stream.of("android-2193-classic", "android-2193-persona").flatMap(recipient ->
-                        Stream.of(false, true).map(selfFirst -> Arguments.of(device, recipient, selfFirst))));
+                        Stream.of(false, true).map(selfFirst -> Arguments.of(protocol, device, recipient, selfFirst)))));
     }
 
-    @ParameterizedTest(name = "source OS={0}, recipient={1}, self first={2}")
+    static Stream<Protocol> supportedProtocols() {
+        return ProtocolRegistry.getDefault().getProtocols().stream()
+                .sorted(Comparator.comparing((Protocol protocol) -> protocol.getVariant().name())
+                        .thenComparingInt(Protocol::getProtocolVersion));
+    }
+
+    @ParameterizedTest(name = "{0}, source OS={1}, recipient={2}, self first={3}")
     @MethodSource("replayCases")
     void capturedAppearanceSequenceEncodesAndDecodesWithoutTrailingBytes(
-            int device, String recipientCapture, boolean selfFirst
+            Protocol protocol, int device, String recipientCapture, boolean selfFirst
     ) throws Exception {
-        var protocol = protocol();
         var sourceData = capture(SOURCE_CAPTURE);
         sourceData.addProperty("DeviceOS", device);
         var source = player(decodeAppearance(sourceData), SOURCE_ID, "SourceFixture", 3);
@@ -148,16 +155,65 @@ class CapturedPlayerPacketReplayTest {
         assertArrayEquals(encode(protocol, windowsList), encode(protocol, androidList));
     }
 
-    @Test
-    void capturedPersonaProfileHashMustSurviveThePlayerList() throws Exception {
-        var protocol = protocol();
+    @ParameterizedTest(name = "player list profile hash: {0}")
+    @MethodSource("supportedProtocols")
+    void capturedPersonaProfileHashMustSurviveThePlayerList(Protocol protocol) throws Exception {
         var data = capture("android-2193-persona");
         var recipient = player(decodeAppearance(data), RECIPIENT_ID, "RecipientFixture", 4);
         var packet = protocol.getEncoder().encodePlayerList(List.of(recipient.player()), true, true);
+        String capturedHash = data.get("ProfileHash").getAsString();
+        assertFalse(capturedHash.isEmpty());
+        assertEquals(capturedHash, recipient.player().getLoginData().getSkin().profileHash());
+        assertEquals(capturedHash, packet.getEntries().getFirst().getSkin().getProfileHash());
         var decoded = (PlayerListPacket) roundTrip(protocol, helper(protocol), helper(protocol), packet);
-        assertFalse(data.get("ProfileHash").getAsString().isEmpty());
-        assertEquals(data.get("ProfileHash").getAsString(), decoded.getEntries().getFirst().getSkin().getProfileHash(),
-                "The captured appearance cache key must survive login decoding and player-list serialization");
+        assertEquals(wireProfileHash(protocol, capturedHash),
+                Objects.requireNonNullElse(decoded.getEntries().getFirst().getSkin().getProfileHash(), ""),
+                "New codecs must retain the hash; legacy codecs must omit the unsupported field");
+    }
+
+    @ParameterizedTest(name = "player skin profile hash: {0}")
+    @MethodSource("supportedProtocols")
+    void capturedPersonaProfileHashMustSurviveSkinUpdates(Protocol protocol) throws Exception {
+        var data = capture("android-2193-persona");
+        String capturedHash = data.get("ProfileHash").getAsString();
+        var source = player(decodeAppearance(data), SOURCE_ID, "SourceFixture", 3);
+        var packet = (PlayerSkinPacket) protocol.getEncoder().encodePlayerSkin(source.entity(), true).iterator().next();
+        assertEquals(capturedHash, packet.getSkin().getProfileHash());
+        var decoded = (PlayerSkinPacket) roundTrip(protocol, helper(protocol), helper(protocol), packet);
+        assertEquals(wireProfileHash(protocol, capturedHash),
+                SkinConvertor.fromSerializedSkin(decoded.getSkin()).profileHash());
+    }
+
+    static Stream<Arguments> optionalProfileHashes() {
+        return supportedProtocols().flatMap(protocol -> Stream.of("absent", "null", "empty")
+                .map(state -> Arguments.of(protocol, state)));
+    }
+
+    @ParameterizedTest(name = "optional hash {1}: {0}")
+    @MethodSource("optionalProfileHashes")
+    void missingProfileHashesRemainUsableOnEveryProtocol(Protocol protocol, String state) throws Exception {
+        var data = capture(SOURCE_CAPTURE);
+        if (state.equals("null")) {
+            data.add("ProfileHash", com.google.gson.JsonNull.INSTANCE);
+        } else if (state.equals("empty")) {
+            data.addProperty("ProfileHash", "");
+        } else {
+            data.remove("ProfileHash");
+        }
+        var login = decodeAppearance(data);
+        assertEquals("", login.getSkin().profileHash());
+        var source = player(login, SOURCE_ID, "SourceFixture", 3);
+        var list = protocol.getEncoder().encodePlayerList(List.of(source.player()), true, true);
+        var decodedList = (PlayerListPacket) roundTrip(protocol, helper(protocol), helper(protocol), list);
+        assertEquals("", SkinConvertor.fromSerializedSkin(decodedList.getEntries().getFirst().getSkin()).profileHash());
+        var skin = protocol.getEncoder().encodePlayerSkin(source.entity(), true).iterator().next();
+        var decodedSkin = (PlayerSkinPacket) roundTrip(protocol, helper(protocol), helper(protocol), skin);
+        assertEquals("", SkinConvertor.fromSerializedSkin(decodedSkin.getSkin()).profileHash());
+    }
+
+    private static String wireProfileHash(Protocol protocol, String hash) {
+        // The profile hash is part of the skin wire layout starting at Bedrock v2168.
+        return protocol.getProtocolVersion() >= 2168 ? hash : "";
     }
 
     @Test

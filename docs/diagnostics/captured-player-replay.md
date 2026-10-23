@@ -19,7 +19,7 @@ firma. Así ejercita el decodificador real sin crear una API pública nueva ni s
 
 ## Casos
 
-El encoder real del protocolo receptor 2193 genera esta secuencia de aparición:
+El encoder real de cada protocolo registrado genera esta secuencia de aparición:
 
 `ADD_PLAYER`, `SET_ENTITY_DATA`, `MOB_ARMOR_EQUIPMENT`, dos `MOB_EQUIPMENT`, `PLAYER_SKIN`, `PLAYER_LIST`, `UPDATE_ABILITIES`.
 
@@ -27,14 +27,19 @@ Se conservan el orden y los valores de equipamiento vacío, permisos y velocidad
 y las cuentas son dobles de prueba con identificadores sintéticos. No se reconstruyen el mundo, NPCs, plugins,
 temporización, compresión, cifrado ni toda la secuencia de login del servidor.
 
-Se prueban las dos apariencias del receptor, ambos órdenes de entradas en la lista y los valores de plataforma 7 y 1.
+Se prueban las dos apariencias del receptor, ambos órdenes de entradas en la lista y los valores de plataforma 7 y 1
+en todos los protocolos registrados (internacionales y NetEase).
 El caso Android cambia únicamente `DeviceOS` sobre la captura de Windows: es un control de esa variable, no otra
 captura de cliente. Se usan helpers independientes para codificar y decodificar cada paquete, se exige consumir todos
 los bytes y se comprueba la conservación de textura, geometría y plataforma. Otro caso compara los bytes generados
 por Windows y Android tras normalizar únicamente la plataforma de `PLAYER_LIST`.
 
-Dos contratos adicionales comprueban que el `ProfileHash` del receptor Persona se conserva y que su color `#RRGGBB`
-se transmite con alfa opaco, siguiendo las correcciones descritas en AllayMC/Allay#1856 y AllayMC/Protocol#290.
+Los contratos de `ProfileHash` verifican las listas de jugadores y los cambios de skin en todos los protocolos.
+El modelo interno conserva el hash; el campo viaja por la red desde v2168 y los codecs anteriores lo omiten.
+También se cubren los clientes cuyo hash está ausente, es nulo o está vacío, así como las conversiones en ambos sentidos,
+las copias mediante builder y el constructor usado por los plugins existentes. Un control adicional comprueba que
+el color Persona `#RRGGBB` se transmite con alfa opaco. Estas comprobaciones se relacionan con los problemas
+descritos en AllayMC/Allay#1856 y AllayMC/Protocol#290.
 Son comprobaciones semánticas independientes del mero round-trip; pueden fallar aunque el codec lea sus propios bytes.
 Un fallo en esos controles no demuestra que PartySteve provocara la desconexión original.
 
@@ -52,5 +57,7 @@ semánticos señalan datos perdidos o transformados. Si los casos de PartySteve 
 fallo en el camino cubierto: el codec del servidor puede compartir una interpretación incorrecta en ambos sentidos,
 y el cliente Minecraft puede imponer validaciones adicionales. El resultado «Block» requiere una prueba en el cliente.
 
-Este cambio añade únicamente pruebas, capturas desidentificadas y documentación. No aplica las correcciones de los PR
-externos ni cambia el tráfico del servidor.
+La prueba original detectó que el login descartaba `ProfileHash`. La corrección lo conserva en `Skin`, en su builder y
+en `SkinConvertor`, usando una cadena vacía cuando falta. Mantiene el constructor anterior para los plugins existentes.
+No se aplican otros cambios de los PR externos. Esto corrige la pérdida reproducible del hash, sin afirmar que resuelva
+por sí sola la desconexión «Block» observada originalmente.

@@ -210,6 +210,11 @@ public class AllayLoginData implements LoginData {
             skinBuilder.playFabId(skinMap.get("PlayFabID").getAsString());
         }
 
+        var profileHash = skinMap.get("ProfileHash");
+        if (profileHash != null && profileHash.isJsonPrimitive()) {
+            skinBuilder.profileHash(profileHash.getAsString());
+        }
+
         skinBuilder.skinData(this.getImage(skinMap, "Skin"));
         skinBuilder.capeData(this.getImage(skinMap, "Cape"));
 
@@ -306,3 +311,4 @@ public class AllayLoginData implements LoginData {
     }
 
 }
+
