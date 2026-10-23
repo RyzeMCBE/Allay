@@ -5,7 +5,7 @@ import org.allaymc.server.ServerSettings;
 import org.cloudburstmc.protocol.bedrock.data.skin.SerializedSkin;
 import org.cloudburstmc.protocol.bedrock.packet.*;
 
-import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
@@ -18,7 +18,7 @@ import java.util.UUID;
  */
 @Slf4j
 public final class PlayerPacketDiagnostics {
-    private static final Set<BedrockPacketType> SUPPORTED = EnumSet.of(
+    private static final Set<BedrockPacketType> SUPPORTED = Set.of(
             BedrockPacketType.PLAYER_LIST, BedrockPacketType.PLAYER_SKIN, BedrockPacketType.ADD_PLAYER,
             BedrockPacketType.SET_ENTITY_DATA, BedrockPacketType.MOB_ARMOR_EQUIPMENT,
             BedrockPacketType.MOB_EQUIPMENT, BedrockPacketType.UPDATE_ABILITIES,
@@ -67,15 +67,15 @@ public final class PlayerPacketDiagnostics {
             if (source.equals(recipient) || settings.recipientProtocol() <= 0 || settings.maxLogPackets() <= 0) {
                 throw new IllegalArgumentException("Use distinct player UUIDs, a positive protocol and a positive log limit");
             }
-            var excluded = EnumSet.noneOf(BedrockPacketType.class);
+            var excluded = new HashSet<BedrockPacketType>();
             for (var name : settings.excludedPackets()) {
                 if ("*".equals(name)) {
                     excluded.addAll(SUPPORTED);
                 } else {
-                    var type = BedrockPacketType.valueOf(name.trim().toUpperCase(Locale.ROOT));
-                    if (!SUPPORTED.contains(type)) {
-                        throw new IllegalArgumentException("Unsupported player packet type: " + type);
-                    }
+                    var normalized = name.trim().toUpperCase(Locale.ROOT);
+                    var type = SUPPORTED.stream().filter(value -> value.name().equals(normalized))
+                            .findFirst().orElseThrow(() -> new IllegalArgumentException(
+                                    "Unsupported player packet type: " + normalized));
                     excluded.add(type);
                 }
             }
