@@ -38,7 +38,7 @@ class FireworkMetadataTest {
         var packet = (LevelEventPacket)encoder.encodeParticle(new DustParticle(new Color(255,136,0)),new Vector3d(2,78,4),0).iterator().next();
         for (var codec : List.of(Bedrock_v818.CODEC,Bedrock_v2193.CODEC)) {
             var helper = codec.createHelper();
-            var serializer = codec.getPacketDefinition(LevelEventPacket.class).getSerializer();
+            var serializer = codec.getPacketDefinition(LevelEventPacket.class).serializer();
             var buffer = Unpooled.buffer();
             try {
                 serializer.serialize(buffer,helper,packet);
