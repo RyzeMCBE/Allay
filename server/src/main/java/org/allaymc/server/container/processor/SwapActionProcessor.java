@@ -56,9 +56,9 @@ public class SwapActionProcessor implements ContainerActionProcessor<SwapAction>
         // Swaps move both stacks. Give plugins the same veto as TAKE/PLACE before
         // either slot changes, including an empty destination helmet slot.
         if (!new ContainerItemMoveEvent(sourceContainer, sourceSlot, destinationContainer,
-                destinationSlot, sourceItem.getItemType(), sourceItem.getCount()).call()
+                destinationSlot, sourceItem.getItemType(), sourceItem.getCount(), player.getControlledEntity()).call()
                 || !new ContainerItemMoveEvent(destinationContainer, destinationSlot, sourceContainer,
-                sourceSlot, destinationItem.getItemType(), destinationItem.getCount()).call()) {
+                sourceSlot, destinationItem.getItemType(), destinationItem.getCount(), player.getControlledEntity()).call()) {
             return error();
         }
 

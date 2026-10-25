@@ -1,6 +1,7 @@
 package org.allaymc.server.container.processor;
 
 import org.allaymc.api.container.Container;
+import org.allaymc.api.entity.interfaces.EntityPlayer;
 import org.allaymc.api.eventbus.EventHandler;
 import org.allaymc.api.eventbus.event.container.ContainerItemMoveEvent;
 import org.allaymc.api.item.ItemStack;
@@ -21,9 +22,11 @@ public class SwapEventTest {
     public static final class Veto {
         final Container deniedSource;
         int calls;
+        EntityPlayer actor;
         Veto(Container deniedSource) { this.deniedSource = deniedSource; }
         @EventHandler public void move(ContainerItemMoveEvent event) {
             calls++;
+            actor = event.getPlayer();
             if (event.getSource() == deniedSource) event.cancel();
         }
     }
@@ -41,6 +44,8 @@ public class SwapEventTest {
         when(source.getItemStack(0)).thenReturn(sourceItem);
         when(destination.getItemStack(0)).thenReturn(destinationItem);
         var player = mock(Player.class);
+        var actor = mock(EntityPlayer.class);
+        when(player.getControlledEntity()).thenReturn(actor);
         var action = mock(SwapAction.class, RETURNS_DEEP_STUBS);
         var from = action.source().containerName();
         var to = action.destination().containerName();
@@ -53,6 +58,7 @@ public class SwapEventTest {
             access.when(() -> ContainerActionProcessor.canPlaceItemToSlot(source, 0, destinationItem)).thenReturn(true);
             assertFalse(new SwapActionProcessor().handle(action, player, 0, new ItemStackRequestAction[]{action}, new HashMap<>()).ok());
             assertEquals(reverse ? 2 : 1, veto.calls);
+            assertSame(actor, veto.actor);
             verify(source, never()).setItemStack(anyInt(), any(), anyBoolean());
             verify(destination, never()).setItemStack(anyInt(), any(), anyBoolean());
         } finally {
