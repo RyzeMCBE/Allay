@@ -7,6 +7,9 @@ No conecta un cliente Minecraft ni intenta reutilizar las credenciales de los ju
 
 - `windows-844-party.json.gz`: PartySteve de Windows 1.21.114. Textura RGBA de 64×64 y geometría `1.8.0` conservadas
   byte por byte. El test comprueba sus SHA-256 para evitar sustituir accidentalmente esta captura por una skin genérica.
+- `windows-827-persona.json.gz`: Persona de Windows 1.21.100, con textura RGBA de 256×256, dos geometrías `1.14.0`
+  y una animación facial. La textura y las mallas se conservan; el identificador de cuenta incluido en los nombres de
+  geometría y en `SkinResourcePatch` se sustituye de forma consistente por uno sintético, al igual que `PlayFabId`.
 - `android-2193-classic.json.gz`: apariencia del receptor 1.26.52 del intento original que falló.
 - `android-2193-persona.json.gz`: apariencia Persona 256×256 del receptor 1.26.52 de los intentos que funcionaron.
 
@@ -27,7 +30,7 @@ Se conservan el orden y los valores de equipamiento vacío, permisos y velocidad
 y las cuentas son dobles de prueba con identificadores sintéticos. No se reconstruyen el mundo, NPCs, plugins,
 temporización, compresión, cifrado ni toda la secuencia de login del servidor.
 
-Se prueban las dos apariencias del receptor, ambos órdenes de entradas en la lista y los valores de plataforma 7 y 1
+Se prueban ambas capturas de origen, las dos apariencias del receptor, ambos órdenes de entradas en la lista y los valores de plataforma 7 y 1
 en todos los protocolos registrados (internacionales y NetEase).
 El caso Android cambia únicamente `DeviceOS` sobre la captura de Windows: es un control de esa variable, no otra
 captura de cliente. Se usan helpers independientes para codificar y decodificar cada paquete, se exige consumir todos
@@ -59,5 +62,7 @@ y el cliente Minecraft puede imponer validaciones adicionales. El resultado «Bl
 
 La prueba original detectó que el login descartaba `ProfileHash`. La corrección lo conserva en `Skin`, en su builder y
 en `SkinConvertor`, usando una cadena vacía cuando falta. Mantiene el constructor anterior para los plugins existentes.
-No se aplican otros cambios de los PR externos. Esto corrige la pérdida reproducible del hash, sin afirmar que resuelva
-por sí sola la desconexión «Block» observada originalmente.
+La lectura de `PlayFabId` conserva la clave actual y acepta `PlayFabID` como alternativa para emisores anteriores.
+El Protocol enlazado interpreta los colores RGB de seis dígitos como opacos y mantiene el alfa de valores ARGB explícitos.
+Las pruebas comprueban esos contratos en los paquetes de ambas capturas y conservan las geometrías y los píxeles de animación.
+Estas correcciones eliminan pérdidas reproducibles de datos, sin afirmar que resuelvan por sí solas la desconexión «Block».

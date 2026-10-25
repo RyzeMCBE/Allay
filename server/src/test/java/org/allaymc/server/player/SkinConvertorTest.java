@@ -12,6 +12,18 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 class SkinConvertorTest {
 
     @Test
+    void opaqueSkinColorSurvivesRepeatedApiAndProtocolConversions() {
+        var original = createSkin(new byte[]{1}, new byte[]{2}, new byte[]{3}, new ArrayList<>(List.of("#111111")))
+                .toBuilder().skinColor("#ff7e5337").build();
+        var serialized = SkinConvertor.toSerializedSkin(original);
+        for (int i = 0; i < 3; i++) {
+            assertEquals(0xff7e5337, serialized.getColor().getRGB());
+            serialized = SkinConvertor.toSerializedSkin(SkinConvertor.fromSerializedSkin(serialized));
+        }
+        assertEquals(0xff7e5337, serialized.getColor().getRGB());
+    }
+
+    @Test
     void profileHashSurvivesBothConversionsAndBuilderCopies() {
         var skin = createSkin(new byte[]{1}, new byte[]{2}, new byte[]{3}, new ArrayList<>(List.of("#111111")))
                 .toBuilder().profileHash("appearance-cache-key").build();

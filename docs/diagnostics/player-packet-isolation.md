@@ -5,14 +5,15 @@ por defecto y selecciona todos los jugadores de un protocolo de origen hacia tod
 Allay genera esos paquetes; no son bytes reenviados directamente desde el cliente de origen.
 
 En `server-settings.yml`, añade el bloque dentro del `network-settings` existente. El ejemplo selecciona
-1.21.114 (844) hacia 1.26.52 (2193), sin restricciones por nick ni UUID. Sustituye el bloque de diagnóstico
+1.21.100 (827) hacia 1.26.52 (2193), sin restricciones por nick ni UUID. Para probar 1.21.114, usa 844 como protocolo
+de origen. Sustituye el bloque de diagnóstico
 anterior completo: ya no se usan `source-uuid` ni `recipient-uuid`.
 
 ```yaml
 network-settings:
   player-packet-diagnostics:
     enabled: true
-    source-protocol: 844
+    source-protocol: 827
     recipient-protocol: 2193
     excluded-packets: []
     max-log-packets: 200

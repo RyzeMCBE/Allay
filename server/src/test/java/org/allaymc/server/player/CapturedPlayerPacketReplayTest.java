@@ -62,6 +62,7 @@ class CapturedPlayerPacketReplayTest {
     private static final UUID SOURCE_ID = UUID.fromString("00000000-0000-0000-8000-000000000003");
     private static final UUID RECIPIENT_ID = UUID.fromString("00000000-0000-0000-8000-000000000004");
     private static final String SOURCE_CAPTURE = "windows-844-party";
+    private static final String PERSONA_CAPTURE = "windows-827-persona";
 
     @Test
     void sourceCaptureRetainsTheActualTextureAndLegacyGeometry() throws Exception {
@@ -84,9 +85,10 @@ class CapturedPlayerPacketReplayTest {
     }
 
     static Stream<Arguments> replayCases() {
-        return supportedProtocols().flatMap(protocol -> Stream.of(7, 1).flatMap(device ->
+        return Stream.of(SOURCE_CAPTURE, PERSONA_CAPTURE).flatMap(source ->
+                supportedProtocols().flatMap(protocol -> Stream.of(7, 1).flatMap(device ->
                 Stream.of("android-2193-classic", "android-2193-persona").flatMap(recipient ->
-                        Stream.of(false, true).map(selfFirst -> Arguments.of(protocol, device, recipient, selfFirst)))));
+                        Stream.of(false, true).map(selfFirst -> Arguments.of(protocol, source, device, recipient, selfFirst))))));
     }
 
     static Stream<Protocol> supportedProtocols() {
@@ -95,12 +97,12 @@ class CapturedPlayerPacketReplayTest {
                         .thenComparingInt(Protocol::getProtocolVersion));
     }
 
-    @ParameterizedTest(name = "{0}, source OS={1}, recipient={2}, self first={3}")
+    @ParameterizedTest(name = "{0}, source={1}, source OS={2}, recipient={3}, self first={4}")
     @MethodSource("replayCases")
     void capturedAppearanceSequenceEncodesAndDecodesWithoutTrailingBytes(
-            Protocol protocol, int device, String recipientCapture, boolean selfFirst
+            Protocol protocol, String sourceCapture, int device, String recipientCapture, boolean selfFirst
     ) throws Exception {
-        var sourceData = capture(SOURCE_CAPTURE);
+        var sourceData = capture(sourceCapture);
         sourceData.addProperty("DeviceOS", device);
         var source = player(decodeAppearance(sourceData), SOURCE_ID, "SourceFixture", 3);
         var recipient = player(decodeAppearance(capture(recipientCapture)), RECIPIENT_ID, "RecipientFixture", 4);
@@ -132,6 +134,39 @@ class CapturedPlayerPacketReplayTest {
                 assertCapturedSkin(capture(recipientCapture), selfEntry.getSkin());
             }
         }
+    }
+
+    @Test
+    void capturedLegacyPersonaRetainsItsTextureMeshAndAnimatedFace() throws Exception {
+        var data = capture(PERSONA_CAPTURE);
+        assertEquals("1.21.100", data.get("GameVersion").getAsString());
+        assertEquals("ebbe9ff78e8a65eb5f44deb84d5a613a7a355412567ccf9e31287b9aab8cd593",
+                sha256(Base64.getDecoder().decode(data.get("SkinData").getAsString())));
+        assertEquals("78b2a500de6a7aec9d2e95c7d5d0eca9d277f1dafd25c0738bf0e3f0c92bb61c",
+                sha256(Base64.getDecoder().decode(data.get("SkinGeometryData").getAsString())));
+        var skin = decodeAppearance(data).getSkin();
+        assertTrue(skin.isValid());
+        assertTrue(skin.personaSkin());
+        assertEquals(256, skin.skinData().width());
+        assertEquals(256, skin.skinData().height());
+        assertEquals(1, skin.animations().size());
+        assertEquals(2, JsonParser.parseString(skin.skinGeometry()).getAsJsonObject()
+                .getAsJsonArray("minecraft:geometry").size());
+        assertEquals("0011223344556677", skin.playFabId());
+    }
+
+    @Test
+    void bothClientPlayFabKeysAreAcceptedWithoutInventingMissingIds() throws Exception {
+        var data = capture(PERSONA_CAPTURE);
+        data.remove("PlayFabId");
+        data.remove("PlayFabID");
+        assertNull(decodeAppearance(data).getSkin().playFabId());
+        data.addProperty("PlayFabID", "legacy-id");
+        assertEquals("legacy-id", decodeAppearance(data).getSkin().playFabId());
+        data.addProperty("PlayFabId", "current-id");
+        assertEquals("current-id", decodeAppearance(data).getSkin().playFabId());
+        data.add("PlayFabId", com.google.gson.JsonNull.INSTANCE);
+        assertEquals("legacy-id", decodeAppearance(data).getSkin().playFabId());
     }
 
     @Test
@@ -325,6 +360,23 @@ class CapturedPlayerPacketReplayTest {
         assertEquals(capture.get("PremiumSkin").getAsBoolean(), actual.isPremium());
         assertEquals(capture.getAsJsonArray("AnimatedImageData").size(), actual.getAnimations().size());
         assertEquals(capture.getAsJsonArray("PersonaPieces").size(), actual.getPersonaPieces().size());
+        String playFabId = "";
+        for (var key : List.of("PlayFabId", "PlayFabID")) {
+            if (capture.has(key) && capture.get(key).isJsonPrimitive()) {
+                playFabId = capture.get(key).getAsString();
+                break;
+            }
+        }
+        assertEquals(playFabId, actual.getPlayFabId());
+        for (int i = 0; i < actual.getAnimations().size(); i++) {
+            assertArrayEquals(Base64.getDecoder().decode(capture.getAsJsonArray("AnimatedImageData")
+                    .get(i).getAsJsonObject().get("Image").getAsString()),
+                    actual.getAnimations().get(i).image().getImage());
+        }
+        String color = capture.get("SkinColor").getAsString().replace("#", "");
+        int expectedArgb = (int) Long.parseLong(color, 16);
+        if (color.length() == 6) expectedArgb |= 0xff000000;
+        assertEquals(expectedArgb, actual.getColor().getRGB());
     }
 
     private static Protocol protocol() {
