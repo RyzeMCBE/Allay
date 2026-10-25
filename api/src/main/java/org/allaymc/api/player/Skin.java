@@ -35,6 +35,8 @@ import java.util.Objects;
  * @param pieceTintColors           a list of specific tint colors for some of the Persona pieces
  * @param overrideAppearance        specifies if the skin should override the player's client-side equipped skin. If false, the client will reject this skin and
  *                                  continue to use its own
+ * @param profileHash               the client-provided appearance cache key, or an empty string when absent; only codecs
+ *                                  that support this field transmit it
  * @author gophertunnel | daoge_cmd
  */
 @Builder(toBuilder = true)
@@ -43,8 +45,30 @@ public record Skin(
         ImageData capeData, String skinGeometry, String animationData, String geometryDataEngineVersion,
         boolean premiumSkin, boolean personaSkin, boolean personaCapeOnClassicSkin, boolean primaryUser, String capeId,
         String fullId, String skinColor, String armSize, List<PersonaPieces> personaPieces,
-        List<PersonaPieceTintColor> pieceTintColors, boolean overrideAppearance
+        List<PersonaPieceTintColor> pieceTintColors, boolean overrideAppearance, String profileHash
 ) {
+
+    /**
+     * Creates a skin, normalizing an absent profile hash to an empty string.
+     */
+    public Skin {
+        profileHash = Objects.requireNonNullElse(profileHash, "");
+    }
+
+    /**
+     * Creates a skin without a profile hash, retaining the constructor used by existing plugins.
+     */
+    public Skin(
+            String skinId, String playFabId, String skinResourcePatch, ImageData skinData, List<AnimationData> animations,
+            ImageData capeData, String skinGeometry, String animationData, String geometryDataEngineVersion,
+            boolean premiumSkin, boolean personaSkin, boolean personaCapeOnClassicSkin, boolean primaryUser, String capeId,
+            String fullId, String skinColor, String armSize, List<PersonaPieces> personaPieces,
+            List<PersonaPieceTintColor> pieceTintColors, boolean overrideAppearance
+    ) {
+        this(skinId, playFabId, skinResourcePatch, skinData, animations, capeData, skinGeometry, animationData,
+                geometryDataEngineVersion, premiumSkin, personaSkin, personaCapeOnClassicSkin, primaryUser, capeId,
+                fullId, skinColor, armSize, personaPieces, pieceTintColors, overrideAppearance, "");
+    }
 
     public static final String ARM_SIZE_WIDE = "wide";
     public static final String ARM_SIZE_SLIM = "slim";

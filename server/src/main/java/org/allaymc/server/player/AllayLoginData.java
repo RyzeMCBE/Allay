@@ -206,8 +206,17 @@ public class AllayLoginData implements LoginData {
             skinBuilder.armSize(skinMap.get("ArmSize").getAsString());
         }
 
-        if (skinMap.has("PlayFabID")) {
-            skinBuilder.playFabId(skinMap.get("PlayFabID").getAsString());
+        var playFabId = skinMap.get("PlayFabId");
+        if (playFabId == null || !playFabId.isJsonPrimitive()) {
+            playFabId = skinMap.get("PlayFabID");
+        }
+        if (playFabId != null && playFabId.isJsonPrimitive()) {
+            skinBuilder.playFabId(playFabId.getAsString());
+        }
+
+        var profileHash = skinMap.get("ProfileHash");
+        if (profileHash != null && profileHash.isJsonPrimitive()) {
+            skinBuilder.profileHash(profileHash.getAsString());
         }
 
         skinBuilder.skinData(this.getImage(skinMap, "Skin"));
@@ -306,3 +315,4 @@ public class AllayLoginData implements LoginData {
     }
 
 }
+

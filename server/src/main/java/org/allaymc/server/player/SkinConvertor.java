@@ -73,6 +73,7 @@ public final class SkinConvertor {
                 .personaPieces(serializedPersonaPieces)
                 .tintColors(serializedTintColors)
                 .overridingPlayerAppearance(skin.overrideAppearance())
+                .profileHash(skin.profileHash())
                 .build();
     }
 
@@ -141,7 +142,8 @@ public final class SkinConvertor {
                 serializedSkin.getArmSize(),
                 personaPieces,
                 tintColors,
-                serializedSkin.isOverridingPlayerAppearance()
+                serializedSkin.isOverridingPlayerAppearance(),
+                serializedSkin.getProfileHash()
         );
     }
 
@@ -211,3 +213,4 @@ public final class SkinConvertor {
         };
     }
 }
+

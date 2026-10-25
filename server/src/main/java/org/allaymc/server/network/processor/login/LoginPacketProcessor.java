@@ -1,8 +1,11 @@
 package org.allaymc.server.network.processor.login;
 
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
 import lombok.extern.slf4j.Slf4j;
 import org.allaymc.api.message.TrKeys;
 import org.allaymc.api.player.Player;
+import org.allaymc.api.player.Skin;
 import org.allaymc.api.server.Server;
 import org.allaymc.server.AllayServer;
 import org.allaymc.server.network.processor.ingame.ILoginPacketProcessor;
@@ -67,6 +70,8 @@ public class LoginPacketProcessor extends ILoginPacketProcessor<LoginPacket> {
         }
 
         if (!loginData.getSkin().isValid()) {
+            log.warn("[SKIN-LOGIN-DIAG] Rejected skin for {} (protocol={}): {}", name,
+                    allayPlayer.getProtocol().getProtocolVersion(), skinValidationSummary(loginData.getSkin()));
             player.disconnect(TrKeys.MC_DISCONNECTIONSCREEN_INVALIDSKIN);
             return;
         }
@@ -145,6 +150,37 @@ public class LoginPacketProcessor extends ILoginPacketProcessor<LoginPacket> {
      */
     protected boolean isValidName(String name) {
         return name != null && NAME_PATTERN.matcher(name).matches();
+    }
+
+    private static String skinValidationSummary(Skin skin) {
+        var image = skin.skinData();
+        var imageBytes = image == null || image.data() == null ? 0 : image.data().length;
+        return "skinIdPresent=" + (skin.skinId() != null && !skin.skinId().trim().isEmpty())
+                + " image=" + (image == null ? "missing" : image.width() + "x" + image.height())
+                + " imageBytes=" + imageBytes
+                + " expectedImageBytes=" + (image == null ? 0L : (long) image.width() * image.height() * 4)
+                + " imageValid=" + (image != null && image.data() != null && image.isValid())
+                + " persona=" + skin.personaSkin()
+                + " resourcePatch=" + resourcePatchStatus(skin.skinResourcePatch());
+    }
+
+    private static String resourcePatchStatus(String patch) {
+        if (patch == null) return "missing";
+        try {
+            var root = JsonParser.parseString(patch);
+            if (!root.isJsonObject()) return "not_object";
+            var geometry = root.getAsJsonObject().get("geometry");
+            if (geometry == null) return "geometry_missing";
+            if (!geometry.isJsonObject()) return "geometry_not_object";
+            var defaultGeometry = geometry.getAsJsonObject().get("default");
+            if (defaultGeometry == null) return "default_missing";
+            if (!defaultGeometry.isJsonPrimitive() || !defaultGeometry.getAsJsonPrimitive().isString()) {
+                return "default_not_string";
+            }
+            return "valid";
+        } catch (JsonParseException exception) {
+            return "invalid_json";
+        }
     }
 
     @Override
