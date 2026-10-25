@@ -508,6 +508,10 @@ public class EntityLivingComponentImpl implements EntityLivingComponent {
         }
 
         effectInstance = event.getEffect();
+        if (effectInstance.getType().isInstant()) {
+            effectInstance.getType().onAdd(thisEntity, effectInstance);
+            return true;
+        }
         var old = effects.put(effectInstance.getType(), effectInstance);
         if (old == null) {
             effectInstance.getType().onAdd(thisEntity, effectInstance);

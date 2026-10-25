@@ -20,6 +20,8 @@ public class EntityPlayerPhysicsComponentImpl extends EntityHumanPhysicsComponen
     @ComponentObject
     protected EntityPlayer thisPlayer;
 
+    private final ServerMotionAllowance serverMotionAllowance = new ServerMotionAllowance();
+
     @EventHandler
     protected void onGameModeChange(CPlayerGameModeChangeEvent event) {
         this.fallDistance = 0;
@@ -60,6 +62,11 @@ public class EntityPlayerPhysicsComponentImpl extends EntityHumanPhysicsComponen
         this.motion = new Vector3d(motion);
     }
 
+    /** Consumes one recent server impulse matching this client movement; does not grant flight. */
+    public boolean consumeServerMotion(Vector3dc motion) {
+        return serverMotionAllowance.consume(motion.y(), System.nanoTime());
+    }
+
     @Override
     public boolean setMotion(Vector3dc motion) {
         if (thisPlayer.isActualPlayer()) {
@@ -72,6 +79,7 @@ public class EntityPlayerPhysicsComponentImpl extends EntityHumanPhysicsComponen
                 // For player, motion effect is calculated by the client rather than the server. We only
                 // need to send SetEntityMotionPacket to the client when we want to apply motion on a player
                 thisPlayer.getController().setMotion(event.getMotion());
+                serverMotionAllowance.record(event.getMotion().y(), System.nanoTime());
                 return true;
             }
 

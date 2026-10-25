@@ -17,14 +17,20 @@ public class EffectInstantHealthType extends AbstractEffectType {
     }
 
     @Override
+    public boolean isInstant() {
+        return true;
+    }
+
+    @Override
     public void onAdd(EntityLiving entity, EffectInstance effectInstance) {
         var level = effectInstance.getLevel();
+        var intensity = effectInstance.getIntensity();
 
         if (entity instanceof EntityUndeadComponent) {
-            entity.attack(DamageContainer.magicEffect((float) (3 * Math.pow(2, level))));
+            entity.attack(DamageContainer.magicEffect((float) Math.floor(3 * Math.pow(2, level) * intensity + 0.5)));
             return;
         }
 
-        entity.setHealth(entity.getHealth() + (float) (2 * Math.pow(2, level)));
+        entity.setHealth(entity.getHealth() + (float) Math.floor(2 * Math.pow(2, level) * intensity + 0.5));
     }
 }
