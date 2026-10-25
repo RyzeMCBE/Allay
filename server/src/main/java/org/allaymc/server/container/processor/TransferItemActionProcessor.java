@@ -56,8 +56,8 @@ public abstract class TransferItemActionProcessor<T extends TransferItemStackReq
         }
 
         var destItem = destinationContainer.getItemStack(destinationSlot);
-        if (destItem.getItemType() != AIR && destItem.getItemType() != sourItem.getItemType()) {
-            log.warn("place an item to a slot that has a different item is not allowed");
+        if (destItem.getItemType() != AIR && !sourItem.canMerge(destItem, true)) {
+            log.warn("place an item to a slot that has an incompatible item is not allowed");
             return error();
         }
 
@@ -71,7 +71,7 @@ public abstract class TransferItemActionProcessor<T extends TransferItemStackReq
             return error();
         }
 
-        if (destItem.getCount() + count > destItem.getItemType().getItemData().maxStackSize()) {
+        if (destItem.getCount() + count > sourItem.getItemType().getItemData().maxStackSize()) {
             log.warn("destination stack size bigger than the max stack size!");
             return error();
         }
@@ -79,7 +79,7 @@ public abstract class TransferItemActionProcessor<T extends TransferItemStackReq
         var event = new ContainerItemMoveEvent(
                 sourceContainer, sourceSlot,
                 destinationContainer, destinationSlot,
-                sourItem.getItemType(), count
+                sourItem.getItemType(), count, player.getControlledEntity()
         );
         if (!event.call()) {
             return error();
