@@ -24,9 +24,9 @@ import org.allaymc.server.container.impl.*;
 public final class BlockEntityTypeInitializer {
     public static void initDaylightDetector() {
         BlockEntityTypes.DAYLIGHT_DETECTOR = AllayBlockEntityType
-                .builder(BlockEntityDaylightDetectorImpl.class)
+                .builder(BlockEntityImpl.class)
                 .name(BlockEntityId.DAYLIGHT_DETECTOR)
-                .addComponent(BlockEntityLegacyNbtBaseComponentImpl::new, BlockEntityLegacyNbtBaseComponentImpl.class)
+                .addComponent(BlockEntityDaylightDetectorBaseComponentImpl::new, BlockEntityDaylightDetectorBaseComponentImpl.class)
                 .build();
     }
 

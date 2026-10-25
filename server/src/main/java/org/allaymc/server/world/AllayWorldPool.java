@@ -18,6 +18,8 @@ import org.allaymc.api.message.I18n;
 import org.allaymc.api.message.TrKeys;
 import org.allaymc.api.registry.Registries;
 import org.allaymc.api.utils.identifier.Identifier;
+import org.allaymc.api.utils.NBTIO;
+import org.allaymc.server.utils.AllayNBTIO;
 import org.allaymc.api.world.Dimension;
 import org.allaymc.api.world.World;
 import org.allaymc.api.world.WorldPool;
@@ -116,6 +118,7 @@ public final class AllayWorldPool implements WorldPool {
 
     public void shutdown() {
         this.worlds.values().forEach(AllayWorld::shutdown);
+        IllegalStateException failure = null;
 
         // Wait for a finite time; never spin forever if a world tick thread
         // crashes during shutdown and leaves its LevelDB handle open.
@@ -127,10 +130,14 @@ public final class AllayWorldPool implements WorldPool {
                 throw new IllegalStateException("Interrupted while waiting for world shutdown", e);
             }
             if (world.getState() != WorldState.STOPPED) {
-                throw new IllegalStateException("World " + world.getName() +
-                        " failed to stop cleanly; settings and LevelDB are left untouched");
+                var error = new IllegalStateException("World " + world.getName() +
+                        " failed to stop cleanly; world settings were not updated", world.getShutdownFailure());
+                if (failure == null) failure = error;
+                else failure.addSuppressed(error);
             }
         }
+        if (NBTIO.getAPI() instanceof AllayNBTIO nbtio) nbtio.reportUnsupportedBlockEntities();
+        if (failure != null) throw failure;
 
         // Preserve configured worlds even if they were unloaded before shutdown.
         // Their definitions must not disappear from world-settings.yml.
@@ -254,7 +261,7 @@ public final class AllayWorldPool implements WorldPool {
             throw new IllegalStateException("Interrupted while unloading world " + name, e);
         }
         if (world.getState() != WorldState.STOPPED) {
-            throw new IllegalStateException("World " + name + " did not finish shutdown; refusing unsafe reload");
+            throw new IllegalStateException("World " + name + " did not finish shutdown; refusing unsafe reload", world.getShutdownFailure());
         }
         this.worlds.remove(name, world);
     }

@@ -30,18 +30,32 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(AllayTestExtension.class)
 class AllayNBTIOTest {
     @Test
-    void daylightDetectorHasNativeStorageTypeAndKeepsImportedTags() {
+    void unsupportedTilesAreCountedByTypeAndTheirDataIsPreserved() {
+        var nbtio = new AllayNBTIO();
         var dimension = Server.getInstance().getWorldPool().getDefaultWorld().getOverWorld();
-        var original = NbtMap.builder().putString("id", "DaylightDetector")
-                .putInt("x", 12).putInt("y", 70).putInt("z", 9)
-                .putByte("isMovable", (byte) 1).putInt("CustomSensorData", 27).build();
+        var original = NbtMap.builder().putString("id","FutureTestTile")
+                .putInt("x",1).putInt("y",65).putInt("z",2).putInt("CustomData",42).build();
+        for (int i=0;i<3;i++) {
+            assertEquals(42,nbtio.fromBlockEntityNBT(dimension,original).saveNBT().getInt("CustomData"));
+        }
+        assertEquals(java.util.Map.of("FutureTestTile",3L),nbtio.unsupportedBlockEntityCounts());
+    }
 
-        var loaded = NBTIO.getAPI().fromBlockEntityNBT(dimension, original);
-
-        assertEquals(BlockEntityTypes.DAYLIGHT_DETECTOR, loaded.getBlockEntityType());
-        assertEquals("DaylightDetector", loaded.saveNBT().getString("id"));
-        assertEquals(27, loaded.saveNBT().getInt("CustomSensorData"));
-        assertEquals(loaded.saveNBT(), NBTIO.getAPI().fromBlockEntityNBT(dimension, loaded.saveNBT()).saveNBT());
+    @Test
+    void daylightDetectorIsRecognizedAndKeepsItsImportedData() {
+        var nbtio = new AllayNBTIO();
+        var dimension = Server.getInstance().getWorldPool().getDefaultWorld().getOverWorld();
+        var original = NbtMap.builder().putString("id","DaylightDetector")
+                .putInt("x",1).putInt("y",65).putInt("z",2)
+                .putByte("isMovable", (byte) 1).putInt("CustomSensorData", 27)
+                .putCompound("ImportedData",NbtMap.builder().putInt("value",42).build()).build();
+        var tile = nbtio.fromBlockEntityNBT(dimension,original);
+        assertEquals(BlockEntityTypes.DAYLIGHT_DETECTOR,tile.getBlockEntityType());
+        assertEquals("DaylightDetector",tile.saveNBT().getString("id"));
+        assertEquals(original.getCompound("ImportedData"),tile.saveNBT().getCompound("ImportedData"));
+        assertEquals(27, tile.saveNBT().getInt("CustomSensorData"));
+        assertEquals(tile.saveNBT(), nbtio.fromBlockEntityNBT(dimension, tile.saveNBT()).saveNBT());
+        assertTrue(nbtio.unsupportedBlockEntityCounts().isEmpty());
     }
 
     @Test

@@ -38,6 +38,8 @@ public class EntityFireworksRocketBaseComponentImpl extends EntityBaseComponentI
     protected static final String TAG_LIFE = "Life";
 
     protected int existenceTicks, existedTicks;
+    protected boolean exploded;
+    protected int removalTicks;
     @Setter(AccessLevel.NONE)
     protected Set<FireworkExplosion> explosions;
     protected EntityPlayer attachedPlayer;
@@ -51,10 +53,25 @@ public class EntityFireworksRocketBaseComponentImpl extends EntityBaseComponentI
     @Override
     public void tick(long currentTick) {
         super.tick(currentTick);
+        tickFirework();
+    }
+
+    protected void tickFirework() {
+        if (exploded) {
+            if (removalTicks > 0 && --removalTicks == 0) {
+                remove();
+            }
+            return;
+        }
         this.existedTicks++;
         if (this.existedTicks > this.existenceTicks) {
+            // Keep the actor alive across client frames after FIREWORK_EXPLODE.
+            // An immediate remove can be batched with the event before particles render.
+            exploded = true;
+            removalTicks = 3;
+            setPersistent(false);
+            setImmobile(true);
             explode();
-            remove();
         }
     }
 
