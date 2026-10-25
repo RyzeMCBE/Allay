@@ -46,6 +46,13 @@ El conjunto reconocido es: `PLAYER_LIST`, `PLAYER_SKIN`, `ADD_PLAYER`, `SET_ENTI
 `*` se limita a ese conjunto y al cruce de protocolos seleccionado: no elimina chunks, bloques ni registros globales.
 Un tipo desconocido o no admitido desactiva el diagnóstico y deja pasar el tráfico con una advertencia.
 
+Si aparece «Invalid or corrupt skin» al entrar, busca `[SKIN-LOGIN-DIAG]`. Este aviso se emite
+cuando la validación de login rechaza la skin, incluso con `debug` y `debug-packets` desactivados.
+Incluye el nombre validado, el protocolo, la presencia del identificador, las dimensiones y longitud
+de la textura y el estado de `SkinResourcePatch`. No imprime identificadores de skin, texturas,
+geometría ni tokens. Esta validación no comprueba `SkinGeometryData`; el aviso describe el rechazo
+de login y no identifica por sí mismo la causa de «Block» en otro cliente.
+
 ## Interpretación y límites
 
 Los mensajes indican el tipo, número de secuencia, UUIDs observados, ambos protocolos y decisión `ALLOW`/`OMIT`.
