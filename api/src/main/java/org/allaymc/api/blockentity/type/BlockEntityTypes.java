@@ -45,5 +45,7 @@ public final class BlockEntityTypes {
     public static BlockEntityType<BlockEntityMovingBlock> MOVING_BLOCK;
     public static BlockEntityType<BlockEntityCauldron> CAULDRON;
     public static BlockEntityType<BlockEntity> MOB_SPAWNER;
+    /** The DaylightDetector tile stored by Bedrock and imported worlds. */
+    public static BlockEntityType<BlockEntity> DAYLIGHT_DETECTOR;
     public static BlockEntityType<BlockEntity> UNKNOWN;
 }

@@ -22,6 +22,14 @@ import org.allaymc.server.container.impl.*;
 @SuppressWarnings("unused")
 @UtilityClass
 public final class BlockEntityTypeInitializer {
+    public static void initDaylightDetector() {
+        BlockEntityTypes.DAYLIGHT_DETECTOR = AllayBlockEntityType
+                .builder(BlockEntityDaylightDetectorImpl.class)
+                .name(BlockEntityId.DAYLIGHT_DETECTOR)
+                .addComponent(BlockEntityLegacyNbtBaseComponentImpl::new, BlockEntityLegacyNbtBaseComponentImpl.class)
+                .build();
+    }
+
     public static void initMobSpawner() {
         BlockEntityTypes.MOB_SPAWNER = AllayBlockEntityType
                 .builder(BlockEntityMobSpawnerImpl.class)

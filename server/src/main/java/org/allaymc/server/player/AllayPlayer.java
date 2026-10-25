@@ -654,10 +654,10 @@ public class AllayPlayer implements Player {
     @Override
     public void viewContainerSlot(Container container, int slot) {
         if (container instanceof AbstractPlayerContainer playerContainer) {
-            if (playerContainer.getContainerType() == ContainerTypes.OFFHAND) {
-                // HACK: for unknown reason, we should send InventoryContentPacket instead of InventorySlotPacket
-                // for offhand container, otherwise the client will not update the offhand item
-                // TODO: replace this hack when we find the reason and have better solution
+            if (playerContainer.getContainerType() == ContainerTypes.OFFHAND
+                    || playerContainer.getContainerType() == ContainerTypes.ARMOR) {
+                // Synchronize equipment stacks and their network IDs together. Slot-only
+                // updates can leave client equipment referencing an earlier stack ID.
                 viewContentsWithSpecificContainerId(playerContainer, playerContainer.getUnopenedContainerId());
             } else {
                 viewSlotWithSpecificContainerId(playerContainer, slot, playerContainer.getUnopenedContainerId());

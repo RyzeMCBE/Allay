@@ -30,6 +30,21 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(AllayTestExtension.class)
 class AllayNBTIOTest {
     @Test
+    void daylightDetectorHasNativeStorageTypeAndKeepsImportedTags() {
+        var dimension = Server.getInstance().getWorldPool().getDefaultWorld().getOverWorld();
+        var original = NbtMap.builder().putString("id", "DaylightDetector")
+                .putInt("x", 12).putInt("y", 70).putInt("z", 9)
+                .putByte("isMovable", (byte) 1).putInt("CustomSensorData", 27).build();
+
+        var loaded = NBTIO.getAPI().fromBlockEntityNBT(dimension, original);
+
+        assertEquals(BlockEntityTypes.DAYLIGHT_DETECTOR, loaded.getBlockEntityType());
+        assertEquals("DaylightDetector", loaded.saveNBT().getString("id"));
+        assertEquals(27, loaded.saveNBT().getInt("CustomSensorData"));
+        assertEquals(loaded.saveNBT(), NBTIO.getAPI().fromBlockEntityNBT(dimension, loaded.saveNBT()).saveNBT());
+    }
+
+    @Test
     void testFromBlockStateNBT() {
         var block1 = BlockTypes.BAMBOO.getDefaultState();
         var nbt = block1.getBlockStateNBT();
