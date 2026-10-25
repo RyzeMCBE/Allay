@@ -14,18 +14,23 @@ public class EnderChestContainerImpl extends BlockContainerImpl {
 
     @Override
     public void onOpen(ContainerViewer viewer) {
+        var openedPosition = blockPos;
         super.onOpen(viewer);
 
-        if (blockPos.dimension().getBlockEntity(blockPos) instanceof BlockEntityEnderChestBaseComponent enderChest) {
+        if (openedPosition != null && openedPosition.dimension() != null
+                && openedPosition.dimension().getBlockEntity(openedPosition) instanceof BlockEntityEnderChestBaseComponent enderChest) {
             enderChest.setViewersCount(enderChest.getViewersCount() + 1);
         }
     }
 
     @Override
     public void onClose(ContainerViewer viewer) {
+        // Virtual-container close listeners restore the original (possibly null) position.
+        var closedPosition = blockPos;
         super.onClose(viewer);
 
-        if (blockPos.dimension().getBlockEntity(blockPos) instanceof BlockEntityEnderChestBaseComponent enderChest) {
+        if (closedPosition != null && closedPosition.dimension() != null
+                && closedPosition.dimension().getBlockEntity(closedPosition) instanceof BlockEntityEnderChestBaseComponent enderChest) {
             enderChest.setViewersCount(enderChest.getViewersCount() - 1);
         }
     }

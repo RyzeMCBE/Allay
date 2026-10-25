@@ -47,11 +47,14 @@ class AllayNBTIOTest {
         var dimension = Server.getInstance().getWorldPool().getDefaultWorld().getOverWorld();
         var original = NbtMap.builder().putString("id","DaylightDetector")
                 .putInt("x",1).putInt("y",65).putInt("z",2)
+                .putByte("isMovable", (byte) 1).putInt("CustomSensorData", 27)
                 .putCompound("ImportedData",NbtMap.builder().putInt("value",42).build()).build();
         var tile = nbtio.fromBlockEntityNBT(dimension,original);
         assertEquals(BlockEntityTypes.DAYLIGHT_DETECTOR,tile.getBlockEntityType());
         assertEquals("DaylightDetector",tile.saveNBT().getString("id"));
         assertEquals(original.getCompound("ImportedData"),tile.saveNBT().getCompound("ImportedData"));
+        assertEquals(27, tile.saveNBT().getInt("CustomSensorData"));
+        assertEquals(tile.saveNBT(), nbtio.fromBlockEntityNBT(dimension, tile.saveNBT()).saveNBT());
         assertTrue(nbtio.unsupportedBlockEntityCounts().isEmpty());
     }
 

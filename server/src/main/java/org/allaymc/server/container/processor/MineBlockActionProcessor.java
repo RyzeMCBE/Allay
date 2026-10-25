@@ -34,7 +34,11 @@ public class MineBlockActionProcessor implements ContainerActionProcessor<MineBl
         }
 
         if (itemInHand.getDamage() != action.predictedDurability()) {
-            log.warn("Durability predicted by the client does not match that of the server! client: {}, server: {}, player: {}", action.predictedDurability(), itemInHand.getDamage(), player.getOriginName());
+            // Enchantment rolls and server-side repairs can differ from client prediction.
+            // Send the complete authoritative item, including its damage tag and stack ID.
+            container.sendContent(player, handSlot);
+            log.debug("Corrected predicted tool durability: client={}, server={}, player={}",
+                    action.predictedDurability(), itemInHand.getDamage(), player.getOriginName());
         }
         return new ActionResponse(
                 true,
