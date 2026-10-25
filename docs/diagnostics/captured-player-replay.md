@@ -66,3 +66,20 @@ La lectura de `PlayFabId` conserva la clave actual y acepta `PlayFabID` como alt
 El Protocol enlazado interpreta los colores RGB de seis dígitos como opacos y mantiene el alfa de valores ARGB explícitos.
 Las pruebas comprueban esos contratos en los paquetes de ambas capturas y conservan las geometrías y los píxeles de animación.
 Estas correcciones eliminan pérdidas reproducibles de datos, sin afirmar que resuelvan por sí solas la desconexión «Block».
+
+## Plataformas retiradas en el protocolo moderno
+
+El `DeviceOS=7` de los clientes Windows anteriores representa UWP. Copiar ese número directamente a `BuildPlatform`
+en una lista moderna conserva un valor retirado del enum. Los esquemas oficiales de Mojang para
+[2168](https://github.com/Mojang/bedrock-protocol-docs/blob/80f5254176d199507f83a22495cb54eeb4352cd5/json/BuildPlatform.json)
+y [2193](https://github.com/Mojang/bedrock-protocol-docs/blob/c0bd91f7d896cec780f1185cc548b5e46a46f5d5/json/BuildPlatform.json)
+incluyen Win32 y no UWP; la implementación de PowerNukkitX conserva Win32 como 8. Por ello el encoder desde v2168
+traduce UWP a Win32. Los encoders anteriores conservan sus valores históricos.
+El dispositivo de login y todos los campos de la skin permanecen intactos.
+
+La regresión lee el entero de plataforma directamente de los bytes de `PLAYER_LIST`, sin usar el deserializador
+del paquete como oráculo. Antes de la corrección, cuatro casos fallan con «esperado 8, obtenido 7»: ambas capturas
+Windows frente a 2168 y 2193. Los dos controles frente a 1001 conservan 7. La matriz completa comprueba también
+la textura, las geometrías, la animación facial y los metadatos de apariencia. El diagnóstico de la lista registra
+`buildPlatform=WIN32` para comprobar que el servidor en ejecución aplica la traducción. La validación final de «Block»
+se hace con el cliente, sin excluir paquetes y conservando la skin Persona original.

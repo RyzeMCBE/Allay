@@ -158,7 +158,8 @@ public final class PlayerPacketDiagnostics {
                 recordUniqueId(source, entry.getEntityId());
                 source.listRemoved = false;
             }
-            trace(recipient, source, list, omit, "action=" + action + " " + skinSummary(entry.getSkin()));
+            trace(recipient, source, list, omit, "action=" + action + " buildPlatform="
+                    + entry.getBuildPlatform() + " " + skinSummary(entry.getSkin()));
             if (!omit) kept.add(entry);
             if (action == PlayerListPacket.Action.REMOVE) {
                 source.listRemoved = true;

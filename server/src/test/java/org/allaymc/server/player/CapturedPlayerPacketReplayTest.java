@@ -29,6 +29,7 @@ import org.cloudburstmc.protocol.bedrock.data.definitions.ItemDefinition;
 import org.cloudburstmc.protocol.bedrock.data.skin.SerializedSkin;
 import org.cloudburstmc.protocol.bedrock.definition.SimpleDefinitionRegistry;
 import org.cloudburstmc.protocol.bedrock.packet.*;
+import org.cloudburstmc.protocol.bedrock.util.VarInts;
 import org.joml.primitives.AABBd;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -97,6 +98,45 @@ class CapturedPlayerPacketReplayTest {
                         .thenComparingInt(Protocol::getProtocolVersion));
     }
 
+    static Stream<Arguments> windowsPlatformCases() {
+        return Stream.of(1001, 2168, 2193).flatMap(version -> Stream.of(SOURCE_CAPTURE, PERSONA_CAPTURE)
+                .map(capture -> Arguments.of(version, capture)));
+    }
+
+    @ParameterizedTest(name = "Windows player-list platform: protocol={0}, capture={1}")
+    @MethodSource("windowsPlatformCases")
+    void windowsPlatformMatchesTheRecipientSchemaWithoutChangingTheSkin(int version, String captureName) throws Exception {
+        var protocol = ProtocolRegistry.getDefault().resolve(ClientVariant.INTERNATIONAL, version);
+        var data = capture(captureName);
+        var login = decodeAppearance(data);
+        var source = player(login, SOURCE_ID, "SourceFixture", 3);
+        var packet = protocol.getEncoder().encodePlayerList(List.of(source.player()), true, true);
+
+        // Read the field directly: a codec round trip also accepts retired enum values.
+        var buffer = Unpooled.wrappedBuffer(encode(protocol, packet));
+        try {
+            if (version >= 2168) {
+                assertEquals(1, VarInts.readUnsignedInt(buffer));
+                assertEquals(1, VarInts.readUnsignedInt(buffer));
+                assertEquals(0, buffer.readUnsignedByte());
+            } else {
+                assertEquals(0, buffer.readUnsignedByte());
+                assertEquals(1, VarInts.readUnsignedInt(buffer));
+            }
+            buffer.skipBytes(16);
+            VarInts.readLong(buffer);
+            for (int i = 0; i < 3; i++) {
+                buffer.skipBytes(VarInts.readUnsignedInt(buffer));
+            }
+            // Mojang's 2168/2193 BuildPlatform schema has Win32 (8), but no UWP (7).
+            assertEquals(version >= 2168 ? 8 : 7, buffer.readIntLE());
+        } finally {
+            buffer.release();
+        }
+        assertEquals(LoginData.Device.WINDOWS, login.getDeviceInfo().device());
+        assertCapturedSkin(data, packet.getEntries().getFirst().getSkin());
+    }
+
     @ParameterizedTest(name = "{0}, source={1}, source OS={2}, recipient={3}, self first={4}")
     @MethodSource("replayCases")
     void capturedAppearanceSequenceEncodesAndDecodesWithoutTrailingBytes(
@@ -126,7 +166,8 @@ class CapturedPlayerPacketReplayTest {
                 assertEquals(2, list.getEntries().size());
                 var sourceEntry = list.getEntries().stream()
                         .filter(entry -> SOURCE_ID.equals(entry.getUuid())).findFirst().orElseThrow();
-                assertEquals(device == 7 ? BuildPlatform.UWP : BuildPlatform.GOOGLE, sourceEntry.getBuildPlatform());
+                var windowsPlatform = protocol.getProtocolVersion() >= 2168 ? BuildPlatform.WIN32 : BuildPlatform.UWP;
+                assertEquals(device == 7 ? windowsPlatform : BuildPlatform.GOOGLE, sourceEntry.getBuildPlatform());
                 assertEquals("", sourceEntry.getPlatformChatId());
                 assertCapturedSkin(sourceData, sourceEntry.getSkin());
                 var selfEntry = list.getEntries().stream()
@@ -183,7 +224,7 @@ class CapturedPlayerPacketReplayTest {
 
         var windowsList = protocol.getEncoder().encodePlayerList(List.of(windows.player()), true, true);
         var androidList = protocol.getEncoder().encodePlayerList(List.of(android.player()), true, true);
-        assertEquals(BuildPlatform.UWP, windowsList.getEntries().getFirst().getBuildPlatform());
+        assertEquals(BuildPlatform.WIN32, windowsList.getEntries().getFirst().getBuildPlatform());
         assertEquals(BuildPlatform.GOOGLE, androidList.getEntries().getFirst().getBuildPlatform());
         windowsList.getEntries().getFirst().setBuildPlatform(BuildPlatform.UNKNOWN);
         androidList.getEntries().getFirst().setBuildPlatform(BuildPlatform.UNKNOWN);
