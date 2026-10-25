@@ -6,6 +6,7 @@ import org.allaymc.api.block.data.BlockFace;
 import org.allaymc.api.block.dto.Block;
 import org.allaymc.api.entity.Entity;
 import org.allaymc.api.entity.component.EntityPotionComponent;
+import org.allaymc.api.entity.effect.EffectInstance;
 import org.allaymc.api.entity.interfaces.EntityLiving;
 import org.allaymc.api.entity.interfaces.EntitySplashPotion;
 import org.allaymc.api.eventbus.event.entity.PotionSplashEvent;
@@ -94,6 +95,9 @@ public abstract class EntityPotionPhysicsComponentImpl extends EntityProjectileP
                 }
 
                 var factor = living != entityBeingHit ? 1.0 - distance / 4.0 : 1.0;
+                if (factor <= 0) {
+                    continue;
+                }
 
                 if (thisEntity instanceof EntitySplashPotion splashPotion) {
                     var event = new PotionSplashEvent(splashPotion, living);
@@ -102,10 +106,16 @@ public abstract class EntityPotionPhysicsComponentImpl extends EntityProjectileP
                     }
                 }
 
-                for (var effect : effects) {
-                    // Instant effects (duration <= 1) should not have duration modified
-                    if (effect.getDuration() > 1) {
+                for (var template : effects) {
+                    // Each target owns its effect; duration ticks must not mutate another target's copy.
+                    var effect = new EffectInstance(template);
+                    if (effect.getType().isInstant()) {
+                        effect.setIntensity(factor);
+                    } else {
                         effect.setDuration((int) (effect.getDuration() * getDurationMultiplier() * factor));
+                        if (effect.getDuration() <= 0) {
+                            continue;
+                        }
                     }
                     living.addEffect(effect);
                 }

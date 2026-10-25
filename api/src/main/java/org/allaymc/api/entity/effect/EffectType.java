@@ -44,6 +44,13 @@ public interface EffectType {
     EffectInstance createInstance(int amplifier, int duration, boolean ambient, boolean visible);
 
     /**
+     * Returns whether each accepted application runs once without being stored as an active effect.
+     */
+    default boolean isInstant() {
+        return false;
+    }
+
+    /**
      * Called every tick while the effect is active.
      *
      * @param entity         The entity the effect is on

@@ -1,7 +1,6 @@
 package org.allaymc.api.entity.effect;
 
 import com.google.common.base.Preconditions;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -18,7 +17,6 @@ import org.jetbrains.annotations.Range;
 @Setter
 @Getter
 @ToString
-@AllArgsConstructor
 public final class EffectInstance {
     /**
      * The type of this effect instance.
@@ -41,6 +39,33 @@ public final class EffectInstance {
      * Whether the particle is visible to players.
      */
     private boolean visible;
+    /**
+     * Intensity of an instant effect, from zero to one. Not persisted in entity NBT.
+     */
+    private double intensity = 1.0;
+
+    /**
+     * Creates an effect with full intensity and a duration measured in game ticks.
+     */
+    public EffectInstance(EffectType type, int amplifier, int duration, boolean ambient, boolean visible) {
+        this.type = type;
+        this.amplifier = amplifier;
+        this.duration = duration;
+        this.ambient = ambient;
+        this.visible = visible;
+    }
+
+    /**
+     * Sets the intensity used by instant effects.
+     *
+     * @throws IllegalArgumentException if intensity is not finite or outside zero to one
+     */
+    public void setIntensity(double intensity) {
+        if (!Double.isFinite(intensity) || intensity < 0 || intensity > 1) {
+            throw new IllegalArgumentException("Effect intensity must be finite and between zero and one");
+        }
+        this.intensity = intensity;
+    }
 
     /**
      * A constructor that creates a copy of the given effect instance.
@@ -53,6 +78,7 @@ public final class EffectInstance {
         this.duration = effect.duration;
         this.ambient = effect.ambient;
         this.visible = effect.visible;
+        this.intensity = effect.intensity;
     }
 
     /**

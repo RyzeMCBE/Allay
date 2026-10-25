@@ -396,14 +396,21 @@ public class AllayEntityPhysicsEngine implements EntityPhysicsEngine {
             return false;
         }
 
-        // A normal jump starts while grounded. Once airborne, its vertical velocity
-        // should decrease because gravity is applied by the client. A second jump
-        // (the reported double-jump flight) produces a clear upward velocity reset.
-        if (physicsComponent.isOnGround() || motion.y() <= 0 || physicsComponent.getLastMotion().y() <= 0) {
+        var previousVertical = physicsComponent.getMotion().y();
+        var upwardReset = motion.y() > previousVertical + 0.05;
+        if (motion.y() > 0 && (physicsComponent.isOnGround() || previousVertical <= 0 || upwardReset)
+                && physicsComponent.consumeServerMotion(motion)) {
             return false;
         }
 
-        return motion.y() > physicsComponent.getLastMotion().y() + 0.05;
+        // A normal jump starts while grounded. Once airborne, its vertical velocity
+        // should decrease because gravity is applied by the client. A second jump
+        // (the reported double-jump flight) produces a clear upward velocity reset.
+        if (physicsComponent.isOnGround() || motion.y() <= 0 || previousVertical <= 0) {
+            return false;
+        }
+
+        return upwardReset;
     }
 
     protected void handleClientMoveQueue() {
@@ -436,9 +443,8 @@ public class AllayEntityPhysicsEngine implements EntityPhysicsEngine {
                 // Calculate delta pos (motion)
                 var motion = event.getTo().sub(player.getLocation(), new Vector3d());
                 var physicsComponent = ((EntityPlayerPhysicsComponentImpl) ((EntityPlayerImpl) player).getPhysicsComponent());
-                //log.warn("[DEBUG] gm={} canFly={} isFlying={} onGround={} motionY={} lastMotionY={}", player.getGameMode(), player.getController().canFly(), player.isFlying(), physicsComponent.isOnGround(), motion.y(), physicsComponent.getLastMotion().y());
                 if (isUnauthorizedFlightMovement(player, physicsComponent, motion)) {
-                    log.warn("Player {} attempted unauthorized client flight: vertical motion {} after {}", player.getRuntimeId(), motion.y(), physicsComponent.getLastMotion().y());
+                    log.warn("Player {} attempted unauthorized client flight: vertical motion {} after {}", player.getRuntimeId(), motion.y(), physicsComponent.getMotion().y());
                     physicsComponent.setMotionValueOnly(new Vector3d());
                     player.setFlying(false);
                     player.getController().viewPlayerAbilities(player.getController());
