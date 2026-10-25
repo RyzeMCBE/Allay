@@ -23,12 +23,28 @@ import org.cloudburstmc.nbt.NbtMap;
 
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.LongAdder;
 
 /**
  * @author daoge_cmd
  */
 @Slf4j
 public class AllayNBTIO implements NBTIO {
+    private final Map<String, LongAdder> unsupportedBlockEntities = new ConcurrentHashMap<>();
+
+    /** Reports preserved unsupported tiles by type after the worlds have finished closing. */
+    public void reportUnsupportedBlockEntities() {
+        unsupportedBlockEntities.forEach((type, count) ->
+                log.info("Preserved {} unsupported block entities of type {}", count.sum(), type));
+    }
+
+    Map<String, Long> unsupportedBlockEntityCounts() {
+        var snapshot = new java.util.LinkedHashMap<String, Long>();
+        unsupportedBlockEntities.forEach((type, count) -> snapshot.put(type, count.sum()));
+        return Map.copyOf(snapshot);
+    }
     @Override
     public BlockState fromBlockStateNBT(NbtMap nbt) {
         // Older states must be migrated. Newer states are still worth resolving:
@@ -172,7 +188,10 @@ public class AllayNBTIO implements NBTIO {
         if (blockEntityType == null) {
             // Preserve the imported tile NBT rather than deleting it on save.
             // This is storage compatibility, not support for its gameplay behavior.
-            log.warn("Preserving unsupported block entity type: {}", id);
+            unsupportedBlockEntities.computeIfAbsent(id, type -> {
+                log.warn("Preserving unsupported block entity type: {} (further entries will be summarized)", type);
+                return new LongAdder();
+            }).increment();
             blockEntityType = BlockEntityTypes.UNKNOWN;
         }
 

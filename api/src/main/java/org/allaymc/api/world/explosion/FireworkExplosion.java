@@ -36,11 +36,15 @@ public record FireworkExplosion(
      * @return a new {@link FireworkExplosion} instance
      */
     public static FireworkExplosion fromNBT(NbtMap nbt) {
-        var type = FireworkType.values()[nbt.getShort(TAG_FIREWORK_TYPE)];
+        // Bedrock writes this tag as BYTE; older plugin data may use SHORT.
+        var rawType = nbt.get(TAG_FIREWORK_TYPE);
+        var typeId = rawType instanceof Number number ? number.intValue() : 0;
+        var types = FireworkType.values();
+        var type = typeId >= 0 && typeId < types.length ? types[typeId] : FireworkType.SMALL_SPHERE;
 
         var colors = new ArrayList<DyeColor>();
         for (var colorIndex : nbt.getByteArray(TAG_FIREWORK_COLOR, new byte[0])) {
-            colors.add(DyeColor.fromInverted(colorIndex));
+            if (colorIndex >= 0 && colorIndex < 16) colors.add(DyeColor.fromInverted(colorIndex));
         }
         if (colors.isEmpty()) {
             colors.add(DyeColor.WHITE);
@@ -48,7 +52,7 @@ public record FireworkExplosion(
 
         var fadeColors = new ArrayList<DyeColor>();
         for (var fadeColorIndex : nbt.getByteArray(TAG_FIREWORK_FADE, new byte[0])) {
-            fadeColors.add(DyeColor.fromInverted(fadeColorIndex));
+            if (fadeColorIndex >= 0 && fadeColorIndex < 16) fadeColors.add(DyeColor.fromInverted(fadeColorIndex));
         }
 
         var flicker = nbt.getBoolean(TAG_FIREWORK_FLICKER);
