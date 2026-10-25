@@ -46,6 +46,15 @@ class InstantPotionEffectTest {
     }
 
     @Test
+    void negligibleInstantDamageDoesNotStartADamageCooldown() {
+        var entity = mock(EntityLiving.class);
+        var effect = EffectTypes.INSTANT_DAMAGE.createInstance(1, 1);
+        effect.setIntensity(0.01);
+        EffectTypes.INSTANT_DAMAGE.onAdd(entity, effect);
+        verify(entity, never()).attack(any(org.allaymc.api.entity.damage.DamageContainer.class));
+    }
+
+    @Test
     void cancelledInstantEffectDoesNotHeal() {
         var entity = mock(EntityLiving.class);
         var component = new TestLiving(entity);
