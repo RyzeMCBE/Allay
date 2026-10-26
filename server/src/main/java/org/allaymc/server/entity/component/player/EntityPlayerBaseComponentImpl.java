@@ -15,6 +15,7 @@ import org.allaymc.api.entity.interfaces.EntityPlayer;
 import org.allaymc.api.eventbus.EventHandler;
 import org.allaymc.api.eventbus.event.entity.EntityPortalEnterEvent;
 import org.allaymc.api.eventbus.event.player.*;
+import org.allaymc.api.item.ItemStack;
 import org.allaymc.api.item.component.ItemShieldBaseComponent;
 import org.allaymc.api.item.interfaces.ItemShieldStack;
 import org.allaymc.api.math.location.Location3dc;
