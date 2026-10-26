@@ -11,11 +11,14 @@ import org.allaymc.api.entity.interfaces.EntityNpc;
 import org.allaymc.api.entity.interfaces.EntityPlayer;
 import org.allaymc.api.eventbus.event.player.*;
 import org.allaymc.api.item.ItemStack;
+import org.allaymc.api.item.component.ItemEdibleComponent;
+import org.allaymc.api.player.InputMode;
 import org.allaymc.api.player.Player;
 import org.allaymc.api.world.sound.AttackSound;
 import org.allaymc.server.network.NetworkHelper;
 import org.allaymc.server.network.processor.PacketProcessor;
 import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.InventorySource;
+import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.ItemUseTransaction;
 import org.cloudburstmc.protocol.bedrock.packet.BedrockPacketType;
 import org.cloudburstmc.protocol.bedrock.packet.InventoryTransactionPacket;
 import org.joml.Vector3fc;
@@ -129,13 +132,17 @@ public class InventoryTransactionPacketProcessor extends PacketProcessor<Invento
                         }
 
                         if (!player.canPlaceBlocks()) {
-                            handleItemUseInAir(entity, itemInHand);
+                            if (player.getInputMode() != InputMode.TOUCH) {
+                                handleItemUseInAir(entity, itemInHand);
+                            }
                             player.viewBlockUpdate(placeBlockPos, 0, dimension.getBlockState(placeBlockPos));
                             break;
                         }
 
                         if (!itemInHand.placeBlock(dimension, placeBlockPos, interactInfo)) {
-                            handleItemUseInAir(entity, itemInHand);
+                            if (player.getInputMode() != InputMode.TOUCH) {
+                                handleItemUseInAir(entity, itemInHand);
+                            }
                             var blockStateReplaced = dimension.getBlockState(placeBlockPos);
                             player.viewBlockUpdate(placeBlockPos, 0, blockStateReplaced);
                         }
@@ -147,14 +154,17 @@ public class InventoryTransactionPacketProcessor extends PacketProcessor<Invento
                             break;
                         }
 
+                        var simulatedTouch = player.getInputMode() == InputMode.TOUCH
+                                && packet.getTriggerType() == ItemUseTransaction.TriggerType.SIMULATION_TICK;
                         if (!entity.isUsingItemInAir()) {
-                            handleItemUseInAir(entity, itemInHand);
-                        } else {
-                            entity.setUsingItemInAir(false);
-                            var event = new PlayerUseItemInAirEvent(entity, entity.getItemUsingInAirTime());
-                            if (event.call()) {
-                                itemInHand.useItemInAir(entity, event.getUsingTime());
+                            if (!simulatedTouch) {
+                                handleItemUseInAir(entity, itemInHand);
                             }
+                        } else if (!simulatedTouch || itemInHand instanceof ItemEdibleComponent edible
+                                && entity.getItemUsingInAirTime() >= edible.getEatingTime()) {
+                            // A food-completion tick may finish the active use once. It must
+                            // never become a fresh press or release a bow automatically.
+                            completeItemUseInAir(entity, itemInHand);
                         }
                     }
                 }
@@ -163,11 +173,7 @@ public class InventoryTransactionPacketProcessor extends PacketProcessor<Invento
                 switch (packet.getActionType()) {
                     case ITEM_RELEASE_RELEASE -> {
                         if (entity.isUsingItemInAir()) {
-                            entity.setUsingItemInAir(false);
-                            var event = new PlayerUseItemInAirEvent(entity, entity.getItemUsingInAirTime());
-                            if (event.call()) {
-                                itemInHand.useItemInAir(entity, event.getUsingTime());
-                            }
+                            completeItemUseInAir(entity, itemInHand);
                         }
                     }
                     case ITEM_RELEASE_CONSUME -> {
@@ -281,6 +287,15 @@ public class InventoryTransactionPacketProcessor extends PacketProcessor<Invento
             entity.clearItemInHand();
         } else {
             entity.notifyItemInHandChange();
+        }
+    }
+
+    private void completeItemUseInAir(EntityPlayer player, ItemStack itemStack) {
+        var usedTime = player.getItemUsingInAirTime();
+        player.setUsingItemInAir(false);
+        var event = new PlayerUseItemInAirEvent(player, usedTime);
+        if (event.call()) {
+            itemStack.useItemInAir(player, event.getUsingTime());
         }
     }
 

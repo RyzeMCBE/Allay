@@ -196,6 +196,12 @@ public interface EntityPlayer extends
             return;
         }
 
+        if (isUsingItemInAir()) {
+            setUsingItemInAir(false);
+        }
+        if (isUsingItemOnBlock()) {
+            setUsingItemOnBlock(false);
+        }
         container.setHandSlot(handSlot);
         forEachViewers(viewer -> viewer.viewEntityHand(this));
         if (serverSide) {

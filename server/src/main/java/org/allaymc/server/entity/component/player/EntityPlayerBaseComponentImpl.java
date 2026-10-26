@@ -15,6 +15,7 @@ import org.allaymc.api.entity.interfaces.EntityPlayer;
 import org.allaymc.api.eventbus.EventHandler;
 import org.allaymc.api.eventbus.event.entity.EntityPortalEnterEvent;
 import org.allaymc.api.eventbus.event.player.*;
+import org.allaymc.api.item.ItemStack;
 import org.allaymc.api.item.component.ItemShieldBaseComponent;
 import org.allaymc.api.item.interfaces.ItemShieldStack;
 import org.allaymc.api.math.location.Location3dc;
@@ -117,6 +118,9 @@ public class EntityPlayerBaseComponentImpl extends EntityBaseComponentImpl imple
     @Getter
     protected boolean usingItemOnBlock, usingItemInAir;
     protected long startUsingItemInAirTime;
+    protected ItemStack usingItemInAirStack;
+    protected int usingItemInAirSlot = -1;
+    protected int usingItemInAirNetworkId;
 
     protected Map<String, Long> cooldowns;
 
@@ -370,7 +374,7 @@ public class EntityPlayerBaseComponentImpl extends EntityBaseComponentImpl imple
     }
 
     protected void tickItemUsingInAir(long currentTick) {
-        if (!usingItemInAir) {
+        if (!isUsingItemInAir()) {
             return;
         }
 
@@ -907,7 +911,36 @@ public class EntityPlayerBaseComponentImpl extends EntityBaseComponentImpl imple
     }
 
     @Override
+    public boolean isUsingItemInAir() {
+        if (usingItemInAir) {
+            var held = thisPlayer.getItemInHand();
+            if (held == null || held.isEmptyOrAir()
+                    || thisPlayer.getHandSlot() != usingItemInAirSlot
+                    || usingItemInAirStack == null
+                    || held.getItemType() != usingItemInAirStack.getItemType()
+                    || held != usingItemInAirStack && (usingItemInAirNetworkId == 0
+                    || held.getUniqueId() != usingItemInAirNetworkId)) {
+                setUsingItemInAir(false);
+            }
+        }
+        return usingItemInAir;
+    }
+
+    @Override
     public void setUsingItemInAir(boolean value) {
+        if (value) {
+            var held = thisPlayer.getItemInHand();
+            if (held == null || held.isEmptyOrAir()) {
+                return;
+            }
+            this.usingItemInAirStack = held;
+            this.usingItemInAirSlot = thisPlayer.getHandSlot();
+            this.usingItemInAirNetworkId = held.getUniqueId();
+        } else {
+            this.usingItemInAirStack = null;
+            this.usingItemInAirSlot = -1;
+            this.usingItemInAirNetworkId = 0;
+        }
         this.usingItemInAir = value;
         if (value) {
             this.startUsingItemInAirTime = this.tick;
