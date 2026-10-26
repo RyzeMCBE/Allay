@@ -185,7 +185,7 @@ class CraftingDataWireTest {
         assertEquals(expected.getCount(), actual.getCount());
         assertEquals(expected.getDamage(), actual.getDamage());
         assertEquals(expected.getTag(), actual.getTag());
-        assertEquals(expected.getBlockDefinition() == null ? 0 : expected.getBlockDefinition().getRuntimeId(),
-                actual.getBlockDefinition() == null ? 0 : actual.getBlockDefinition().getRuntimeId());
+        assertEquals(expected.getBlockDefinition() == null ? 0 : expected.getBlockDefinition().runtimeId(),
+                actual.getBlockDefinition() == null ? 0 : actual.getBlockDefinition().runtimeId());
     }
 }
