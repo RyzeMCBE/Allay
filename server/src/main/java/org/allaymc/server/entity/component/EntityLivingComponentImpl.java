@@ -287,7 +287,7 @@ public class EntityLivingComponentImpl implements EntityLivingComponent {
 
             float reduced;
             if (d <= 1.6f * v + 0.2f * v * t) {
-                reduced = (1f / (6.25f + 50f)) * d * d +
+                reduced = (1f / (6.25f * t + 50f)) * d * d +
                           (1f - v / 25f) * d;
             } else {
                 reduced = (1f - v / 125f) * d;
@@ -332,8 +332,9 @@ public class EntityLivingComponentImpl implements EntityLivingComponent {
     protected void applyEffects(DamageContainer damage) {
         // Damage absorption
         if (this.absorption > 0) {
-            setAbsorption(Math.max(0, this.absorption - damage.getFinalDamage()));
-            damage.updateFinalDamage(d -> Math.max(0, d - this.absorption));
+            var absorbed = Math.min(this.absorption, Math.max(0, damage.getFinalDamage()));
+            setAbsorption(this.absorption - absorbed);
+            damage.updateFinalDamage(d -> Math.max(0, d - absorbed));
         }
 
         this.effects.values().forEach(effect ->
@@ -375,7 +376,7 @@ public class EntityLivingComponentImpl implements EntityLivingComponent {
                 }
             }
 
-            if (attacker instanceof EntityPhysicsComponent component) {
+            if (!damage.hasCriticalOverride() && attacker instanceof EntityPhysicsComponent component) {
                 damage.setCritical(component.canCriticalAttack());
             }
         }
@@ -512,8 +513,19 @@ public class EntityLivingComponentImpl implements EntityLivingComponent {
             effectInstance.getType().onAdd(thisEntity, effectInstance);
             return true;
         }
-        var old = effects.put(effectInstance.getType(), effectInstance);
-        if (old == null) {
+        var old = effects.get(effectInstance.getType());
+        if (effectInstance.getType() == EffectTypes.ABSORPTION && old != null) {
+            if (old.getAmplifier() > effectInstance.getAmplifier()) {
+                // Reassert the stronger effect after the client's predicted apple consumption.
+                sendEffects(old, old);
+                return false;
+            }
+            if (old.getAmplifier() == effectInstance.getAmplifier()) {
+                effectInstance.setDuration(Math.max(old.getDuration(), effectInstance.getDuration()));
+            }
+        }
+        effects.put(effectInstance.getType(), effectInstance);
+        if (old == null || effectInstance.getType() == EffectTypes.ABSORPTION) {
             effectInstance.getType().onAdd(thisEntity, effectInstance);
             this.baseComponent.broadcastState();
         }

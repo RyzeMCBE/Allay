@@ -56,8 +56,9 @@ public class DamageContainer {
      * Whether this damage is critical. If this value is {@code true}, the final damage will be multiplied by {@code 1.5},
      * and critical particle will be applied to the victim.
      */
-    @Setter
     protected boolean critical;
+    /** Whether a caller explicitly selected the critical state. */
+    protected boolean criticalOverride;
     /**
      * Whether this damage is enchanted. If this value is {@code true}, action {@link EnchantedHit} will
      * be applied to the victim.
@@ -337,6 +338,25 @@ public class DamageContainer {
     public <T> T getAttacker() {
         // noinspection unchecked
         return (T) attacker;
+    }
+
+    /**
+     * Selects the critical state explicitly, overriding the attacker's native eligibility.
+     *
+     * @param critical whether this hit is critical
+     */
+    public void setCritical(boolean critical) {
+        this.critical = critical;
+        this.criticalOverride = true;
+    }
+
+    /**
+     * Returns whether a caller explicitly selected this hit's critical state.
+     *
+     * @return whether native critical detection must preserve the selected state
+     */
+    public boolean hasCriticalOverride() {
+        return criticalOverride;
     }
 
     /**

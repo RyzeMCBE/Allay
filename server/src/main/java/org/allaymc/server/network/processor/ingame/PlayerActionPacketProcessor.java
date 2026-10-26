@@ -30,6 +30,9 @@ public class PlayerActionPacketProcessor extends PacketProcessor<PlayerActionPac
                 yield PacketSignal.HANDLED;
             }
             case STOP_ITEM_USE_ON -> {
+                if (entity.isUsingItemInAir()) {
+                    entity.setUsingItemInAir(false);
+                }
                 if (!entity.isUsingItemOnBlock()) {
                     log.debug("Player {} tried to stop item use on without starting", player.getOriginName());
                     yield PacketSignal.HANDLED;

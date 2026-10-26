@@ -294,6 +294,12 @@ public class EntityPlayerLivingComponentImpl extends EntityLivingComponentImpl {
         super.sendEffects(newEffect, oldEffect);
         if (thisPlayer.isActualPlayer()) {
             thisPlayer.getController().viewEntityEffectChange(thisPlayer, newEffect, oldEffect);
+            var changedEffect = newEffect != null ? newEffect : oldEffect;
+            if (changedEffect != null && changedEffect.getType() == EffectTypes.ABSORPTION) {
+                // Bedrock predicts absorption when applying the effect; the authoritative
+                // attribute must follow it to prevent visually accumulating yellow hearts.
+                thisPlayer.getController().sendAbsorption(this.absorption);
+            }
         }
     }
 

@@ -117,6 +117,9 @@ public class EntityPlayerBaseComponentImpl extends EntityBaseComponentImpl imple
     @Getter
     protected boolean usingItemOnBlock, usingItemInAir;
     protected long startUsingItemInAirTime;
+    protected ItemStack usingItemInAirStack;
+    protected int usingItemInAirSlot = -1;
+    protected int usingItemInAirNetworkId;
 
     protected Map<String, Long> cooldowns;
 
@@ -370,7 +373,7 @@ public class EntityPlayerBaseComponentImpl extends EntityBaseComponentImpl imple
     }
 
     protected void tickItemUsingInAir(long currentTick) {
-        if (!usingItemInAir) {
+        if (!isUsingItemInAir()) {
             return;
         }
 
@@ -907,7 +910,36 @@ public class EntityPlayerBaseComponentImpl extends EntityBaseComponentImpl imple
     }
 
     @Override
+    public boolean isUsingItemInAir() {
+        if (usingItemInAir) {
+            var held = thisPlayer.getItemInHand();
+            if (held == null || held.isEmptyOrAir()
+                    || thisPlayer.getHandSlot() != usingItemInAirSlot
+                    || usingItemInAirStack == null
+                    || held.getItemType() != usingItemInAirStack.getItemType()
+                    || held != usingItemInAirStack && (usingItemInAirNetworkId == 0
+                    || held.getUniqueId() != usingItemInAirNetworkId)) {
+                setUsingItemInAir(false);
+            }
+        }
+        return usingItemInAir;
+    }
+
+    @Override
     public void setUsingItemInAir(boolean value) {
+        if (value) {
+            var held = thisPlayer.getItemInHand();
+            if (held == null || held.isEmptyOrAir()) {
+                return;
+            }
+            this.usingItemInAirStack = held;
+            this.usingItemInAirSlot = thisPlayer.getHandSlot();
+            this.usingItemInAirNetworkId = held.getUniqueId();
+        } else {
+            this.usingItemInAirStack = null;
+            this.usingItemInAirSlot = -1;
+            this.usingItemInAirNetworkId = 0;
+        }
         this.usingItemInAir = value;
         if (value) {
             this.startUsingItemInAirTime = this.tick;
