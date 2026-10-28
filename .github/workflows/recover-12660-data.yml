@@ -1,0 +1,42 @@
+name: Reassemble recovered 1.26.60 registry
+on:
+  push:
+    branches: [feat/minecraft-1.26.60]
+    paths:
+      - '.github/recovery-12660/**'
+      - '.github/workflows/recover-12660-data.yml'
+permissions:
+  contents: write
+jobs:
+  store:
+    if: github.repository == 'RyzeMCBE/Allay' && github.ref == 'refs/heads/feat/minecraft-1.26.60'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify and store the recovered registry blob
+        shell: python
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          import base64, hashlib, json, os, pathlib, urllib.request, zlib
+          parts = sorted(pathlib.Path('.github/recovery-12660').glob('block-states.part*'))
+          assert len(parts) == 3
+          raw = zlib.decompress(b''.join(part.read_bytes() for part in parts))
+          assert len(raw) == 15893841
+          expected = 'aab02e3f823ad2af719cab317f534cd65a0ccf5d'
+          actual = hashlib.sha1(b'blob ' + str(len(raw)).encode() + b'\0' + raw).hexdigest()
+          assert actual == expected, (actual, expected)
+          payload = json.dumps({'content': base64.b64encode(raw).decode(), 'encoding': 'base64'}).encode()
+          request = urllib.request.Request(
+              'https://api.github.com/repos/RyzeMCBE/Allay/git/blobs',
+              data=payload, method='POST',
+              headers={'Authorization': 'Bearer ' + os.environ['GH_TOKEN'],
+                       'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json',
+                       'X-GitHub-Api-Version': '2022-11-28'})
+          with urllib.request.urlopen(request, timeout=120) as response:
+              result = json.load(response)
+          assert result['sha'] == expected, result.get('sha')
+          print('Verified recovered registry blob:', expected)
