@@ -31,12 +31,12 @@ jobs:
           root = pathlib.Path('data/resources')
           raw = (root / 'unpacked/block_states_raw.json').read_bytes()
           assert len(raw) == 15893841
-          assert hashlib.sha1(b'blob ' + str(len(raw)).encode() + b'\\0' + raw).hexdigest() == 'aab02e3f823ad2af719cab317f534cd65a0ccf5d'
+          assert hashlib.sha1(b'blob ' + str(len(raw)).encode() + b'\0' + raw).hexdigest() == 'aab02e3f823ad2af719cab317f534cd65a0ccf5d'
           remote = 'https://raw.githubusercontent.com/CloudburstMC/Data/293c848098cc636a2758937fb6610b8bed1f12c5/block_palette.nbt'
           with urllib.request.urlopen(remote, timeout=120) as resp:
               palette = resp.read()
           assert len(palette) == 293502
-          assert hashlib.sha1(b'blob ' + str(len(palette)).encode() + b'\\0' + palette).hexdigest() == 'ad9e886233bcfc535bd8d31143da039ec99b8bd4'
+          assert hashlib.sha1(b'blob ' + str(len(palette)).encode() + b'\0' + palette).hexdigest() == 'ad9e886233bcfc535bd8d31143da039ec99b8bd4'
           (root / 'protocol_palettes/1_26_60.nbt').write_bytes(palette)
           (root / 'unpacked/block_palette.nbt').write_bytes(palette)
           print('Source registry and official 1.26.60 palette verified')
