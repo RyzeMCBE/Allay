@@ -122,6 +122,7 @@ import org.allaymc.api.block.interfaces.BlockDiamondBlockBehavior;
 import org.allaymc.api.block.interfaces.BlockDioriteBehavior;
 import org.allaymc.api.block.interfaces.BlockDirtBehavior;
 import org.allaymc.api.block.interfaces.BlockDirtWithRootsBehavior;
+import org.allaymc.api.block.interfaces.BlockDiscPressBehavior;
 import org.allaymc.api.block.interfaces.BlockDispenserBehavior;
 import org.allaymc.api.block.interfaces.BlockDoorBehavior;
 import org.allaymc.api.block.interfaces.BlockDoubleCopperSlabBehavior;
@@ -140,7 +141,6 @@ import org.allaymc.api.block.interfaces.BlockEndPortalFrameBehavior;
 import org.allaymc.api.block.interfaces.BlockEndRodBehavior;
 import org.allaymc.api.block.interfaces.BlockEndStoneBehavior;
 import org.allaymc.api.block.interfaces.BlockEnderChestBehavior;
-import org.allaymc.api.block.interfaces.BlockCopperChestBehavior;
 import org.allaymc.api.block.interfaces.BlockFarmlandBehavior;
 import org.allaymc.api.block.interfaces.BlockFenceBehavior;
 import org.allaymc.api.block.interfaces.BlockFenceGateBehavior;
@@ -178,6 +178,8 @@ import org.allaymc.api.block.interfaces.BlockHoneyBlockBehavior;
 import org.allaymc.api.block.interfaces.BlockHoneycombBlockBehavior;
 import org.allaymc.api.block.interfaces.BlockHopperBehavior;
 import org.allaymc.api.block.interfaces.BlockIceBehavior;
+import org.allaymc.api.block.interfaces.BlockIceCrystalBehavior;
+import org.allaymc.api.block.interfaces.BlockIcicleBehavior;
 import org.allaymc.api.block.interfaces.BlockInfestedBlockBehavior;
 import org.allaymc.api.block.interfaces.BlockInfoUpdate2Behavior;
 import org.allaymc.api.block.interfaces.BlockInfoUpdateBehavior;
@@ -230,7 +232,6 @@ import org.allaymc.api.block.interfaces.BlockObserverBehavior;
 import org.allaymc.api.block.interfaces.BlockObsidianBehavior;
 import org.allaymc.api.block.interfaces.BlockOchreFroglightBehavior;
 import org.allaymc.api.block.interfaces.BlockOreBehavior;
-import org.allaymc.api.block.interfaces.BlockCopperChestBehavior;
 import org.allaymc.api.block.interfaces.BlockPackedMudBehavior;
 import org.allaymc.api.block.interfaces.BlockPaleHangingMossBehavior;
 import org.allaymc.api.block.interfaces.BlockPaleMossBlockBehavior;
@@ -359,11 +360,6 @@ import org.allaymc.api.block.interfaces.BlockWarpedNyliumBehavior;
 import org.allaymc.api.block.interfaces.BlockWarpedRootsBehavior;
 import org.allaymc.api.block.interfaces.BlockWarpedWartBlockBehavior;
 import org.allaymc.api.block.interfaces.BlockWaterlilyBehavior;
-import org.allaymc.api.block.interfaces.BlockCopperChestBehavior;
-import org.allaymc.api.block.interfaces.BlockCopperChestBehavior;
-import org.allaymc.api.block.interfaces.BlockCopperChestBehavior;
-import org.allaymc.api.block.interfaces.BlockCopperChestBehavior;
-import org.allaymc.api.block.interfaces.BlockCopperChestBehavior;
 import org.allaymc.api.block.interfaces.BlockWebBehavior;
 import org.allaymc.api.block.interfaces.BlockWeepingVinesBehavior;
 import org.allaymc.api.block.interfaces.BlockWetSpongeBehavior;
@@ -2258,6 +2254,11 @@ public final class BlockTypes {
     public static BlockType<BlockDirtWithRootsBehavior> DIRT_WITH_ROOTS;
 
     /**
+     * {@link BlockPropertyTypes#MINECRAFT_CARDINAL_DIRECTION}
+     */
+    public static BlockType<BlockDiscPressBehavior> DISC_PRESS;
+
+    /**
      * {@link BlockPropertyTypes#FACING_DIRECTION}
      * {@link BlockPropertyTypes#TRIGGERED_BIT}
      */
@@ -3184,6 +3185,18 @@ public final class BlockTypes {
     public static BlockType<BlockCoralWallFanBehavior> HORN_CORAL_WALL_FAN;
 
     public static BlockType<BlockIceBehavior> ICE;
+
+    /**
+     * {@link BlockPropertyTypes#MINECRAFT_BLOCK_FACE}
+     */
+    public static BlockType<BlockIceCrystalBehavior> ICE_CRYSTAL;
+
+    /**
+     * {@link BlockPropertyTypes#ATTACHED_BIT}
+     * {@link BlockPropertyTypes#DRIPSTONE_THICKNESS}
+     * {@link BlockPropertyTypes#HANGING}
+     */
+    public static BlockType<BlockIcicleBehavior> ICICLE;
 
     public static BlockType<BlockInfestedBlockBehavior> INFESTED_CHISELED_STONE_BRICKS;
 

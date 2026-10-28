@@ -815,6 +815,8 @@ public enum BlockId {
 
     DIRT_WITH_ROOTS("minecraft:dirt_with_roots"),
 
+    DISC_PRESS("minecraft:disc_press"),
+
     DISPENSER("minecraft:dispenser"),
 
     DOUBLE_CUT_COPPER_SLAB("minecraft:double_cut_copper_slab"),
@@ -1368,6 +1370,10 @@ public enum BlockId {
     HORN_CORAL_WALL_FAN("minecraft:horn_coral_wall_fan"),
 
     ICE("minecraft:ice"),
+
+    ICE_CRYSTAL("minecraft:ice_crystal"),
+
+    ICICLE("minecraft:icicle"),
 
     INFESTED_CHISELED_STONE_BRICKS("minecraft:infested_chiseled_stone_bricks"),
 
