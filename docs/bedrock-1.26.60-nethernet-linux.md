@@ -9,7 +9,7 @@ The supported gameplay protocol is **2225** for Minecraft Bedrock **1.26.60**, w
 
 ## Linux x86_64
 
-The server uses CloudburstMC/Network's NetherNet transport and includes the matching `libdatachannel-java` **Linux glibc x86_64** native through Gradle dependencies. Use Java 21. This packaging does **not** claim support for musl/Alpine, Linux aarch64, macOS or Windows.
+The server uses CloudburstMC/Network's NetherNet transport and includes the matching `libdatachannel-java` **Linux glibc x86_64** native through Gradle dependencies. RakNet remains pinned to the legacy version from the Protocol fork to preserve `RakDisconnectReason` and other older APIs. Use Java 21. This packaging does **not** claim support for musl/Alpine, Linux aarch64, macOS or Windows.
 
 Default `network-settings` values:
 

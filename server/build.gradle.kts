@@ -29,10 +29,8 @@ dependencies {
     api(libs.disruptor)
     api(libs.netty.epoll)
     api(libs.netty.kqueue)
-    // Match Cloudburst RakNet with the NetherNet transport in one release family.
-    // The Protocol submodule still declares an older RakNet version; Gradle
-    // resolves to this newer version to avoid duplicate transport implementations.
-    api(libs.raknet.modern) { exclude(group = "io.netty") }
+    // Preserve the Protocol submodule's older RakNet API: BedrockPeer still
+    // links RakDisconnectReason, removed from Cloudburst RakNet 2.x.
     api(libs.nethernet.transport) { exclude(group = "io.netty") }
     // Only the Linux glibc x86_64 native WebRTC transport is bundled.
     runtimeOnly("dev.opencollab:libdatachannel-java:${libs.versions.libdatachannel.get()}:linux-glibc-x86_64")

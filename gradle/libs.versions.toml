@@ -15,7 +15,6 @@ nbt = { group = "org.allaymc", name = "nbt", version = "3.0.12" }
 protocol = { group = "org.allaymc.protocol", name = "bedrock-connection", version = "1.26.60-R1-SNAPSHOT" }
 # Linux x86_64 NetherNet / WebRTC transport
 nethernet-transport = { group = "org.cloudburstmc.netty", name = "netty-transport-nethernet", version.ref = "cloudburst-network" }
-raknet-modern = { group = "org.cloudburstmc.netty", name = "netty-transport-raknet", version.ref = "cloudburst-network" }
 libdatachannel-native-linux = { group = "dev.opencollab", name = "libdatachannel-java", version.ref = "libdatachannel" }
 # State Updater
 updater-common = { group = "org.allaymc.stateupdater", name = "common", version = "0.1.1" }
