@@ -142,6 +142,7 @@ import org.allaymc.server.block.impl.BlockEndPortalFrameBehaviorImpl;
 import org.allaymc.server.block.impl.BlockEndRodBehaviorImpl;
 import org.allaymc.server.block.impl.BlockEndStoneBehaviorImpl;
 import org.allaymc.server.block.impl.BlockEnderChestBehaviorImpl;
+import org.allaymc.server.block.impl.BlockExposedCopperChestBehaviorImpl;
 import org.allaymc.server.block.impl.BlockFarmlandBehaviorImpl;
 import org.allaymc.server.block.impl.BlockFenceBehaviorImpl;
 import org.allaymc.server.block.impl.BlockFenceGateBehaviorImpl;
@@ -231,6 +232,7 @@ import org.allaymc.server.block.impl.BlockObserverBehaviorImpl;
 import org.allaymc.server.block.impl.BlockObsidianBehaviorImpl;
 import org.allaymc.server.block.impl.BlockOchreFroglightBehaviorImpl;
 import org.allaymc.server.block.impl.BlockOreBehaviorImpl;
+import org.allaymc.server.block.impl.BlockOxidizedCopperChestBehaviorImpl;
 import org.allaymc.server.block.impl.BlockPackedMudBehaviorImpl;
 import org.allaymc.server.block.impl.BlockPaleHangingMossBehaviorImpl;
 import org.allaymc.server.block.impl.BlockPaleMossBlockBehaviorImpl;
@@ -325,7 +327,6 @@ import org.allaymc.server.block.impl.BlockStickyPistonBehaviorImpl;
 import org.allaymc.server.block.impl.BlockStoneBehaviorImpl;
 import org.allaymc.server.block.impl.BlockStonecutterBehaviorImpl;
 import org.allaymc.server.block.impl.BlockStonecutterBlockBehaviorImpl;
-import org.allaymc.server.block.impl.BlockStrawBedBehaviorImpl;
 import org.allaymc.server.block.impl.BlockStructureBlockBehaviorImpl;
 import org.allaymc.server.block.impl.BlockStructureVoidBehaviorImpl;
 import org.allaymc.server.block.impl.BlockSulfurBehaviorImpl;
@@ -360,6 +361,11 @@ import org.allaymc.server.block.impl.BlockWarpedNyliumBehaviorImpl;
 import org.allaymc.server.block.impl.BlockWarpedRootsBehaviorImpl;
 import org.allaymc.server.block.impl.BlockWarpedWartBlockBehaviorImpl;
 import org.allaymc.server.block.impl.BlockWaterlilyBehaviorImpl;
+import org.allaymc.server.block.impl.BlockWaxedCopperChestBehaviorImpl;
+import org.allaymc.server.block.impl.BlockWaxedExposedCopperChestBehaviorImpl;
+import org.allaymc.server.block.impl.BlockWaxedOxidizedCopperChestBehaviorImpl;
+import org.allaymc.server.block.impl.BlockWaxedWeatheredCopperChestBehaviorImpl;
+import org.allaymc.server.block.impl.BlockWeatheredCopperChestBehaviorImpl;
 import org.allaymc.server.block.impl.BlockWebBehaviorImpl;
 import org.allaymc.server.block.impl.BlockWeepingVinesBehaviorImpl;
 import org.allaymc.server.block.impl.BlockWetSpongeBehaviorImpl;
@@ -1848,6 +1854,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.CHORUS_PLANT = AllayBlockType
                             .builder(BlockChorusPlantBehaviorImpl.class)
                             .vanillaBlock(BlockId.CHORUS_PLANT)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_DOWN, BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_UP, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.CINNABAR == null) {
@@ -3965,7 +3972,7 @@ public final class BlockTypeDefaultInitializer {
         }
         if (BlockTypes.EXPOSED_COPPER_CHEST == null) {
             BlockTypes.EXPOSED_COPPER_CHEST = AllayBlockType
-                            .builder(BlockCopperChestBehaviorImpl.class)
+                            .builder(BlockExposedCopperChestBehaviorImpl.class)
                             .vanillaBlock(BlockId.EXPOSED_COPPER_CHEST)
                             .setProperties(BlockPropertyTypes.MINECRAFT_CARDINAL_DIRECTION)
                             .build();
@@ -4062,7 +4069,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.FIRE = AllayBlockType
                             .builder(BlockFireBehaviorImpl.class)
                             .vanillaBlock(BlockId.FIRE)
-                            .setProperties(BlockPropertyTypes.AGE_16)
+                            .setProperties(BlockPropertyTypes.AGE_16, BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_UP, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.FIRE_CORAL == null) {
@@ -6453,7 +6460,7 @@ public final class BlockTypeDefaultInitializer {
         }
         if (BlockTypes.OXIDIZED_COPPER_CHEST == null) {
             BlockTypes.OXIDIZED_COPPER_CHEST = AllayBlockType
-                            .builder(BlockCopperChestBehaviorImpl.class)
+                            .builder(BlockOxidizedCopperChestBehaviorImpl.class)
                             .vanillaBlock(BlockId.OXIDIZED_COPPER_CHEST)
                             .setProperties(BlockPropertyTypes.MINECRAFT_CARDINAL_DIRECTION)
                             .build();
@@ -7903,7 +7910,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.REDSTONE_WIRE = AllayBlockType
                             .builder(BlockRedstoneWireBehaviorImpl.class)
                             .vanillaBlock(BlockId.REDSTONE_WIRE)
-                            .setProperties(BlockPropertyTypes.REDSTONE_SIGNAL)
+                            .setProperties(BlockPropertyTypes.REDSTONE_EAST, BlockPropertyTypes.REDSTONE_NORTH, BlockPropertyTypes.REDSTONE_SIGNAL, BlockPropertyTypes.REDSTONE_SOUTH, BlockPropertyTypes.REDSTONE_WEST)
                             .build();
         }
         if (BlockTypes.REEDS == null) {
@@ -8575,7 +8582,7 @@ public final class BlockTypeDefaultInitializer {
         }
         if (BlockTypes.STRAW_BED == null) {
             BlockTypes.STRAW_BED = AllayBlockType
-                            .builder(BlockStrawBedBehaviorImpl.class)
+                            .builder(BlockBedBehaviorImpl.class)
                             .vanillaBlock(BlockId.STRAW_BED)
                             .setProperties(BlockPropertyTypes.HEAD_PIECE_BIT, BlockPropertyTypes.MINECRAFT_CARDINAL_DIRECTION, BlockPropertyTypes.OCCUPIED_BIT)
                             .build();
@@ -9331,7 +9338,7 @@ public final class BlockTypeDefaultInitializer {
         }
         if (BlockTypes.WAXED_COPPER_CHEST == null) {
             BlockTypes.WAXED_COPPER_CHEST = AllayBlockType
-                            .builder(BlockCopperChestBehaviorImpl.class)
+                            .builder(BlockWaxedCopperChestBehaviorImpl.class)
                             .vanillaBlock(BlockId.WAXED_COPPER_CHEST)
                             .setProperties(BlockPropertyTypes.MINECRAFT_CARDINAL_DIRECTION)
                             .build();
@@ -9432,7 +9439,7 @@ public final class BlockTypeDefaultInitializer {
         }
         if (BlockTypes.WAXED_EXPOSED_COPPER_CHEST == null) {
             BlockTypes.WAXED_EXPOSED_COPPER_CHEST = AllayBlockType
-                            .builder(BlockCopperChestBehaviorImpl.class)
+                            .builder(BlockWaxedExposedCopperChestBehaviorImpl.class)
                             .vanillaBlock(BlockId.WAXED_EXPOSED_COPPER_CHEST)
                             .setProperties(BlockPropertyTypes.MINECRAFT_CARDINAL_DIRECTION)
                             .build();
@@ -9547,7 +9554,7 @@ public final class BlockTypeDefaultInitializer {
         }
         if (BlockTypes.WAXED_OXIDIZED_COPPER_CHEST == null) {
             BlockTypes.WAXED_OXIDIZED_COPPER_CHEST = AllayBlockType
-                            .builder(BlockCopperChestBehaviorImpl.class)
+                            .builder(BlockWaxedOxidizedCopperChestBehaviorImpl.class)
                             .vanillaBlock(BlockId.WAXED_OXIDIZED_COPPER_CHEST)
                             .setProperties(BlockPropertyTypes.MINECRAFT_CARDINAL_DIRECTION)
                             .build();
@@ -9655,7 +9662,7 @@ public final class BlockTypeDefaultInitializer {
         }
         if (BlockTypes.WAXED_WEATHERED_COPPER_CHEST == null) {
             BlockTypes.WAXED_WEATHERED_COPPER_CHEST = AllayBlockType
-                            .builder(BlockCopperChestBehaviorImpl.class)
+                            .builder(BlockWaxedWeatheredCopperChestBehaviorImpl.class)
                             .vanillaBlock(BlockId.WAXED_WEATHERED_COPPER_CHEST)
                             .setProperties(BlockPropertyTypes.MINECRAFT_CARDINAL_DIRECTION)
                             .build();
@@ -9763,7 +9770,7 @@ public final class BlockTypeDefaultInitializer {
         }
         if (BlockTypes.WEATHERED_COPPER_CHEST == null) {
             BlockTypes.WEATHERED_COPPER_CHEST = AllayBlockType
-                            .builder(BlockCopperChestBehaviorImpl.class)
+                            .builder(BlockWeatheredCopperChestBehaviorImpl.class)
                             .vanillaBlock(BlockId.WEATHERED_COPPER_CHEST)
                             .setProperties(BlockPropertyTypes.MINECRAFT_CARDINAL_DIRECTION)
                             .build();

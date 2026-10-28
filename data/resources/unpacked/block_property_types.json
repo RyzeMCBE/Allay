@@ -777,6 +777,14 @@
         "east"
       ]
     },
+    "minecraft_connection_down": {
+      "serializationName": "minecraft:connection_down",
+      "valueType": "BOOLEAN",
+      "values": [
+        false,
+        true
+      ]
+    },
     "minecraft_connection_east": {
       "serializationName": "minecraft:connection_east",
       "valueType": "BOOLEAN",
@@ -795,6 +803,14 @@
     },
     "minecraft_connection_south": {
       "serializationName": "minecraft:connection_south",
+      "valueType": "BOOLEAN",
+      "values": [
+        false,
+        true
+      ]
+    },
+    "minecraft_connection_up": {
+      "serializationName": "minecraft:connection_up",
       "valueType": "BOOLEAN",
       "values": [
         false,
@@ -1128,6 +1144,24 @@
         5
       ]
     },
+    "redstone_east": {
+      "serializationName": "redstone_east",
+      "valueType": "ENUM",
+      "values": [
+        "none",
+        "side",
+        "up"
+      ]
+    },
+    "redstone_north": {
+      "serializationName": "redstone_north",
+      "valueType": "ENUM",
+      "values": [
+        "none",
+        "side",
+        "up"
+      ]
+    },
     "redstone_signal": {
       "serializationName": "redstone_signal",
       "valueType": "INTEGER",
@@ -1148,6 +1182,24 @@
         13,
         14,
         15
+      ]
+    },
+    "redstone_south": {
+      "serializationName": "redstone_south",
+      "valueType": "ENUM",
+      "values": [
+        "none",
+        "side",
+        "up"
+      ]
+    },
+    "redstone_west": {
+      "serializationName": "redstone_west",
+      "valueType": "ENUM",
+      "values": [
+        "none",
+        "side",
+        "up"
       ]
     },
     "rehydration_level": {
