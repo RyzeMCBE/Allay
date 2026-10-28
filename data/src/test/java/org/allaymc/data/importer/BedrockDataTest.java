@@ -32,7 +32,7 @@ class BedrockDataTest {
     private static final Path RESOURCES = Path.of("data/resources");
     private static final Path UNPACKED = RESOURCES.resolve("unpacked");
     /** Veri sürümünün resmî paleti; veri güncellenince bu yol da güncellenir. */
-    private static final Path OFFICIAL_PALETTE = RESOURCES.resolve("protocol_palettes/1_26_50.nbt");
+    private static final Path OFFICIAL_PALETTE = RESOURCES.resolve("protocol_palettes/1_26_60.nbt");
     private static final Path DATA_DRIVEN_BLOCKS = RESOURCES.resolve("protocol_palettes/1_26_50_data_driven_blocks.nbt");
     private static final Path BDS_DUMP = UNPACKED.resolve("bds_registry_dump.json");
     private static final int UNKNOWN_HASH = -2;
@@ -194,7 +194,7 @@ class BedrockDataTest {
     private static JsonObject requireBdsDump() throws IOException {
         Assumptions.assumeTrue(
                 Files.isRegularFile(BDS_DUMP),
-                "BDS 1.26.50 oracle dump is not versioned; place bds_registry_dump.json in data/resources/unpacked to run oracle checks"
+                "BDS oracle dump is not versioned; place bds_registry_dump.json in data/resources/unpacked to run oracle checks"
         );
         return readJson(BDS_DUMP).getAsJsonObject();
     }
