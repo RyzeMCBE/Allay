@@ -35,8 +35,8 @@ class StagedBedrockDataTest {
 
                 // Provenance and the local BDS oracle are not runtime files.
                 if (relativeName.equals("SOURCES.md") || relativeName.equals("bds_registry_dump.json") ||
-                        relativeName.equals("unpacked/block_palette.nbt")) {
-                    // The live block palette advances independently to 1.26.60.
+                        (relativeName.equals("unpacked/block_palette.nbt") || relativeName.equals("unpacked/block_states_raw.json"))) {
+                    // The live block palette and raw physics data advance independently to 1.26.60.
                     continue;
                 }
 
