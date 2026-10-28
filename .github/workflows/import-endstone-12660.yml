@@ -8,6 +8,8 @@ on:
       - 'scripts/ci/import_official_bds_12660.py'
       - 'codegen/src/main/java/org/allaymc/codegen/BlockIdEnumGen.java'
       - 'server/src/main/java/org/allaymc/server/block/type/BlockTypeInitializer.java'
+      - 'server/src/main/java/org/allaymc/server/block/component/BlockBedBaseComponentImpl.java'
+      - 'server/src/main/java/org/allaymc/server/block/component/respawnpoint/BlockBedRespawnPointComponentImpl.java'
   workflow_dispatch:
 
 permissions:

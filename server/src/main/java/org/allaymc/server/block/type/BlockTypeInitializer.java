@@ -2168,7 +2168,7 @@ public final class BlockTypeInitializer {
                 .builder(BlockBedBehaviorImpl.class)
                 .vanillaBlock(BlockId.STRAW_BED)
                 .bindBlockEntity(BlockEntityTypes.BED)
-                .setProperties(BlockPropertyTypes.HEAD_PIECE_BIT, BlockPropertyTypes.OCCUPIED_BIT, BlockPropertyTypes.DIRECTION_4)
+                .setProperties(BlockPropertyTypes.HEAD_PIECE_BIT, BlockPropertyTypes.OCCUPIED_BIT, BlockPropertyTypes.MINECRAFT_CARDINAL_DIRECTION)
                 .setBaseComponentSupplier(BlockBedBaseComponentImpl::new)
                 .addComponent(new BlockBedRespawnPointComponentImpl())
                 .build();

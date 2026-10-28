@@ -45,9 +45,25 @@ public class BlockBedBaseComponentImpl extends BlockBaseComponentImpl {
         return new Block(block.getDimension(), otherPos);
     }
 
+    /**
+     * Bedrock 1.26.60 uses minecraft:cardinal_direction for straw beds while
+     * conventional beds still use the legacy integer direction property.
+     * Centralizing this conversion keeps placement and respawn consistent.
+     */
+    public static BlockFace getBedFacing(BlockState state) {
+        if (state.getPropertyValues().containsKey(BlockPropertyTypes.MINECRAFT_CARDINAL_DIRECTION)) {
+            return Preconditions.checkNotNull(
+                    BlockFace.from(state.getPropertyValue(BlockPropertyTypes.MINECRAFT_CARDINAL_DIRECTION))
+            );
+        }
+        return Preconditions.checkNotNull(
+                BlockFace.fromHorizontalIndex(state.getPropertyValue(BlockPropertyTypes.DIRECTION_4))
+        );
+    }
+
     private static Vector3ic posOfOtherPart(Block block) {
         var head = block.getPropertyValue(BlockPropertyTypes.HEAD_PIECE_BIT);
-        var face = Preconditions.checkNotNull(BlockFace.fromHorizontalIndex(block.getPropertyValue(BlockPropertyTypes.DIRECTION_4)));
+        var face = getBedFacing(block.getBlockState());
         return (head ? face.opposite() : face).offsetPos(block.getPosition());
     }
 
@@ -64,9 +80,15 @@ public class BlockBedBaseComponentImpl extends BlockBaseComponentImpl {
             return false;
         }
 
-        blockState = blockState
-                .setPropertyValue(BlockPropertyTypes.DIRECTION_4, playerFace.getHorizontalIndex())
-                .setPropertyValue(BlockPropertyTypes.OCCUPIED_BIT, false);
+        if (blockState.getPropertyValues().containsKey(BlockPropertyTypes.MINECRAFT_CARDINAL_DIRECTION)) {
+            blockState = blockState.setPropertyValue(
+                    BlockPropertyTypes.MINECRAFT_CARDINAL_DIRECTION,
+                    Preconditions.checkNotNull(playerFace.toMinecraftCardinalDirection())
+            );
+        } else {
+            blockState = blockState.setPropertyValue(BlockPropertyTypes.DIRECTION_4, playerFace.getHorizontalIndex());
+        }
+        blockState = blockState.setPropertyValue(BlockPropertyTypes.OCCUPIED_BIT, false);
 
         return dimension.setBlockState(
                 placeBlockPos.x(), placeBlockPos.y(), placeBlockPos.z(),
