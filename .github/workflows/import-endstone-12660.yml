@@ -87,7 +87,6 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A data/resources/
           git add -A api/src/main/java/org/allaymc/api/block/ api/src/main/java/org/allaymc/api/item/
-          git add -A codegen/src/main/java/org/allaymc/dependence/
           git add -A server/src/main/java/org/allaymc/server/block/ server/src/main/java/org/allaymc/server/item/
           if ! git diff --cached --quiet; then
             git commit -m "data: integrate verified BDS 1.26.60 registries"
