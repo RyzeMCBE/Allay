@@ -11,6 +11,7 @@ on:
       - 'server/src/main/java/org/allaymc/server/block/component/BlockBedBaseComponentImpl.java'
       - 'server/src/main/java/org/allaymc/server/block/component/respawnpoint/BlockBedRespawnPointComponentImpl.java'
       - 'server/src/main/java/org/allaymc/server/registry/loader/RecipeJsonUtils.java'
+      - 'server/src/test/java/org/allaymc/server/registry/loader/RecipeNbtDecodeTest.java'
   workflow_dispatch:
 
 permissions:
