@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/import-endstone-12660.yml'
       - 'scripts/ci/import_official_bds_12660.py'
+      - 'codegen/src/main/java/org/allaymc/codegen/BlockIdEnumGen.java'
   workflow_dispatch:
 
 permissions:
