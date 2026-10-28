@@ -14,7 +14,6 @@ import org.allaymc.server.eventbus.event.network.NettyPipelineInitEvent;
 import org.allaymc.server.network.nethernet.AllayNetherNetPeer;
 import org.allaymc.server.network.nethernet.NetherNetFrameCodec;
 import org.allaymc.server.network.nethernet.NetherNetPacketEncoder;
-import org.allaymc.server.network.protocol.ProtocolInfo;
 import org.cloudburstmc.netty.channel.nethernet.NetherNetChannelFactory;
 import org.cloudburstmc.netty.channel.nethernet.config.NetherChannelOption;
 import org.cloudburstmc.netty.channel.nethernet.signaling.NetherNetHTTPServerSignaling;
