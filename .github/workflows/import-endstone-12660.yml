@@ -15,6 +15,18 @@ on:
       - 'server/src/test/java/org/allaymc/server/network/protocol/BlockNetworkIdMappingTest.java'
       - 'server/src/test/java/org/allaymc/server/network/protocol/ProtocolRegistryTest.java'
       - 'server/src/test/java/org/allaymc/server/player/CapturedPlayerPacketReplayTest.java'
+      - 'gradle/libs.versions.toml'
+      - 'server/build.gradle.kts'
+      - 'server/src/main/java/org/allaymc/server/ServerSettings.java'
+      - 'server/src/main/java/org/allaymc/server/network/AllayNetworkInterface.java'
+      - 'server/src/main/java/org/allaymc/server/network/AllayNetworkManager.java'
+      - 'server/src/main/java/org/allaymc/server/AllayServer.java'
+      - 'server/src/main/java/org/allaymc/server/network/processor/login/LoginPacketProcessor.java'
+      - 'server/src/main/java/org/allaymc/server/network/nethernet/NetherNetFrameCodec.java'
+      - 'server/src/main/java/org/allaymc/server/network/nethernet/NetherNetPacketEncoder.java'
+      - 'server/src/main/java/org/allaymc/server/network/nethernet/AllayNetherNetPeer.java'
+      - 'server/src/main/java/org/allaymc/server/network/AllayNetherNetInterface.java'
+      - 'server/src/test/java/org/allaymc/server/network/nethernet/NetherNetFrameCodecTest.java'
   workflow_dispatch:
 
 permissions:

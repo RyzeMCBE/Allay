@@ -24,9 +24,10 @@ public class AllayNetworkManager implements NetworkManager {
 
     protected volatile boolean started;
 
-    public AllayNetworkManager(AllayNetworkInterface defaultInterface) {
+    public AllayNetworkManager(AllayNetworkInterface defaultInterface, AllayNetworkInterface... additionalInterfaces) {
         this.defaultInterface = defaultInterface;
         this.interfaces.add(defaultInterface);
+        Collections.addAll(this.interfaces, additionalInterfaces);
     }
 
     @Override

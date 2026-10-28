@@ -108,6 +108,26 @@ public class ServerSettings extends OkaeriConfig {
         @Comment("The IPv6 port of this server. Works only when enablev6 is true")
         private int portv6 = 19133;
 
+        @Comment("Enable the NetherNet WebRTC listener for Minecraft Bedrock 1.26.50+; keep RakNet for legacy players")
+        @CustomKey("nethernet-enabled")
+        private boolean nethernetEnabled = true;
+
+        @Comment("NetherNet HTTP signaling TCP port. Zero means use the normal IPv4 Bedrock port")
+        @CustomKey("nethernet-signaling-port")
+        private int nethernetSignalingPort = 0;
+
+        @Comment("Dedicated UDP WebRTC/ICE port; must differ from RakNet IPv4 and IPv6 ports")
+        @CustomKey("nethernet-ice-port")
+        private int nethernetIcePort = 19134;
+
+        @Comment("Persistent NetherNet server identity. Keep this PEM file across restarts")
+        @CustomKey("nethernet-identity-file")
+        private String nethernetIdentityFile = "nethernet-identity.pem";
+
+        @Comment("Public host:port endpoints advertised by NetherNet when behind a NAT or tunnel")
+        @CustomKey("nethernet-advertise-addresses")
+        private List<String> nethernetAdvertiseAddresses = List.of();
+
         @CustomKey("xbox-auth")
         private boolean xboxAuth = true;
 

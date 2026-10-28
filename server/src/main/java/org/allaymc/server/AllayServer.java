@@ -25,6 +25,7 @@ import org.allaymc.api.utils.TextFormat;
 import org.allaymc.server.eventbus.AllayEventBus;
 import org.allaymc.server.network.AllayNetworkManager;
 import org.allaymc.server.network.AllayRakNetInterface;
+import org.allaymc.server.network.AllayNetherNetInterface;
 import org.allaymc.server.network.protocol.ProtocolRegistry;
 import org.allaymc.server.player.AllayEmptyPlayerStorage;
 import org.allaymc.server.player.AllayNBTFilePlayerStorage;
@@ -97,7 +98,11 @@ public final class AllayServer implements Server {
     private AllayServer() {
         this.state = new AtomicReference<>(ServerState.STARTING);
         var rakNetInterface = new AllayRakNetInterface(this);
-        var networkManager = new AllayNetworkManager(rakNetInterface);
+        // Both transports may bind the same numeric port: RakNet uses UDP,
+        // NetherNet uses TCP signaling and a distinct UDP ICE media port.
+        var networkManager = SETTINGS.networkSettings().nethernetEnabled()
+                ? new AllayNetworkManager(rakNetInterface, new AllayNetherNetInterface(this))
+                : new AllayNetworkManager(rakNetInterface);
         this.playerManager = new AllayPlayerManager(SETTINGS.storageSettings().savePlayerData() ? new AllayNBTFilePlayerStorage(Path.of("players")) : AllayEmptyPlayerStorage.INSTANCE, networkManager);
         this.worldPool = new AllayWorldPool();
         this.computeThreadPool = createComputeThreadPool();

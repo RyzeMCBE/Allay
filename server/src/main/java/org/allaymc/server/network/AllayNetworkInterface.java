@@ -78,6 +78,11 @@ public abstract class AllayNetworkInterface implements NetworkInterface {
      *
      * @return the RakNet protocol version, or an empty result if the transport does not provide one
      */
+    /** DTLS secures NetherNet; transport peers must not additionally negotiate Bedrock AES. */
+    public boolean isTransportEncrypted() {
+        return false;
+    }
+
     public OptionalInt getRakNetProtocolVersion(BedrockServerSession session) {
         return OptionalInt.empty();
     }

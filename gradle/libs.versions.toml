@@ -4,12 +4,19 @@ commons-rng = "1.7"
 fastutil = "8.5.15"
 leveldb = "1.1.0"
 netty = "4.2.19.Final"
+# CloudburstMC Network NetherNet branch (same RakNet/NetherNet transport family)
+cloudburst-network = "2.0.0.CR6-20261026.130552-16"
+libdatachannel = "0.24.6.0-20261023.142230-9"
 
 [libraries]
 # NBT
 nbt = { group = "org.allaymc", name = "nbt", version = "3.0.12" }
 # Protocol
 protocol = { group = "org.allaymc.protocol", name = "bedrock-connection", version = "1.26.60-R1-SNAPSHOT" }
+# Linux x86_64 NetherNet / WebRTC transport
+nethernet-transport = { group = "org.cloudburstmc.netty", name = "netty-transport-nethernet", version.ref = "cloudburst-network" }
+raknet-modern = { group = "org.cloudburstmc.netty", name = "netty-transport-raknet", version.ref = "cloudburst-network" }
+libdatachannel-native-linux = { group = "dev.opencollab", name = "libdatachannel-java", version.ref = "libdatachannel" }
 # State Updater
 updater-common = { group = "org.allaymc.stateupdater", name = "common", version = "0.1.1" }
 item-updater = { group = "org.allaymc.stateupdater", name = "item-updater", version = "1.26.50-R1-SNAPSHOT" }
