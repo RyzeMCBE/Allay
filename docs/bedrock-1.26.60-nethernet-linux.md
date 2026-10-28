@@ -1,8 +1,8 @@
 # Bedrock 1.26.60 on Linux: NetherNet + legacy RakNet
 
-Allay speaks **two transports** at the same time:
+Allay speaks **two transports on the same public IPv4 port** by default:
 
-- **NetherNet**: 1.26.60 and other NetherNet-capable Bedrock clients. HTTP signaling on **TCP** and DTLS/WebRTC ICE media on a dedicated **UDP** port.
+- **NetherNet**: 1.26.60 and other NetherNet-capable Bedrock clients. HTTP signaling on **TCP** and DTLS/WebRTC ICE media on the normal Bedrock **UDP** port.
 - **RakNet**: earlier Bedrock and NetEase clients on the traditional Bedrock **UDP** port.
 
 The supported gameplay protocol is **2225** for Minecraft Bedrock **1.26.60**, with older protocol adapters retained. Merely adding codec 2225 without the NetherNet listener is not sufficient for 1.26.60 clients.
@@ -21,14 +21,19 @@ network-settings:
   portv6: 19133
   nethernet-enabled: true
   nethernet-signaling-port: 0 # 0 = use port, TCP 19132
-  nethernet-ice-port: 19134 # UDP 19134, separate from RakNet
+  nethernet-shared-port: true # RakNet and WebRTC both use UDP 19132
+  nethernet-ice-port: 19134 # used only when nethernet-shared-port is false
   nethernet-identity-file: nethernet-identity.pem
   nethernet-advertise-addresses: []
 ```
 
-Open **TCP 19132** for HTTP signaling, **UDP 19134** for WebRTC/ICE and **UDP 19132** for legacy RakNet. The same numeric TCP/UDP signaling and legacy port can coexist; **do not assign the WebRTC UDP port to RakNet**. When using IPv6 the legacy IPv6 UDP port 19133 must also differ from WebRTC's UDP port.
+Open **TCP 19132 and UDP 19132**. Players keep the same address and port for both old and new clients; no public UDP 19134 allocation is needed in shared mode. A hosting panel or container must forward **both protocols** for the main port. The existing optional legacy IPv6 listener remains on UDP 19133.
 
-On a VPS with a public IP, WebRTC can advertise the server's gathered host candidates. Behind NAT or a tunnel, set `nethernet-advertise-addresses` to the actual externally reachable `host:port` of the forwarded **WebRTC media** port, for example `["203.0.113.10:19134"]` (documentation address only). The UDP forward must preserve its advertised source endpoint. If you allocate a separate public signaling port, configure `nethernet-signaling-port` accordingly and open its TCP port.
+The shared UDP socket routes RakNet packets normally and forwards authenticated ICE/DTLS to a private native endpoint on loopback. Per-client PROXY protocol v2 relays preserve the original player IP and source port. Private native ports are never advertised as ICE candidates and need no firewall or hosting allocation. Only a peer whose HTTP identity has been validated and whose SDP answer has been issued can create a relay. Relays close with the peer and expire when idle.
+
+Existing configurations automatically receive `nethernet-shared-port: true`. Their old `nethernet-ice-port: 19134` value is ignored while shared mode is enabled. To retain separate media ports, set `nethernet-shared-port: false`; only in that mode must `nethernet-ice-port` differ from both RakNet UDP ports.
+
+On a VPS with a public IP, WebRTC advertises the shared UDP listener. Behind NAT or a tunnel, set `nethernet-advertise-addresses` to the actual externally reachable main **UDP** endpoint, for example `["203.0.113.10:19132"]` (documentation address only). An IP literal in the client's HTTP Host header is also inferred automatically. Names can be configured explicitly and are resolved at startup. The UDP forward must preserve its advertised source endpoint. If you allocate a separate public signaling port, configure `nethernet-signaling-port` accordingly and open its TCP port.
 
 NetherNet creates `nethernet-identity.pem` on first launch. **Preserve this file** across deployments: connected clients can pin its public key, so replacing it changes the server identity.
 
@@ -40,12 +45,12 @@ Allay's normal version negotiation, gameplay packet processing, compression nego
 
 ## Verification
 
-1. Check that both the TCP signaling port and UDP media port bind, and that the Linux WebRTC native loads.
+1. Check that TCP signaling and the shared UDP socket bind on the configured main port, and that the Linux WebRTC native loads.
 2. Verify a real Bedrock 1.26.60 client can connect, receive StartGame and play; also verify an older RakNet client.
 3. Check malformed / unauthenticated NetherNet logins are rejected and that world and inventory packets round-trip correctly.
 4. Run `./gradlew build` and publish the shaded server JAR only when tests pass.
 
-Automated CI validates registry imports, protocol codec tests, frame and recipe handling. **No automated test can substitute for connecting an actual Bedrock client through the full HTTPS/HTTP signaling, ICE, DTLS and login flow.**
+Automated CI validates registry imports, protocol codec tests, frame and recipe handling. The shared-port regression also connects two real native WebRTC peers, checks bidirectional data and sends legacy RakNet pings to that same UDP socket. **These tests do not substitute for connecting an actual Bedrock client through the full HTTP signaling, Xbox identity, ICE, DTLS and Bedrock login flow.**
 
 Sources:
 - CloudburstMC Network NetherNet implementation: https://github.com/CloudburstMC/Network/tree/nethernet

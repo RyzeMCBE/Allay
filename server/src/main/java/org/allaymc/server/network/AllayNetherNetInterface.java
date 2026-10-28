@@ -14,10 +14,14 @@ import org.allaymc.server.eventbus.event.network.NettyPipelineInitEvent;
 import org.allaymc.server.network.nethernet.AllayNetherNetPeer;
 import org.allaymc.server.network.nethernet.NetherNetFrameCodec;
 import org.allaymc.server.network.nethernet.NetherNetPacketEncoder;
+import org.allaymc.server.network.nethernet.NetherNetUdpMultiplexer;
+import org.allaymc.server.network.nethernet.SharedPortNetherNetSignaling;
 import org.cloudburstmc.netty.channel.nethernet.NetherNetChannelFactory;
 import org.cloudburstmc.netty.channel.nethernet.config.NetherChannelOption;
 import org.cloudburstmc.netty.channel.nethernet.signaling.NetherNetHTTPServerSignaling;
+import org.cloudburstmc.netty.channel.nethernet.signaling.NetherNetServerSignaling;
 import org.cloudburstmc.netty.channel.nethernet.signaling.PongData;
+import org.cloudburstmc.netty.util.nethernet.IpRangeSet;
 import org.cloudburstmc.netty.util.nethernet.OperatorIdentity;
 import org.cloudburstmc.netty.util.nethernet.TokenTrust;
 import org.cloudburstmc.protocol.bedrock.BedrockPeer;
@@ -31,18 +35,23 @@ import org.cloudburstmc.protocol.bedrock.netty.codec.packet.BedrockPacketCodec;
 import org.cloudburstmc.protocol.bedrock.netty.codec.packet.BedrockPacketCodec_v3;
 import org.cloudburstmc.protocol.bedrock.netty.initializer.BedrockServerInitializer;
 
+import java.net.Inet4Address;
 import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Real NetherNet listener: HTTP signaling over TCP + WebRTC ICE over UDP.
- * Runs beside the existing UDP RakNet listener, preserving legacy and NetEase support.
+ * NetherNet listener with TCP signaling and WebRTC on shared or dedicated UDP.
+ * Preserves the RakNet listener for legacy and NetEase support.
  * Requires Linux's libdatachannel native library at runtime.
  */
 @Slf4j
 public final class AllayNetherNetInterface extends AllayNetworkInterface {
     private final Server server;
+    private final NetherNetUdpMultiplexer sharedUdp;
     private volatile String motd;
     private volatile String subMotd;
     private final AtomicInteger players = new AtomicInteger();
@@ -52,7 +61,12 @@ public final class AllayNetherNetInterface extends AllayNetworkInterface {
     private Channel channel;
 
     public AllayNetherNetInterface(Server server) {
+        this(server, null);
+    }
+
+    public AllayNetherNetInterface(Server server, NetherNetUdpMultiplexer sharedUdp) {
         this.server = server;
+        this.sharedUdp = sharedUdp;
         var generic = AllayServer.getSettings().genericSettings();
         this.motd = generic.motd();
         this.subMotd = generic.subMotd();
@@ -71,10 +85,12 @@ public final class AllayNetherNetInterface extends AllayNetworkInterface {
         int tcpPort = config.nethernetSignalingPort() == 0 ? config.port() : config.nethernetSignalingPort();
         int icePort = config.nethernetIcePort();
         Preconditions.checkArgument(tcpPort > 0 && tcpPort <= 65535, "Invalid NetherNet TCP signaling port");
-        Preconditions.checkArgument(icePort > 0 && icePort <= 65535, "Invalid NetherNet WebRTC UDP port");
-        Preconditions.checkArgument(icePort != config.port(), "NetherNet ICE UDP port cannot share RakNet IPv4 port");
-        Preconditions.checkArgument(!config.enablev6() || icePort != config.portv6(),
-                "NetherNet ICE UDP port cannot share RakNet IPv6 port");
+        if (sharedUdp == null) {
+            Preconditions.checkArgument(icePort > 0 && icePort <= 65535, "Invalid NetherNet WebRTC UDP port");
+            Preconditions.checkArgument(icePort != config.port(), "Enable nethernet-shared-port to share the RakNet UDP port");
+            Preconditions.checkArgument(!config.enablev6() || icePort != config.portv6(),
+                    "Dedicated NetherNet ICE UDP port cannot share RakNet IPv6 port");
+        }
         Preconditions.checkArgument(!config.nethernetIdentityFile().isBlank(), "NetherNet identity PEM file is required");
 
         try {
@@ -91,25 +107,48 @@ public final class AllayNetherNetInterface extends AllayNetworkInterface {
             }
             signaling = builder.build();
 
+            InetSocketAddress iceAddress = sharedUdp == null
+                    ? new InetSocketAddress(config.ip(), icePort) : sharedUdp.start();
+            NetherNetServerSignaling transportSignaling = signaling;
+            if (sharedUdp != null) {
+                transportSignaling = new SharedPortNetherNetSignaling(signaling, sharedUdp,
+                        new InetSocketAddress(config.ip(), config.port()), sharedHostEndpoints(config.ip(), config.port()));
+            }
+
             int threads = config.networkThreadNumber();
             Preconditions.checkArgument(threads >= 0, "networkThreadNumber cannot be negative");
             var factory = new ThreadFactoryBuilder().setNameFormat("NetherNet Server IO #%d").setDaemon(true).build();
             IoHandlerFactory ioHandlerFactory = NioIoHandler.newFactory();
             group = new MultiThreadIoEventLoopGroup(threads, factory, ioHandlerFactory);
-            channel = new ServerBootstrap()
+            var bootstrap = new ServerBootstrap()
                     .group(group)
-                    .channelFactory(NetherNetChannelFactory.server(signaling))
-                    .option(NetherChannelOption.NETHER_SERVER_ICE_ADDRESS,
-                            new InetSocketAddress(config.ip(), icePort))
-                    .childHandler(new AllayNetherNetInitializer())
-                    .bind(new InetSocketAddress(config.ip(), tcpPort)).syncUninterruptibly().channel();
-            log.info("NetherNet enabled: HTTP signaling TCP {}:{}, WebRTC UDP {}:{}",
-                    config.ip(), tcpPort, config.ip(), icePort);
+                    .channelFactory(NetherNetChannelFactory.server(transportSignaling))
+                    .option(NetherChannelOption.NETHER_SERVER_ICE_ADDRESS, iceAddress)
+                    .childHandler(new AllayNetherNetInitializer());
+            if (sharedUdp != null) {
+                bootstrap.option(NetherChannelOption.NETHER_SERVER_PROXY_PROTOCOL, IpRangeSet.parse(List.of("127.0.0.1")));
+            }
+            channel = bootstrap.bind(new InetSocketAddress(config.ip(), tcpPort)).syncUninterruptibly().channel();
+            if (sharedUdp == null) {
+                log.info("NetherNet enabled: HTTP signaling TCP {}:{}, WebRTC UDP {}:{}",
+                        config.ip(), tcpPort, config.ip(), icePort);
+            } else {
+                log.info("NetherNet enabled: HTTP signaling TCP {}:{}, shared RakNet/WebRTC UDP {}:{}",
+                        config.ip(), tcpPort, config.ip(), config.port());
+            }
         } catch (Throwable failure) {
             shutdown();
             throw new IllegalStateException("Failed to start NetherNet (check Linux libdatachannel native and TCP/UDP ports)",
                     failure);
         }
+    }
+
+    private static List<InetSocketAddress> sharedHostEndpoints(String host, int port) throws SocketException {
+        var address = new InetSocketAddress(host, port);
+        if (!address.getAddress().isAnyLocalAddress()) return List.of(address);
+        return NetworkInterface.networkInterfaces().flatMap(NetworkInterface::inetAddresses)
+                .filter(ip -> ip instanceof Inet4Address && !ip.isLinkLocalAddress())
+                .map(ip -> new InetSocketAddress(ip, port)).distinct().toList();
     }
 
     private PongData createPong() {
@@ -134,6 +173,7 @@ public final class AllayNetherNetInterface extends AllayNetworkInterface {
             signaling.close();
             signaling = null;
         }
+        if (sharedUdp != null) sharedUdp.close();
         if (group != null) {
             group.shutdownGracefully().syncUninterruptibly();
             group = null;

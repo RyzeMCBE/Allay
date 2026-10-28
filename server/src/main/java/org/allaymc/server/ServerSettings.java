@@ -116,7 +116,11 @@ public class ServerSettings extends OkaeriConfig {
         @CustomKey("nethernet-signaling-port")
         private int nethernetSignalingPort = 0;
 
-        @Comment("Dedicated UDP WebRTC/ICE port; must differ from RakNet IPv4 and IPv6 ports")
+        @Comment("Share the normal IPv4 UDP port between NetherNet and RakNet; no extra public UDP port is needed")
+        @CustomKey("nethernet-shared-port")
+        private boolean nethernetSharedPort = true;
+
+        @Comment("Dedicated UDP WebRTC/ICE port when nethernet-shared-port is false")
         @CustomKey("nethernet-ice-port")
         private int nethernetIcePort = 19134;
 
