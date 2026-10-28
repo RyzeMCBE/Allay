@@ -6,6 +6,7 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+    testLogging.exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
     // GearsMC: veri testleri dosyaları üretim araçlarıyla aynı göreli yoldan ("data/resources/...") okur.
     workingDir = rootProject.projectDir
 }
