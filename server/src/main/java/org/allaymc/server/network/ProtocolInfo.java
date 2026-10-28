@@ -5,11 +5,11 @@ import org.allaymc.api.utils.SemVersion;
 import org.allaymc.server.network.protocol.ClientVariant;
 import org.allaymc.server.network.protocol.ProtocolRegistry;
 import org.allaymc.updater.block.BlockStateUpdater;
-import org.allaymc.updater.block.BlockStateUpdater_1_26_50;
+import org.allaymc.updater.block.BlockStateUpdater_1_26_60;
 import org.allaymc.updater.item.ItemStateUpdater;
-import org.allaymc.updater.item.ItemStateUpdater_1_26_20;
+import org.allaymc.updater.item.ItemStateUpdater_1_26_50;
 import org.cloudburstmc.protocol.bedrock.codec.BedrockCodec;
-import org.cloudburstmc.protocol.bedrock.codec.v2193.Bedrock_v2193;
+import org.cloudburstmc.protocol.bedrock.codec.v2225.Bedrock_v2225;
 import org.cloudburstmc.protocol.bedrock.codec.v818.Bedrock_v818;
 
 /**
@@ -23,7 +23,7 @@ public final class ProtocolInfo {
     /**
      * Feature version is the version of the game from which vanilla features will be used.
      */
-    public static final BedrockCodec FEATURE_VERSION = Bedrock_v2193.CODEC;
+    public static final BedrockCodec FEATURE_VERSION = Bedrock_v2225.CODEC;
 
     /**
      * Bedrock version of the most recent backwards-incompatible change to block states.
@@ -31,17 +31,17 @@ public final class ProtocolInfo {
      * This is different from the current game version. It should match the nearest version
      * that has block state changes.
      */
-    public static final SemVersion BLOCK_STATE_VERSION = new SemVersion(1, 26, 50, 0, 0);
+    public static final SemVersion BLOCK_STATE_VERSION = new SemVersion(1, 26, 60, 0, 0);
 
     /**
      * The currently used block state updater instance.
      */
-    public static final BlockStateUpdater BLOCK_STATE_UPDATER = BlockStateUpdater_1_26_50.INSTANCE;
+    public static final BlockStateUpdater BLOCK_STATE_UPDATER = BlockStateUpdater_1_26_60.INSTANCE;
 
     /**
      * The currently used item state updater instance.
      */
-    public static final ItemStateUpdater ITEM_STATE_UPDATER = ItemStateUpdater_1_26_20.INSTANCE;
+    public static final ItemStateUpdater ITEM_STATE_UPDATER = ItemStateUpdater_1_26_50.INSTANCE;
 
     /**
      * The encoded version number of the block state version.
@@ -61,7 +61,7 @@ public final class ProtocolInfo {
         if (ProtocolRegistry.hasDefault()) {
             return ProtocolRegistry.getDefault().getLatest(ClientVariant.INTERNATIONAL).getCodec();
         }
-        return Bedrock_v2193.CODEC;
+        return Bedrock_v2225.CODEC;
     }
 
     /**
