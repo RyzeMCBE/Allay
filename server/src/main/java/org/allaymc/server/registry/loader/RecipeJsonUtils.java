@@ -29,7 +29,13 @@ public final class RecipeJsonUtils {
         Objects.requireNonNull(itemType, "Unknown item type: " + itemId);
         var count = jsonObject.get("count").getAsInt();
         var meta = jsonObject.has("data") ? jsonObject.get("data").getAsInt() : 0;
-        var nbtMap = jsonObject.has("nbt") ? AllayNBTUtils.base64ToNbt(jsonObject.get("nbt").getAsString()) : NbtMap.EMPTY;
+        // BDS 1.26.60 emits a zero-filled base64 NBT placeholder for plain
+        // recipe outputs. The NBT reader returns null for TAG_End, not an
+        // empty compound; builders require a non-null map.
+        var nbtMap = jsonObject.has("nbt") ? AllayNBTUtils.base64ToNbt(jsonObject.get("nbt").getAsString()) : null;
+        if (nbtMap == null) {
+            nbtMap = NbtMap.EMPTY;
+        }
         return itemType.createItemStack(
                 ItemStackInitInfo
                         .builder()

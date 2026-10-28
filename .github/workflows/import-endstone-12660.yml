@@ -10,6 +10,7 @@ on:
       - 'server/src/main/java/org/allaymc/server/block/type/BlockTypeInitializer.java'
       - 'server/src/main/java/org/allaymc/server/block/component/BlockBedBaseComponentImpl.java'
       - 'server/src/main/java/org/allaymc/server/block/component/respawnpoint/BlockBedRespawnPointComponentImpl.java'
+      - 'server/src/main/java/org/allaymc/server/registry/loader/RecipeJsonUtils.java'
   workflow_dispatch:
 
 permissions:
