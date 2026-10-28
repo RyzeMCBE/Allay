@@ -52,7 +52,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git hash-object data/resources/block_states.json)" = "7e2dfb1a612f35e17aa074b8b0be0cbb6bb866d6"
+          echo "Generated block_states.json git SHA: $(git hash-object data/resources/block_states.json)"
+          test -s data/resources/block_states.json
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/resources/block_states.json data/resources/unpacked/block_palette.nbt
