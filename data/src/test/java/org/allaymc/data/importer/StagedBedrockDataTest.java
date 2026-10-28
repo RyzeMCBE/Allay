@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Verifies that the vetted 1.26.50 staging snapshot was actually promoted to the live data paths.
+ * Verifies that unchanged live data remains consistent with the vetted 1.26.50 staging snapshot.
  *
  * <p>The previous version compared staging against the old 1.26.30 live data. Once the migration is promoted that
  * comparison becomes invalid by definition. The historical migration assertions remain in Git history; CI now protects
@@ -34,7 +34,9 @@ class StagedBedrockDataTest {
                 var relativeName = relative.toString().replace('\\', '/');
 
                 // Provenance and the local BDS oracle are not runtime files.
-                if (relativeName.equals("SOURCES.md") || relativeName.equals("bds_registry_dump.json")) {
+                if (relativeName.equals("SOURCES.md") || relativeName.equals("bds_registry_dump.json") ||
+                        relativeName.equals("unpacked/block_palette.nbt")) {
+                    // The live block palette advances independently to 1.26.60.
                     continue;
                 }
 
@@ -47,7 +49,7 @@ class StagedBedrockDataTest {
 
         assertFalse(compared.isEmpty());
         assertTrue(compared.contains("resources/block_types.json"));
-        assertTrue(compared.contains("unpacked/block_palette.nbt"));
+        assertTrue(compared.contains("unpacked/block_tags.json"));
         assertTrue(compared.contains("unpacked/items_raw.json"));
     }
 
