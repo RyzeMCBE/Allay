@@ -2161,6 +2161,17 @@ public final class BlockTypeInitializer {
                 .setBaseComponentSupplier(BlockBedBaseComponentImpl::new)
                 .addComponent(new BlockBedRespawnPointComponentImpl())
                 .build();
+        // Straw beds use the same paired-bed/respawn logic as vanilla beds,
+        // but were previously instantiated by the fallback generator without
+        // the block entity holder and respawn-point components.
+        BlockTypes.STRAW_BED = AllayBlockType
+                .builder(BlockBedBehaviorImpl.class)
+                .vanillaBlock(BlockId.STRAW_BED)
+                .bindBlockEntity(BlockEntityTypes.BED)
+                .setProperties(BlockPropertyTypes.HEAD_PIECE_BIT, BlockPropertyTypes.OCCUPIED_BIT, BlockPropertyTypes.DIRECTION_4)
+                .setBaseComponentSupplier(BlockBedBaseComponentImpl::new)
+                .addComponent(new BlockBedRespawnPointComponentImpl())
+                .build();
     }
 
     public static void initRespawnAnchor() {

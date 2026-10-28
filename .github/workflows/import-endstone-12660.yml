@@ -7,6 +7,7 @@ on:
       - '.github/workflows/import-endstone-12660.yml'
       - 'scripts/ci/import_official_bds_12660.py'
       - 'codegen/src/main/java/org/allaymc/codegen/BlockIdEnumGen.java'
+      - 'server/src/main/java/org/allaymc/server/block/type/BlockTypeInitializer.java'
   workflow_dispatch:
 
 permissions:
