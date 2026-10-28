@@ -140,7 +140,7 @@ import org.allaymc.api.block.interfaces.BlockEndPortalFrameBehavior;
 import org.allaymc.api.block.interfaces.BlockEndRodBehavior;
 import org.allaymc.api.block.interfaces.BlockEndStoneBehavior;
 import org.allaymc.api.block.interfaces.BlockEnderChestBehavior;
-import org.allaymc.api.block.interfaces.BlockExposedCopperChestBehavior;
+import org.allaymc.api.block.interfaces.BlockCopperChestBehavior;
 import org.allaymc.api.block.interfaces.BlockFarmlandBehavior;
 import org.allaymc.api.block.interfaces.BlockFenceBehavior;
 import org.allaymc.api.block.interfaces.BlockFenceGateBehavior;
@@ -230,7 +230,7 @@ import org.allaymc.api.block.interfaces.BlockObserverBehavior;
 import org.allaymc.api.block.interfaces.BlockObsidianBehavior;
 import org.allaymc.api.block.interfaces.BlockOchreFroglightBehavior;
 import org.allaymc.api.block.interfaces.BlockOreBehavior;
-import org.allaymc.api.block.interfaces.BlockOxidizedCopperChestBehavior;
+import org.allaymc.api.block.interfaces.BlockCopperChestBehavior;
 import org.allaymc.api.block.interfaces.BlockPackedMudBehavior;
 import org.allaymc.api.block.interfaces.BlockPaleHangingMossBehavior;
 import org.allaymc.api.block.interfaces.BlockPaleMossBlockBehavior;
@@ -359,11 +359,11 @@ import org.allaymc.api.block.interfaces.BlockWarpedNyliumBehavior;
 import org.allaymc.api.block.interfaces.BlockWarpedRootsBehavior;
 import org.allaymc.api.block.interfaces.BlockWarpedWartBlockBehavior;
 import org.allaymc.api.block.interfaces.BlockWaterlilyBehavior;
-import org.allaymc.api.block.interfaces.BlockWaxedCopperChestBehavior;
-import org.allaymc.api.block.interfaces.BlockWaxedExposedCopperChestBehavior;
-import org.allaymc.api.block.interfaces.BlockWaxedOxidizedCopperChestBehavior;
-import org.allaymc.api.block.interfaces.BlockWaxedWeatheredCopperChestBehavior;
-import org.allaymc.api.block.interfaces.BlockWeatheredCopperChestBehavior;
+import org.allaymc.api.block.interfaces.BlockCopperChestBehavior;
+import org.allaymc.api.block.interfaces.BlockCopperChestBehavior;
+import org.allaymc.api.block.interfaces.BlockCopperChestBehavior;
+import org.allaymc.api.block.interfaces.BlockCopperChestBehavior;
+import org.allaymc.api.block.interfaces.BlockCopperChestBehavior;
 import org.allaymc.api.block.interfaces.BlockWebBehavior;
 import org.allaymc.api.block.interfaces.BlockWeepingVinesBehavior;
 import org.allaymc.api.block.interfaces.BlockWetSpongeBehavior;
@@ -2616,7 +2616,7 @@ public final class BlockTypes {
     /**
      * {@link BlockPropertyTypes#MINECRAFT_CARDINAL_DIRECTION}
      */
-    public static BlockType<BlockExposedCopperChestBehavior> EXPOSED_COPPER_CHEST;
+    public static BlockType<BlockCopperChestBehavior> EXPOSED_COPPER_CHEST;
 
     /**
      * {@link BlockPropertyTypes#DOOR_HINGE_BIT}
@@ -4270,7 +4270,7 @@ public final class BlockTypes {
     /**
      * {@link BlockPropertyTypes#MINECRAFT_CARDINAL_DIRECTION}
      */
-    public static BlockType<BlockOxidizedCopperChestBehavior> OXIDIZED_COPPER_CHEST;
+    public static BlockType<BlockCopperChestBehavior> OXIDIZED_COPPER_CHEST;
 
     /**
      * {@link BlockPropertyTypes#DOOR_HINGE_BIT}
@@ -6363,7 +6363,7 @@ public final class BlockTypes {
     /**
      * {@link BlockPropertyTypes#MINECRAFT_CARDINAL_DIRECTION}
      */
-    public static BlockType<BlockWaxedCopperChestBehavior> WAXED_COPPER_CHEST;
+    public static BlockType<BlockCopperChestBehavior> WAXED_COPPER_CHEST;
 
     /**
      * {@link BlockPropertyTypes#DOOR_HINGE_BIT}
@@ -6437,7 +6437,7 @@ public final class BlockTypes {
     /**
      * {@link BlockPropertyTypes#MINECRAFT_CARDINAL_DIRECTION}
      */
-    public static BlockType<BlockWaxedExposedCopperChestBehavior> WAXED_EXPOSED_COPPER_CHEST;
+    public static BlockType<BlockCopperChestBehavior> WAXED_EXPOSED_COPPER_CHEST;
 
     /**
      * {@link BlockPropertyTypes#DOOR_HINGE_BIT}
@@ -6523,7 +6523,7 @@ public final class BlockTypes {
     /**
      * {@link BlockPropertyTypes#MINECRAFT_CARDINAL_DIRECTION}
      */
-    public static BlockType<BlockWaxedOxidizedCopperChestBehavior> WAXED_OXIDIZED_COPPER_CHEST;
+    public static BlockType<BlockCopperChestBehavior> WAXED_OXIDIZED_COPPER_CHEST;
 
     /**
      * {@link BlockPropertyTypes#DOOR_HINGE_BIT}
@@ -6603,7 +6603,7 @@ public final class BlockTypes {
     /**
      * {@link BlockPropertyTypes#MINECRAFT_CARDINAL_DIRECTION}
      */
-    public static BlockType<BlockWaxedWeatheredCopperChestBehavior> WAXED_WEATHERED_COPPER_CHEST;
+    public static BlockType<BlockCopperChestBehavior> WAXED_WEATHERED_COPPER_CHEST;
 
     /**
      * {@link BlockPropertyTypes#DOOR_HINGE_BIT}
@@ -6683,7 +6683,7 @@ public final class BlockTypes {
     /**
      * {@link BlockPropertyTypes#MINECRAFT_CARDINAL_DIRECTION}
      */
-    public static BlockType<BlockWeatheredCopperChestBehavior> WEATHERED_COPPER_CHEST;
+    public static BlockType<BlockCopperChestBehavior> WEATHERED_COPPER_CHEST;
 
     /**
      * {@link BlockPropertyTypes#DOOR_HINGE_BIT}

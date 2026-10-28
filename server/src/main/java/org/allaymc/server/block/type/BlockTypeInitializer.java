@@ -1472,7 +1472,10 @@ public final class BlockTypeInitializer {
         BlockTypes.FIRE = AllayBlockType
                 .builder(BlockFireBehaviorImpl.class)
                 .vanillaBlock(BlockId.FIRE)
-                .setProperties(BlockPropertyTypes.AGE_16)
+                .setProperties(BlockPropertyTypes.AGE_16,
+                        BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_EAST,
+                        BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST,
+                        BlockPropertyTypes.MINECRAFT_CONNECTION_UP)
                 .setBaseComponentSupplier(BlockFireBaseComponentImpl::new)
                 .build();
         BlockTypes.SOUL_FIRE = AllayBlockType
@@ -2018,6 +2021,9 @@ public final class BlockTypeInitializer {
         BlockTypes.CHORUS_PLANT = AllayBlockType
                 .builder(BlockChorusPlantBehaviorImpl.class)
                 .vanillaBlock(BlockId.CHORUS_PLANT)
+                .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_EAST,
+                        BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST,
+                        BlockPropertyTypes.MINECRAFT_CONNECTION_UP, BlockPropertyTypes.MINECRAFT_CONNECTION_DOWN)
                 .setBaseComponentSupplier(BlockChorusPlantBaseComponentImpl::new)
                 .build();
     }
@@ -2426,7 +2432,9 @@ public final class BlockTypeInitializer {
         BlockTypes.REDSTONE_WIRE = AllayBlockType
                 .builder(BlockRedstoneWireBehaviorImpl.class)
                 .vanillaBlock(BlockId.REDSTONE_WIRE)
-                .setProperties(BlockPropertyTypes.REDSTONE_SIGNAL)
+                .setProperties(BlockPropertyTypes.REDSTONE_SIGNAL,
+                        BlockPropertyTypes.REDSTONE_NORTH, BlockPropertyTypes.REDSTONE_EAST,
+                        BlockPropertyTypes.REDSTONE_SOUTH, BlockPropertyTypes.REDSTONE_WEST)
                 .setBaseComponentSupplier(BlockRedstoneWireBaseComponentImpl::new)
                 .build();
     }
