@@ -14,6 +14,8 @@ import org.allaymc.api.item.type.ItemTypes;
 import org.allaymc.api.math.position.Position3i;
 import org.allaymc.api.world.Dimension;
 import org.allaymc.server.block.component.BlockBaseComponentImpl;
+import org.allaymc.server.block.BlockConnectionProperties;
+import org.allaymc.server.block.BlockConnectionResolver;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
 
@@ -30,7 +32,7 @@ import static org.allaymc.api.block.property.type.BlockPropertyTypes.REDSTONE_SI
  *
  * @author daoge_cmd
  */
-public class BlockRedstoneWireBaseComponentImpl extends BlockBaseComponentImpl {
+public class BlockRedstoneWireBaseComponentImpl extends BlockBaseComponentImpl implements BlockConnectionResolver {
 
     public BlockRedstoneWireBaseComponentImpl(BlockType<? extends BlockBehavior> blockType) {
         super(blockType);
@@ -68,6 +70,35 @@ public class BlockRedstoneWireBaseComponentImpl extends BlockBaseComponentImpl {
 
         // Update the entire connected wire network
         updateWireNetwork(block.getDimension(), block.getPosition());
+    }
+
+    @Override
+    public BlockState resolveConnections(Block block) {
+        var dimension = block.getDimension();
+        var pos = block.getPosition();
+        var state = block.getBlockState();
+        Map<BlockFace, String> connection = new EnumMap<>(BlockFace.class);
+        for (var face : BlockFace.getHorizontalBlockFaces()) {
+            String value = "none";
+            if (isConnectedTo(dimension, pos, face)) {
+                var adjacent = face.offsetPos(pos);
+                var adjacentState = dimension.getBlockState(adjacent);
+                boolean up = adjacentState.getBlockStateData().collisionShape().isFull(BlockFace.UP) &&
+                        isRedstoneWire(dimension.getBlockState(adjacent.x(), adjacent.y() + 1, adjacent.z()));
+                value = up ? "up" : "side";
+            }
+            connection.put(face, value);
+        }
+        var connected = connection.entrySet().stream()
+                .filter(entry -> !entry.getValue().equals("none")).toList();
+        if (connected.size() == 1) {
+            connection.put(connected.getFirst().getKey().opposite(), "side");
+        }
+        for (var entry : connection.entrySet()) {
+            state = state.setPropertyValue(
+                    BlockConnectionProperties.redstone(entry.getKey()).tryCreateValue(entry.getValue()));
+        }
+        return state;
     }
 
     /**
@@ -168,10 +199,11 @@ public class BlockRedstoneWireBaseComponentImpl extends BlockBaseComponentImpl {
         for (Map.Entry<Vector3i, Integer> entry : newPowerLevels.entrySet()) {
             Vector3i pos = entry.getKey();
             int newPower = entry.getValue();
-            int oldPower = wirePositions.get(pos);
-
-            if (newPower != oldPower) {
-                dimension.updateBlockProperty(REDSTONE_SIGNAL, newPower, pos);
+            BlockState existing = dimension.getBlockState(pos);
+            BlockState resolved = resolveConnections(new Block(existing, new Position3i(pos, dimension)))
+                    .setPropertyValue(REDSTONE_SIGNAL, newPower);
+            if (!resolved.equals(existing)) {
+                dimension.setBlockState(pos, resolved);
                 changedPositions.add(pos);
             }
         }

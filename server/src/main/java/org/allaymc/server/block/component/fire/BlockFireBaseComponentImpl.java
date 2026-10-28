@@ -23,6 +23,8 @@ import org.allaymc.api.math.position.Position3i;
 import org.allaymc.api.world.data.Weather;
 import org.allaymc.api.world.gamerule.GameRule;
 import org.allaymc.server.block.NetherPortalHelper;
+import org.allaymc.server.block.BlockConnectionResolver;
+import org.allaymc.server.block.BlockConnectionProperties;
 import org.allaymc.server.block.component.BlockBaseComponentImpl;
 import org.joml.Vector3i;
 
@@ -34,7 +36,7 @@ import static org.allaymc.api.block.property.type.BlockPropertyTypes.AGE_16;
 /**
  * @author daoge_cmd
  */
-public class BlockFireBaseComponentImpl extends BlockBaseComponentImpl {
+public class BlockFireBaseComponentImpl extends BlockBaseComponentImpl implements BlockConnectionResolver {
 
     protected static final int FIRE_SCHEDULED_UPDATE_DELAY = 30;
 
@@ -110,6 +112,8 @@ public class BlockFireBaseComponentImpl extends BlockBaseComponentImpl {
     public void afterPlaced(Block oldBlock, BlockState newBlockState, PlayerInteractInfo placementInfo) {
         super.afterPlaced(oldBlock, newBlockState, placementInfo);
 
+        updateConnections(new Block(newBlockState, oldBlock.getPosition()));
+
         // Try to create a nether portal (must be in afterPlaced because
         // onPlace runs before the block is committed to the chunk, so
         // fill() would be overwritten by the fire block placement)
@@ -132,6 +136,8 @@ public class BlockFireBaseComponentImpl extends BlockBaseComponentImpl {
             return;
         }
 
+        updateConnections(block);
+
         var pos = block.getPosition();
         var dimension = block.getDimension();
         var downBlockState = block.offsetPos(BlockFace.DOWN);
@@ -143,6 +149,30 @@ public class BlockFireBaseComponentImpl extends BlockBaseComponentImpl {
         } else if (dimension.getWorld().getWorldData().<Boolean>getGameRuleValue(GameRule.DO_FIRE_TICK) && !dimension.getBlockUpdateManager().hasScheduledBlockUpdate(pos)) {
             dimension.getBlockUpdateManager().scheduleRandomBlockUpdateInDelay(pos, FIRE_SCHEDULED_UPDATE_DELAY);
         }
+    }
+
+    private void updateConnections(Block block) {
+        var resolved = resolveConnections(block);
+        if (!resolved.equals(block.getBlockState())) {
+            var pos = block.getPosition();
+            block.getDimension().setBlockState(pos.x(), pos.y(), pos.z(), resolved,
+                    block.getLayer(), true, true, false, null);
+        }
+    }
+
+    @Override
+    public BlockState resolveConnections(Block block) {
+        if (block.getBlockType() != BlockTypes.FIRE) {
+            return block.getBlockState();
+        }
+        var supported = canSupportFire(block.offsetPos(BlockFace.DOWN).getBlockState());
+        var state = block.getBlockState();
+        for (var face : BlockFace.VALUES) {
+            if (face == BlockFace.DOWN) continue;
+            var connected = !supported && block.offsetPos(face).getBlockStateData().flameOdds() > 0;
+            state = state.setPropertyValue(BlockConnectionProperties.connection(face), connected);
+        }
+        return state;
     }
 
     @Override
