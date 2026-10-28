@@ -12,6 +12,9 @@ on:
       - 'server/src/main/java/org/allaymc/server/block/component/respawnpoint/BlockBedRespawnPointComponentImpl.java'
       - 'server/src/main/java/org/allaymc/server/registry/loader/RecipeJsonUtils.java'
       - 'server/src/test/java/org/allaymc/server/registry/loader/RecipeNbtDecodeTest.java'
+      - 'server/src/test/java/org/allaymc/server/network/protocol/BlockNetworkIdMappingTest.java'
+      - 'server/src/test/java/org/allaymc/server/network/protocol/ProtocolRegistryTest.java'
+      - 'server/src/test/java/org/allaymc/server/player/CapturedPlayerPacketReplayTest.java'
   workflow_dispatch:
 
 permissions:

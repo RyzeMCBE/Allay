@@ -55,7 +55,8 @@ class BlockNetworkIdMappingTest {
             Map.entry(1001, "1_26_30"),
             Map.entry(2168, "1_26_40"),
             Map.entry(2169, "1_26_40"),
-            Map.entry(2193, "1_26_50")
+            Map.entry(2193, "1_26_50"),
+            Map.entry(2225, "1_26_60")
     );
 
     private static final Map<String, OfficialPalette> PALETTES = new HashMap<>();
@@ -98,10 +99,23 @@ class BlockNetworkIdMappingTest {
 
     @Test
     void protocolsWhosePaletteMatchesServerDataSendStateHashesUnchanged() {
-        for (int version : List.of(2193)) {
-            var encoder = international(version).getEncoder();
-            for (var state : vanillaStates) {
-                assertEquals(state.blockStateHash(), encoder.networkBlockId(state), () -> "v" + version + ": " + state);
+        var legacyEncoder = international(2193).getEncoder();
+        var currentEncoder = international(2225).getEncoder();
+        var introducedIn12660 = Set.of(
+                "minecraft:disc_press", "minecraft:ice_crystal", "minecraft:icicle"
+        );
+        for (var state : vanillaStates) {
+            // Version 2225 uses the newly exported complete BDS 1.26.60 palette.
+            assertEquals(state.blockStateHash(), currentEncoder.networkBlockId(state),
+                    () -> "v2225: " + state);
+            // 2193 still uses its verified 1.26.50 palette and must not
+            // accidentally advertise 1.26.60-only block states to old clients.
+            if (introducedIn12660.contains(state.getBlockType().getIdentifier().toString())) {
+                assertEquals(UNKNOWN_BLOCK_ID, legacyEncoder.networkBlockId(state),
+                        () -> "v2193 should not recognize the new block: " + state);
+            } else {
+                assertEquals(state.blockStateHash(), legacyEncoder.networkBlockId(state),
+                        () -> "v2193: " + state);
             }
         }
     }
