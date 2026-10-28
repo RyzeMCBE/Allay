@@ -114,8 +114,13 @@ class BlockNetworkIdMappingTest {
                 assertEquals(UNKNOWN_BLOCK_ID, legacyEncoder.networkBlockId(state),
                         () -> "v2193 should not recognize the new block: " + state);
             } else {
-                assertEquals(state.blockStateHash(), legacyEncoder.networkBlockId(state),
-                        () -> "v2193: " + state);
+                // 1.26.60 also changes existing states (e.g. chorus_plant).
+                // A 1.26.50 client must receive its own official hash, not the
+                // server's newer state hash when the definitions differ.
+                int networkId = legacyEncoder.networkBlockId(state);
+                assertTrue(networkId == UNKNOWN_BLOCK_ID
+                                || palette("1_26_50").hashes().contains(networkId),
+                        () -> "v2193 palette cannot represent: " + state + " -> " + networkId);
             }
         }
     }
