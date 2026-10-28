@@ -49,7 +49,10 @@ class BedrockDataTest {
         var physics = new HashSet<Integer>();
         readJson(UNPACKED.resolve("block_states_raw.json")).getAsJsonArray()
                 .forEach(state -> physics.add((int) state.getAsJsonObject().get("blockStateHash").getAsLong()));
-        assertEquals(official, physics);
+        assertTrue(official.equals(physics), () ->
+                "Palette vs raw-state hashes: official=" + official.size() + ", raw=" + physics.size() +
+                ", missing=" + official.stream().filter(hash -> !physics.contains(hash)).limit(15).toList() +
+                ", extra=" + physics.stream().filter(hash -> !official.contains(hash)).limit(15).toList());
     }
 
     @Test
@@ -61,7 +64,10 @@ class BedrockDataTest {
             paletteTypes.add(state.getString("name"));
         }
         var blockTypes = readJson(RESOURCES.resolve("block_types.json")).getAsJsonObject();
-        assertEquals(paletteTypes, blockTypes.keySet());
+        assertTrue(paletteTypes.equals(blockTypes.keySet()), () ->
+                "Palette names=" + paletteTypes.size() + ", block types=" + blockTypes.size() +
+                ", missing=" + paletteTypes.stream().filter(name -> !blockTypes.has(name)).limit(15).toList() +
+                ", extra=" + blockTypes.keySet().stream().filter(name -> !paletteTypes.contains(name)).limit(15).toList());
 
         var dump = requireBdsDump().getAsJsonObject("blocks");
         for (var name : paletteTypes) {
