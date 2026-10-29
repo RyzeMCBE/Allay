@@ -1,11 +1,13 @@
 package org.allaymc.server.network.nethernet;
 
 import io.netty.channel.EventLoop;
+import lombok.extern.slf4j.Slf4j;
 import org.cloudburstmc.netty.channel.nethernet.config.NetherServerMetrics;
 import org.cloudburstmc.netty.channel.nethernet.signaling.IceServerInfo;
 import org.cloudburstmc.netty.channel.nethernet.signaling.NetherNetHTTPServerSignaling;
 import org.cloudburstmc.netty.channel.nethernet.signaling.NetherNetServerSignaling;
 import org.cloudburstmc.netty.channel.nethernet.signaling.PongData;
+import org.cloudburstmc.netty.util.nethernet.EndpointAddress;
 import org.cloudburstmc.netty.util.nethernet.OperatorIdentity;
 import org.cloudburstmc.netty.util.nethernet.SdpUtil;
 
@@ -16,6 +18,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 /**
@@ -23,21 +26,31 @@ import java.util.stream.Collectors;
  * of the native transport's private endpoint. Relay admission follows the lifetime
  * of the authenticated NetherNet peer, not the HTTP connection.
  */
+@Slf4j
 public final class SharedPortNetherNetSignaling implements NetherNetServerSignaling {
     private final NetherNetHTTPServerSignaling delegate;
     private final NetherNetUdpMultiplexer multiplexer;
     private final InetSocketAddress publicAddress;
     private final List<InetSocketAddress> hostEndpoints;
+    private final SharedPortEndpointResolver endpointResolver;
     private final Map<String, Join> joins = new HashMap<>();
     private final Map<String, Join> pending = new HashMap<>();
 
     public SharedPortNetherNetSignaling(NetherNetHTTPServerSignaling delegate,
                                       NetherNetUdpMultiplexer multiplexer,
                                       InetSocketAddress publicAddress, List<InetSocketAddress> hostEndpoints) {
+        this(delegate, multiplexer, publicAddress, hostEndpoints, null);
+    }
+
+    public SharedPortNetherNetSignaling(NetherNetHTTPServerSignaling delegate,
+                                      NetherNetUdpMultiplexer multiplexer,
+                                      InetSocketAddress publicAddress, List<InetSocketAddress> hostEndpoints,
+                                      SharedPortEndpointResolver endpointResolver) {
         this.delegate = delegate;
         this.multiplexer = multiplexer;
         this.publicAddress = publicAddress;
         this.hostEndpoints = List.copyOf(hostEndpoints);
+        this.endpointResolver = endpointResolver;
     }
 
     @Override
@@ -56,7 +69,8 @@ public final class SharedPortNetherNetSignaling implements NetherNetServerSignal
     public void setNewConnectionHandler(NewConnectionHandler handler) {
         delegate.setNewConnectionHandler((connectionId, networkId, offer, address, player) -> {
             synchronized (this) {
-                var join = new Join(networkId);
+                var join = new Join(connectionId, networkId, endpointResolver == null
+                        ? CompletableFuture.completedFuture(List.of()) : endpointResolver.take(networkId));
                 joins.put(connectionId, join);
                 pending.put(networkId, join);
             }
@@ -68,14 +82,42 @@ public final class SharedPortNetherNetSignaling implements NetherNetServerSignal
     public void sendDescription(String targetNetworkId, String sdp) {
         String ufrag = sdp.lines().filter(line -> line.startsWith("a=ice-ufrag:"))
                 .map(line -> line.substring("a=ice-ufrag:".length())).findFirst().orElseThrow();
+        Join join;
         synchronized (this) {
-            var join = pending.remove(targetNetworkId);
-            if (join != null) {
+            join = pending.remove(targetNetworkId);
+        }
+        if (join == null) return;
+        // DNS belongs to a bounded worker pool. The native callback and Netty loops remain free.
+        join.endpoints.thenAccept(endpoints -> {
+            String announced = SdpUtil.withAddedEndpoints(publicDescription(sdp, hostEndpoints), endpoints);
+            synchronized (this) {
+                if (joins.get(join.connectionId) != join) return;
                 join.ufrag = ufrag;
                 multiplexer.authorize(ufrag);
             }
+            logEndpoints(announced);
+            delegate.sendDescription(targetNetworkId, announced);
+        }).exceptionally(failure -> {
+            log.warn("Could not complete the NetherNet SDP answer", failure);
+            removeSignalHandler(join.connectionId);
+            return null;
+        });
+    }
+
+    private void logEndpoints(String sdp) {
+        String finalSdp = delegate.advertisedAddresses().isEmpty() ? sdp
+                : SdpUtil.withAdvertisedCandidates(sdp, delegate.advertisedAddresses());
+        var endpoints = finalSdp.lines().filter(line -> line.startsWith("a=candidate:"))
+                .map(line -> line.split(" ")).filter(parts -> parts.length >= 8)
+                .map(parts -> new InetSocketAddress(parts[4], Integer.parseInt(parts[5]))).distinct().toList();
+        // Do not log SDP, ICE passwords, identity assertions or client tokens.
+        log.info("NetherNet advertised UDP endpoints: {} (shared Bedrock port {})", endpoints, publicAddress.getPort());
+        if (endpoints.stream().noneMatch(endpoint -> EndpointAddress.scope(endpoint.getAddress()) == EndpointAddress.Scope.PUBLIC)) {
+            log.warn("NetherNet is advertising only LAN/loopback endpoints. An internet client behind NAT may not reach them. "
+                    + "If the connection Host does not name the public game endpoint, set nethernet-advertise-addresses "
+                    + "to that endpoint on the main UDP port {}. Native relay ports in transport warnings are internal.",
+                    publicAddress.getPort());
         }
-        delegate.sendDescription(targetNetworkId, publicDescription(sdp, hostEndpoints));
     }
 
     static String publicDescription(String sdp, List<InetSocketAddress> endpoints) {
@@ -153,11 +195,15 @@ public final class SharedPortNetherNetSignaling implements NetherNetServerSignal
     }
 
     private static final class Join {
+        private final String connectionId;
         private final String networkId;
+        private final CompletableFuture<List<InetSocketAddress>> endpoints;
         private String ufrag;
 
-        private Join(String networkId) {
+        private Join(String connectionId, String networkId, CompletableFuture<List<InetSocketAddress>> endpoints) {
+            this.connectionId = connectionId;
             this.networkId = networkId;
+            this.endpoints = endpoints;
         }
     }
 }

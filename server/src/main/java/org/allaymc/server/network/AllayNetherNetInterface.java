@@ -15,6 +15,7 @@ import org.allaymc.server.network.nethernet.AllayNetherNetPeer;
 import org.allaymc.server.network.nethernet.NetherNetFrameCodec;
 import org.allaymc.server.network.nethernet.NetherNetPacketEncoder;
 import org.allaymc.server.network.nethernet.NetherNetUdpMultiplexer;
+import org.allaymc.server.network.nethernet.SharedPortEndpointResolver;
 import org.allaymc.server.network.nethernet.SharedPortNetherNetSignaling;
 import org.cloudburstmc.netty.channel.nethernet.NetherNetChannelFactory;
 import org.cloudburstmc.netty.channel.nethernet.config.NetherChannelOption;
@@ -58,6 +59,7 @@ public final class AllayNetherNetInterface extends AllayNetworkInterface {
     private volatile int maxPlayers;
     private MultiThreadIoEventLoopGroup group;
     private NetherNetHTTPServerSignaling signaling;
+    private SharedPortEndpointResolver endpointResolver;
     private Channel channel;
 
     public AllayNetherNetInterface(Server server) {
@@ -105,6 +107,15 @@ public final class AllayNetherNetInterface extends AllayNetworkInterface {
             if (!config.nethernetAdvertiseAddresses().isEmpty()) {
                 builder.setAdvertisedAddresses(config.nethernetAdvertiseAddresses());
             }
+            if (sharedUdp != null) {
+                var resolver = new SharedPortEndpointResolver(config.port(), tcpPort,
+                        !config.nethernetAdvertiseAddresses().isEmpty());
+                endpointResolver = resolver;
+                builder.setPlayerFilter((host, player) -> {
+                    resolver.prepare(player.networkId(), host);
+                    return null;
+                });
+            }
             signaling = builder.build();
 
             InetSocketAddress iceAddress = sharedUdp == null
@@ -112,7 +123,8 @@ public final class AllayNetherNetInterface extends AllayNetworkInterface {
             NetherNetServerSignaling transportSignaling = signaling;
             if (sharedUdp != null) {
                 transportSignaling = new SharedPortNetherNetSignaling(signaling, sharedUdp,
-                        new InetSocketAddress(config.ip(), config.port()), sharedHostEndpoints(config.ip(), config.port()));
+                        new InetSocketAddress(config.ip(), config.port()), sharedHostEndpoints(config.ip(), config.port()),
+                        endpointResolver);
             }
 
             int threads = config.networkThreadNumber();
@@ -174,6 +186,10 @@ public final class AllayNetherNetInterface extends AllayNetworkInterface {
             signaling = null;
         }
         if (sharedUdp != null) sharedUdp.close();
+        if (endpointResolver != null) {
+            endpointResolver.close();
+            endpointResolver = null;
+        }
         if (group != null) {
             group.shutdownGracefully().syncUninterruptibly();
             group = null;

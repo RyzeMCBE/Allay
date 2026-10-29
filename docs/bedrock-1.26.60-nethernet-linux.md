@@ -33,7 +33,13 @@ The shared UDP socket routes RakNet packets normally and forwards authenticated 
 
 Existing configurations automatically receive `nethernet-shared-port: true`. Their old `nethernet-ice-port: 19134` value is ignored while shared mode is enabled. To retain separate media ports, set `nethernet-shared-port: false`; only in that mode must `nethernet-ice-port` differ from both RakNet UDP ports.
 
-On a VPS with a public IP, WebRTC advertises the shared UDP listener. Behind NAT or a tunnel, set `nethernet-advertise-addresses` to the actual externally reachable main **UDP** endpoint, for example `["203.0.113.10:19132"]` (documentation address only). An IP literal in the client's HTTP Host header is also inferred automatically. Names can be configured explicitly and are resolved at startup. The UDP forward must preserve its advertised source endpoint. If you allocate a separate public signaling port, configure `nethernet-signaling-port` accordingly and open its TCP port.
+On a VPS with a public IP, WebRTC advertises the shared UDP listener. With `nethernet-advertise-addresses: []`, Allay also infers the destination the player used from the authenticated HTTP join's Host header. Both numeric IPv4 addresses and DNS names are supported. Name lookups run on a bounded worker pool, are cached, and have a two-second per-join deadline without blocking Netty. A failed lookup leaves normal listener discovery intact.
+
+When TCP signaling shares the main port, the port in Host is reused for UDP too, so a normal TCP/UDP forward works with the existing `ip` and `port` settings. If signaling has a separate configured TCP port, its HTTP port is never inferred as the gameplay UDP port. `ip: 0.0.0.0` remains a bind address, not a public address to announce.
+
+An explicit `nethernet-advertise-addresses` value remains an optional override for a proxy that rewrites Host, split DNS, or a tunnel with different TCP and UDP mappings. Set it to the actual externally reachable main **UDP** endpoint, for example `["203.0.113.10:19132"]` (documentation address only). Configured names are resolved at startup. The UDP forward must preserve its advertised source endpoint. If you allocate a separate public signaling port, configure `nethernet-signaling-port` accordingly and open its TCP port.
+
+Each accepted join logs its advertised UDP endpoints without logging SDP, ICE passwords or identity assertions. If only LAN/loopback endpoints are available, a warning explains the NAT/Host limitation and refers to the public main port. Native PROXY transport warnings may mention a private loopback port; it is internal and must not be exposed or entered by players.
 
 NetherNet creates `nethernet-identity.pem` on first launch. **Preserve this file** across deployments: connected clients can pin its public key, so replacing it changes the server identity.
 
@@ -50,7 +56,7 @@ Allay's normal version negotiation, gameplay packet processing, compression nego
 3. Check malformed / unauthenticated NetherNet logins are rejected and that world and inventory packets round-trip correctly.
 4. Run `./gradlew build` and publish the shaded server JAR only when tests pass.
 
-Automated CI validates registry imports, protocol codec tests, frame and recipe handling. The shared-port regression also connects two real native WebRTC peers, checks bidirectional data and sends legacy RakNet pings to that same UDP socket. **These tests do not substitute for connecting an actual Bedrock client through the full HTTP signaling, Xbox identity, ICE, DTLS and Bedrock login flow.**
+Automated CI validates registry imports, protocol codec tests, frame and recipe handling. The shared-port regression also connects two real native WebRTC peers, checks bidirectional data and sends legacy RakNet pings to that same UDP socket. A separate test sends a signed offer through real HTTP signaling and completes ICE/DTLS and both NetherNet data channels without manually authorizing the relay. Synthetic identities are accepted only by that isolated test fixture; production retains Minecraft authentication. **These tests do not substitute for connecting an actual Bedrock client through the full Xbox identity and Bedrock login flow.**
 
 Sources:
 - CloudburstMC Network NetherNet implementation: https://github.com/CloudburstMC/Network/tree/nethernet

@@ -128,7 +128,7 @@ public class ServerSettings extends OkaeriConfig {
         @CustomKey("nethernet-identity-file")
         private String nethernetIdentityFile = "nethernet-identity.pem";
 
-        @Comment("Public host:port endpoints advertised by NetherNet when behind a NAT or tunnel")
+        @Comment("Optional public host:port override for NAT/tunnels; empty uses the join Host and main port automatically")
         @CustomKey("nethernet-advertise-addresses")
         private List<String> nethernetAdvertiseAddresses = List.of();
 
