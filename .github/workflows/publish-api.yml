@@ -1,4 +1,4 @@
-name: Publicar Allay API
+name: Publicar Engine API (compatible con Allay)
 
 on:
   push:
@@ -59,7 +59,7 @@ jobs:
       - name: Subir JAR y fuentes
         uses: actions/upload-artifact@v7
         with:
-          name: allay-api-${{ github.sha }}
+          name: engine-api-${{ github.sha }}
           path: |
             api/build/libs/*.jar
             api/build/publications/ryzeApi/*.pom

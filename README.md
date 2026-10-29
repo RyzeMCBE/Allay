@@ -1,29 +1,27 @@
 <div align="center">
 
-<img src="docs/assets/logo/allay-chan-640x.png" alt="Logotipo de Allay" width="170">
-
-# Allay · RyzeMCBE
+# ENGINE
 
 ### Software de servidor para Minecraft Bedrock Edition
 
-**Fork de Allay mantenido por RyzeMCBE Development Studio.**
+**Engine · RyzeMCBE Development Studio**  
+**Compatible con plugins de Allay que utilizan la API pública conservada.**
 
 [![Compilación](https://github.com/RyzeMCBE/Allay/actions/workflows/gradle.yml/badge.svg)](https://github.com/RyzeMCBE/Allay/actions/workflows/gradle.yml)
 [![Java 21](https://img.shields.io/badge/Java-21-f97316)](https://github.com/RyzeMCBE/Allay)
-[![Licencia](https://img.shields.io/badge/Licencia-LGPL--3.0-blue)](LICENSE)
-[![Estado](https://img.shields.io/badge/Estado-En%20desarrollo-orange)](https://github.com/RyzeMCBE/Allay/actions)
+[![Licencia LGPL-3.0](https://img.shields.io/badge/Licencia-LGPL--3.0-blue)](LICENSE)
 
-[**Código fuente**](https://github.com/RyzeMCBE/Allay) · [**Compilaciones**](https://github.com/RyzeMCBE/Allay/actions) · [**Reportar problemas**](https://github.com/RyzeMCBE/Allay/issues) · [**Organización**](https://github.com/RyzeMCBE)
+[**Código**](https://github.com/RyzeMCBE/Allay) · [**Compilaciones**](https://github.com/RyzeMCBE/Allay/actions) · [**Compatibilidad**](docs/engine-compatibility.md) · [**Incidencias**](https://github.com/RyzeMCBE/Allay/issues)
 
 </div>
 
 ---
 
-## 📖 ¿Qué es Allay?
+## 📖 ¿Qué es Engine?
 
-**Allay** es un software de servidor independiente para **Minecraft: Bedrock Edition**, desarrollado en **Java 21**. Su arquitectura separa la API pública de la implementación del servidor y permite crear extensiones para la JVM.
+**Engine** es una distribución para **Minecraft: Bedrock Edition**, desarrollada en **Java 21** y basada en Allay. Separa la API pública del servidor y conserva compatibilidad con plugins existentes.
 
-Este repositorio contiene un **fork de trabajo de [AllayMC/Allay](https://github.com/AllayMC/Allay)** bajo la organización **RyzeMCBE Development Studio**. Lo utilizamos como base para estudiar, integrar y mantener funcionalidades relacionadas con protocolos, compatibilidad, mundos, dimensiones y rendimiento.
+Engine deriva de [AllayMC/Allay](https://github.com/AllayMC/Allay) y conserva sus atribuciones y obligaciones LGPL-3.0. Protocol y StateUpdater mantienen inicialmente sus coordenadas originales. Consulta la [guía de compatibilidad](docs/engine-compatibility.md).
 
 > [!IMPORTANT]
 > **Estado: desarrollo activo y validación.** El código integrado en `main` superó compilación y pruebas automatizadas. Eso **no garantiza que todos los mundos personalizados y clientes hayan sido probados dentro de Minecraft**. Verifica el [workflow de compilación](https://github.com/RyzeMCBE/Allay/actions/workflows/gradle.yml) de la revisión que vayas a utilizar.

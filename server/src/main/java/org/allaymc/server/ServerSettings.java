@@ -43,11 +43,11 @@ public class ServerSettings extends OkaeriConfig {
     @Accessors(fluent = true)
     public static class GenericSettings extends OkaeriConfig {
 
-        private String motd = "An allay-powered server";
+        private String motd = EngineIdentity.DEFAULT_MOTD;
 
         @CustomKey("sub-motd")
         @Comment("Usually only visible on the LAN interface")
-        private String subMotd = "https://github.com/AllayMC/Allay";
+        private String subMotd = EngineIdentity.DEFAULT_SUB_MOTD;
 
         @CustomKey("max-player-count")
         private int maxPlayerCount = 20;

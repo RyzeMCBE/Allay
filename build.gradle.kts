@@ -74,14 +74,14 @@ subprojects {
 
             pom {
                 name.set(project.name)
-                description.set("The next-generation Minecraft: Bedrock Edition server software aims to be reliable, fast and feature-rich.")
+                description.set("Engine: a Minecraft Bedrock server distribution based on Allay, with compatible plugin APIs.")
                 inceptionYear.set("2023")
-                url.set("https://github.com/AllayMC/Allay")
+                url.set("https://github.com/RyzeMCBE/Allay")
 
                 scm {
                     connection.set("scm:git:git://github.com/AllayMC/Allay.git")
                     developerConnection.set("scm:git:ssh://github.com/AllayMC/Allay.git")
-                    url.set("https://github.com/AllayMC/Allay")
+                    url.set("https://github.com/RyzeMCBE/Allay")
                 }
 
                 licenses {
@@ -92,6 +92,11 @@ subprojects {
                 }
 
                 developers {
+                    developer {
+                        name.set("RyzeMCBE Development Studio")
+                        organization.set("RyzeMCBE")
+                        organizationUrl.set("https://github.com/RyzeMCBE")
+                    }
                     developer {
                         name.set("AllayMC Team")
                         organization.set("AllayMC")

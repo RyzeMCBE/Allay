@@ -1,6 +1,7 @@
 package org.allaymc.server;
 
 import lombok.extern.slf4j.Slf4j;
+import org.allaymc.api.AllayAPI;
 import org.allaymc.api.player.LoginData;
 import org.allaymc.api.player.Player;
 import org.allaymc.api.server.Server;
@@ -28,6 +29,12 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AllayMetrics {
     public static void start() {
+        // Never attribute Engine installations to Allay\u0027s bStats project ID.
+        // Enable metrics only after registering a dedicated Engine project.
+        if (EngineIdentity.NAME.equals(AllayAPI.getInstance().getCoreName())) {
+            log.info("Engine metrics are disabled until a dedicated bStats project is configured.");
+            return;
+        }
         var settings = AllayServer.getSettings().bStatsSettings();
         if (!settings.enable()) {
             return;

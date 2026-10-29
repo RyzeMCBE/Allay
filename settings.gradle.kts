@@ -1,4 +1,4 @@
-rootProject.name = "Allay"
+rootProject.name = "Engine"
 
 // include multi modules
 include(":api")

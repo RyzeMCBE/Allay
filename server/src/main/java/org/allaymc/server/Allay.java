@@ -105,7 +105,7 @@ public final class Allay {
         try {
             initAllay();
         } catch (Exception e) {
-            log.error("Cannot init Allay API!", e);
+            log.error("Cannot init Engine API!", e);
             if (DASHBOARD != null) {
                 sleep(5000);
             }
@@ -176,7 +176,7 @@ public final class Allay {
         api.bind(NBTIO.class, AllayNBTIO::new);
         api.bind(FakeContainerFactory.class, AllayFakeContainerFactory::new);
 
-        api.implement("allay", GitProperties.isDevBuild());
+        api.implement(EngineIdentity.NAME, GitProperties.isDevBuild());
 
         var versionStr = ProtocolInfo.getLowestCodec().getMinecraftVersion() + " - " + ProtocolInfo.getLatestCodec().getMinecraftVersion();
         var protocolStr = ProtocolInfo.getLowestCodec().getProtocolVersion() + " - " + ProtocolInfo.getLatestCodec().getProtocolVersion();

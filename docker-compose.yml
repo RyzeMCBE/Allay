@@ -1,12 +1,12 @@
 services:
-  allaymc:
+  engine:
     build: ./
     ports:
       - "19132:19132"
       - "19132:19132/udp"
     volumes:
       - data:/data
-    container_name: allaymc
+    container_name: engine
     restart: unless-stopped
 volumes:
   data:

@@ -49,8 +49,8 @@ publishing {
                 .get()
             from(components["java"])
             pom {
-                name.set("RyzeMCBE Allay API")
-                description.set("API para desarrollar plugins del fork RyzeMCBE/Allay.")
+                name.set("Engine (Allay-compatible) API")
+                description.set("API compatible con plugins Allay, mantenida para Engine por RyzeMCBE.")
                 url.set("https://github.com/RyzeMCBE/Allay")
             }
         }
