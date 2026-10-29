@@ -13,13 +13,11 @@ cleanup() {
 trap cleanup EXIT
 
 git -C "$root" fetch --no-tags --depth=1 origin main:refs/remotes/origin/main
-# Compare against the 1.26.60 branch: its legitimate protocol API updates
-# must not be mistaken for changes introduced by the Engine branding.
-git -C "$root" fetch --no-tags --depth=1 origin feat/minecraft-1.26.60:refs/remotes/origin/feat/minecraft-1.26.60
-
-# The identity PR must not modify any existing public Allay API source.
-if ! git -C "$root" diff --quiet origin/feat/minecraft-1.26.60 HEAD -- api/src/main/java; then
-    echo "::error::Engine branding must preserve the existing Allay Java API sources" >&2
+# This smoke test now runs on PRs based on the integrated main branch.
+# Compare against main: the old feat/minecraft-1.26.60 branch was merged and
+# is no longer guaranteed to exist on GitHub.
+if ! git -C "$root" diff --quiet origin/main HEAD -- api/src/main/java; then
+    echo "::error::Publishing changes must preserve the existing Allay Java API sources" >&2
     exit 1
 fi
 
