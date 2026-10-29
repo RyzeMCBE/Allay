@@ -7,11 +7,11 @@
 **Engine · RyzeMCBE Development Studio**  
 **Compatible con plugins de Allay que utilizan la API pública conservada.**
 
-[![Compilación](https://github.com/RyzeMCBE/Allay/actions/workflows/gradle.yml/badge.svg)](https://github.com/RyzeMCBE/Allay/actions/workflows/gradle.yml)
-[![Java 21](https://img.shields.io/badge/Java-21-f97316)](https://github.com/RyzeMCBE/Allay)
+[![Compilación](https://github.com/RyzeMCBE/Engine/actions/workflows/gradle.yml/badge.svg)](https://github.com/RyzeMCBE/Engine/actions/workflows/gradle.yml)
+[![Java 21](https://img.shields.io/badge/Java-21-f97316)](https://github.com/RyzeMCBE/Engine)
 [![Licencia LGPL-3.0](https://img.shields.io/badge/Licencia-LGPL--3.0-blue)](LICENSE)
 
-[**Código**](https://github.com/RyzeMCBE/Allay) · [**Betas**](https://github.com/RyzeMCBE/Allay/releases) · [**Guía para servidores**](docs/engine-beta-distribution.md) · [**SDK para plugins**](docs/engine-beta-developers.md) · [**Compatibilidad**](docs/engine-compatibility.md)
+[**Código**](https://github.com/RyzeMCBE/Engine) · [**Betas**](https://github.com/RyzeMCBE/Engine/releases) · [**Guía para servidores**](docs/engine-beta-distribution.md) · [**SDK para plugins**](docs/engine-beta-developers.md) · [**Compatibilidad**](docs/engine-compatibility.md)
 
 </div>
 
@@ -24,7 +24,7 @@
 Engine deriva de [AllayMC/Allay](https://github.com/AllayMC/Allay) y conserva sus atribuciones y obligaciones LGPL-3.0. Protocol y StateUpdater mantienen inicialmente sus coordenadas originales. Consulta la [guía de compatibilidad](docs/engine-compatibility.md).
 
 > [!IMPORTANT]
-> **Estado de esta rama: desarrollo activo y beta experimental.** La compilación de Engine 1.26.60 y las pruebas automáticas de compatibilidad se han superado en CI. Eso **no garantiza que todos los mundos personalizados, plugins y clientes hayan sido probados dentro de Minecraft**. Verifica el [workflow de compilación](https://github.com/RyzeMCBE/Allay/actions/workflows/gradle.yml) de la revisión que vayas a utilizar.
+> **Estado de esta rama: desarrollo activo y beta experimental.** La compilación de Engine 1.26.60 y las pruebas automáticas de compatibilidad se han superado en CI. Eso **no garantiza que todos los mundos personalizados, plugins y clientes hayan sido probados dentro de Minecraft**. Verifica el [workflow de compilación](https://github.com/RyzeMCBE/Engine/actions/workflows/gradle.yml) de la revisión que vayas a utilizar.
 
 ## 🚀 Características y áreas de trabajo
 
@@ -64,7 +64,7 @@ Engine (basado en Allay) utiliza un registro de **protocolos exactos**, separado
 | **1.26.50–1.26.52** | **2193** |
 | **1.26.60** | **2225** |
 
-**Versión más reciente en esta rama de integración: Minecraft Bedrock 1.26.60 (protocolo 2225).** Los clientes 1.26.60 utilizan NetherNet (señalización TCP + tráfico de juego UDP); versiones anteriores conservan RakNet. La entrada de un cliente 1.26.60 ya fue confirmada, pero las comprobaciones completas de juego y retrocompatibilidad siguen abiertas en [#43](https://github.com/RyzeMCBE/Allay/issues/43). **Versión internacional más antigua registrada: 1.21.90 (818).** No debe interpretarse esta tabla como garantía de compatibilidad con todas las revisiones intermedias o versiones anteriores a las registradas.
+**Versión más reciente en esta rama de integración: Minecraft Bedrock 1.26.60 (protocolo 2225).** Los clientes 1.26.60 utilizan NetherNet (señalización TCP + tráfico de juego UDP); versiones anteriores conservan RakNet. La entrada de un cliente 1.26.60 ya fue confirmada, pero las comprobaciones completas de juego y retrocompatibilidad siguen abiertas en [#43](https://github.com/RyzeMCBE/Engine/issues/43). **Versión internacional más antigua registrada: 1.21.90 (818).** No debe interpretarse esta tabla como garantía de compatibilidad con todas las revisiones intermedias o versiones anteriores a las registradas.
 
 Se incluyen por separado los codecs **NetEase 766, 819 y 860**. El servidor identifica la variante y el protocolo en el proceso de conexión; NetEase no equivale a la misma versión del cliente internacional.
 
@@ -170,7 +170,7 @@ protocol-local/bedrock-codec/src/test/java/org/cloudburstmc/protocol/bedrock/cod
 En Ubuntu o cualquier distribución Linux con Java 21:
 
 ~~~bash
-git clone --recurse-submodules https://github.com/RyzeMCBE/Allay.git
+git clone --recurse-submodules https://github.com/RyzeMCBE/Engine.git
 cd Allay
 
 git submodule sync --recursive
@@ -229,8 +229,8 @@ el número de versión correspondiente al tag. También se puede lanzar
 manualmente desde Actions para validar y generar artefactos **sin publicar**.
 
 **[Guía completa de versiones beta y oficiales](docs/RELEASES-RYZEMCBE.md)** ·
-[**GitHub Releases**](https://github.com/RyzeMCBE/Allay/releases) ·
-[**GitHub Actions**](https://github.com/RyzeMCBE/Allay/actions)
+[**GitHub Releases**](https://github.com/RyzeMCBE/Engine/releases) ·
+[**GitHub Actions**](https://github.com/RyzeMCBE/Engine/actions)
 
 ## 🧩 Desarrollo de plugins con VS Code
 
@@ -270,7 +270,7 @@ haya aceptado la publicación.
 
 ## 🤝 Contribuciones y reportes
 
-Puedes presentar propuestas, correcciones o reportes mediante las [issues](https://github.com/RyzeMCBE/Allay/issues) y los pull requests cuando estén habilitados. Revisa [CONTRIBUTING.md](CONTRIBUTING.md) y [AGENTS.md](AGENTS.md) antes de enviar cambios.
+Puedes presentar propuestas, correcciones o reportes mediante las [issues](https://github.com/RyzeMCBE/Engine/issues) y los pull requests cuando estén habilitados. Revisa [CONTRIBUTING.md](CONTRIBUTING.md) y [AGENTS.md](AGENTS.md) antes de enviar cambios.
 
 Para informar de un error incluye la versión exacta de Bedrock, protocolo, sistema operativo, revisión de Git, pasos para reproducirlo y registros relevantes. **Nunca compartas contraseñas, tokens o datos privados en logs públicos.**
 
@@ -290,7 +290,7 @@ También agradecemos a los proyectos citados en el repositorio original: [Endsto
 
 **Desarrollo de software, compatibilidad y herramientas para comunidades.**
 
-[Organización](https://github.com/RyzeMCBE) · [Nuestro fork](https://github.com/RyzeMCBE/Allay) · [Proyecto original](https://github.com/AllayMC/Allay)
+[Organización](https://github.com/RyzeMCBE) · [Nuestro fork](https://github.com/RyzeMCBE/Engine) · [Proyecto original](https://github.com/AllayMC/Allay)
 
 <sub>Proyecto independiente. Minecraft es una marca de Mojang Studios. No afiliado con Mojang Studios ni con Microsoft.</sub>
 
