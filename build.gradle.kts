@@ -76,12 +76,12 @@ subprojects {
                 name.set(project.name)
                 description.set("Engine: a Minecraft Bedrock server distribution based on Allay, with compatible plugin APIs.")
                 inceptionYear.set("2023")
-                url.set("https://github.com/RyzeMCBE/Allay")
+                url.set("https://github.com/RyzeMCBE/Engine")
 
                 scm {
-                    connection.set("scm:git:git://github.com/RyzeMCBE/Allay.git")
-                    developerConnection.set("scm:git:ssh://github.com/RyzeMCBE/Allay.git")
-                    url.set("https://github.com/RyzeMCBE/Allay")
+                    connection.set("scm:git:git://github.com/RyzeMCBE/Engine.git")
+                    developerConnection.set("scm:git:ssh://github.com/RyzeMCBE/Engine.git")
+                    url.set("https://github.com/RyzeMCBE/Engine")
                 }
 
                 licenses {
