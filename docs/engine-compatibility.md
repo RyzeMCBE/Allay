@@ -24,7 +24,7 @@ Existing `plugin.json` files still work:
 4. Load copies of existing worlds and player data; test clean shutdown and restart.
 5. Build Docker with checked out submodules, and keep existing volume `allaymc-data` for deployed worlds.
 6. Verify licenses and notices of shaded third-party dependencies before public JAR distribution.
-7. Keep the Minecraft 1.26.60/NetherNet integration in its independent PR until gameplay is verified.
+7. Validate Minecraft 1.26.60 / NetherNet on the integrated beta branch, including the older RakNet transport and real gameplay, before any stable release.
 
 A plugin tied to undocumented internals or exact `coreName=allay` may need a compatibility shim after testing. The branding PR alone is not a guarantee that every third-party plugin works.
 
