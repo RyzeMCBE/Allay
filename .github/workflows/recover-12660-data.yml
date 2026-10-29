@@ -1,0 +1,68 @@
+name: Recover Bedrock 1.26.60 data and generated source
+on:
+  push:
+    branches: [feat/minecraft-1.26.60]
+    paths:
+      - '.github/workflows/recover-12660-data.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  recover:
+    if: github.repository == 'RyzeMCBE/Allay' && github.ref == 'refs/heads/feat/minecraft-1.26.60'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout pinned dependencies
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          persist-credentials: true
+          fetch-depth: 1
+      - name: Prepare Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Verify recovered blocks and import official 2225 palette
+        shell: python
+        run: |
+          import hashlib, pathlib, urllib.request, shutil
+          root = pathlib.Path('data/resources')
+          raw = (root / 'unpacked/block_states_raw.json').read_bytes()
+          assert len(raw) == 15893841
+          assert hashlib.sha1(b'blob ' + str(len(raw)).encode() + b'\0' + raw).hexdigest() == 'aab02e3f823ad2af719cab317f534cd65a0ccf5d'
+          remote = 'https://raw.githubusercontent.com/CloudburstMC/Data/293c848098cc636a2758937fb6610b8bed1f12c5/block_palette.nbt'
+          with urllib.request.urlopen(remote, timeout=120) as resp:
+              palette = resp.read()
+          assert len(palette) == 293502
+          assert hashlib.sha1(b'blob ' + str(len(palette)).encode() + b'\0' + palette).hexdigest() == 'ad9e886233bcfc535bd8d31143da039ec99b8bd4'
+          (root / 'protocol_palettes/1_26_60.nbt').write_bytes(palette)
+          (root / 'unpacked/block_palette.nbt').write_bytes(palette)
+          print('Source registry and official 1.26.60 palette verified')
+      - name: Generate processed block registry
+        run: ./gradlew :data:runMain -PmainClass=org.allaymc.data.BlockStateDataProcessor --no-daemon
+      - name: Generate property metadata
+        run: ./gradlew :data:runMain -PmainClass=org.allaymc.data.BlockPropertyTypeDataFileGen --no-daemon
+      - name: Regenerate Java property types
+        run: ./gradlew :codegen:runMain -PmainClass=org.allaymc.codegen.BlockPropertyTypeGen --no-daemon
+      - name: Regenerate block initialization
+        run: ./gradlew :codegen:runMain -PmainClass=org.allaymc.codegen.BlockClassGen --no-daemon
+      - name: Validate generated data and publish source
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Generated block_states.json git SHA: $(git hash-object data/resources/block_states.json)"
+          test -s data/resources/block_states.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/resources/block_states.json data/resources/unpacked/block_palette.nbt
+          git add data/resources/unpacked/block_property_types.json data/resources/protocol_palettes/1_26_60.nbt
+          git add api/src/main/java/org/allaymc/api/block/property/
+          git add api/src/main/java/org/allaymc/api/block/type/BlockTypes.java
+          git add server/src/main/java/org/allaymc/server/block/type/BlockTypeDefaultInitializer.java
+          git status --short
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: regenerate verified 1.26.60 block and palette data"
+            git push origin HEAD:feat/minecraft-1.26.60
+          fi

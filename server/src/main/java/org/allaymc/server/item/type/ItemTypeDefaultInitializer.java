@@ -47,13 +47,11 @@ import org.allaymc.server.item.impl.ItemBellStackImpl;
 import org.allaymc.server.item.impl.ItemBigDripleafStackImpl;
 import org.allaymc.server.item.impl.ItemBigFlowerStackImpl;
 import org.allaymc.server.item.impl.ItemBirchPressurePlateStackImpl;
-import org.allaymc.server.item.impl.ItemBlackCushionStackImpl;
 import org.allaymc.server.item.impl.ItemBlackstoneStackImpl;
 import org.allaymc.server.item.impl.ItemBladePotterySherdStackImpl;
 import org.allaymc.server.item.impl.ItemBlazePowderStackImpl;
 import org.allaymc.server.item.impl.ItemBlazeRodStackImpl;
 import org.allaymc.server.item.impl.ItemBleachStackImpl;
-import org.allaymc.server.item.impl.ItemBlueCushionStackImpl;
 import org.allaymc.server.item.impl.ItemBlueIceStackImpl;
 import org.allaymc.server.item.impl.ItemBoardStackImpl;
 import org.allaymc.server.item.impl.ItemBoatStackImpl;
@@ -75,7 +73,6 @@ import org.allaymc.server.item.impl.ItemBrewingStandStackImpl;
 import org.allaymc.server.item.impl.ItemBrickBlockStackImpl;
 import org.allaymc.server.item.impl.ItemBrickStackImpl;
 import org.allaymc.server.item.impl.ItemBricksStackImpl;
-import org.allaymc.server.item.impl.ItemBrownCushionStackImpl;
 import org.allaymc.server.item.impl.ItemBrownMushroomBlockStackImpl;
 import org.allaymc.server.item.impl.ItemBrownMushroomStackImpl;
 import org.allaymc.server.item.impl.ItemBrushStackImpl;
@@ -183,7 +180,7 @@ import org.allaymc.server.item.impl.ItemCrimsonRootsStackImpl;
 import org.allaymc.server.item.impl.ItemCrimsonStemStackImpl;
 import org.allaymc.server.item.impl.ItemCrossbowStackImpl;
 import org.allaymc.server.item.impl.ItemCryingObsidianStackImpl;
-import org.allaymc.server.item.impl.ItemCyanCushionStackImpl;
+import org.allaymc.server.item.impl.ItemCushionStackImpl;
 import org.allaymc.server.item.impl.ItemDangerPotterySherdStackImpl;
 import org.allaymc.server.item.impl.ItemDarkOakPressurePlateStackImpl;
 import org.allaymc.server.item.impl.ItemDarkPrismarineStackImpl;
@@ -211,6 +208,7 @@ import org.allaymc.server.item.impl.ItemDioriteStackImpl;
 import org.allaymc.server.item.impl.ItemDirtStackImpl;
 import org.allaymc.server.item.impl.ItemDirtWithRootsStackImpl;
 import org.allaymc.server.item.impl.ItemDiscFragment5StackImpl;
+import org.allaymc.server.item.impl.ItemDiscPressStackImpl;
 import org.allaymc.server.item.impl.ItemDispenserStackImpl;
 import org.allaymc.server.item.impl.ItemDoorStackImpl;
 import org.allaymc.server.item.impl.ItemDoublePlantStackImpl;
@@ -304,8 +302,6 @@ import org.allaymc.server.item.impl.ItemGraniteStackImpl;
 import org.allaymc.server.item.impl.ItemGrassBlockStackImpl;
 import org.allaymc.server.item.impl.ItemGrassPathStackImpl;
 import org.allaymc.server.item.impl.ItemGravelStackImpl;
-import org.allaymc.server.item.impl.ItemGrayCushionStackImpl;
-import org.allaymc.server.item.impl.ItemGreenCushionStackImpl;
 import org.allaymc.server.item.impl.ItemGrindstoneStackImpl;
 import org.allaymc.server.item.impl.ItemGunpowderStackImpl;
 import org.allaymc.server.item.impl.ItemGusterBannerPatternStackImpl;
@@ -332,7 +328,9 @@ import org.allaymc.server.item.impl.ItemHorseArmorStackImpl;
 import org.allaymc.server.item.impl.ItemHostArmorTrimSmithingTemplateStackImpl;
 import org.allaymc.server.item.impl.ItemHowlPotterySherdStackImpl;
 import org.allaymc.server.item.impl.ItemIceBombStackImpl;
+import org.allaymc.server.item.impl.ItemIceCrystalStackImpl;
 import org.allaymc.server.item.impl.ItemIceStackImpl;
+import org.allaymc.server.item.impl.ItemIcicleStackImpl;
 import org.allaymc.server.item.impl.ItemInfestedCobblestoneStackImpl;
 import org.allaymc.server.item.impl.ItemInfestedDeepslateStackImpl;
 import org.allaymc.server.item.impl.ItemInfestedStoneStackImpl;
@@ -360,7 +358,6 @@ import org.allaymc.server.item.impl.ItemItemKelpStackImpl;
 import org.allaymc.server.item.impl.ItemItemNetherSproutsStackImpl;
 import org.allaymc.server.item.impl.ItemItemNetherWartStackImpl;
 import org.allaymc.server.item.impl.ItemItemReedsStackImpl;
-import org.allaymc.server.item.impl.ItemItemStrawBedStackImpl;
 import org.allaymc.server.item.impl.ItemItemWheatStackImpl;
 import org.allaymc.server.item.impl.ItemJigsawStackImpl;
 import org.allaymc.server.item.impl.ItemJukeboxStackImpl;
@@ -386,11 +383,8 @@ import org.allaymc.server.item.impl.ItemLecternStackImpl;
 import org.allaymc.server.item.impl.ItemLeggingsStackImpl;
 import org.allaymc.server.item.impl.ItemLeverStackImpl;
 import org.allaymc.server.item.impl.ItemLightBlockStackImpl;
-import org.allaymc.server.item.impl.ItemLightBlueCushionStackImpl;
-import org.allaymc.server.item.impl.ItemLightGrayCushionStackImpl;
 import org.allaymc.server.item.impl.ItemLightWeightedPressurePlateStackImpl;
 import org.allaymc.server.item.impl.ItemLightningRodStackImpl;
-import org.allaymc.server.item.impl.ItemLimeCushionStackImpl;
 import org.allaymc.server.item.impl.ItemLingeringPotionStackImpl;
 import org.allaymc.server.item.impl.ItemLiquidStackImpl;
 import org.allaymc.server.item.impl.ItemLitDeepslateRedstoneOreStackImpl;
@@ -401,7 +395,6 @@ import org.allaymc.server.item.impl.ItemLodestoneStackImpl;
 import org.allaymc.server.item.impl.ItemLogStackImpl;
 import org.allaymc.server.item.impl.ItemLoomStackImpl;
 import org.allaymc.server.item.impl.ItemMaceStackImpl;
-import org.allaymc.server.item.impl.ItemMagentaCushionStackImpl;
 import org.allaymc.server.item.impl.ItemMagmaCreamStackImpl;
 import org.allaymc.server.item.impl.ItemMagmaStackImpl;
 import org.allaymc.server.item.impl.ItemMangrovePressurePlateStackImpl;
@@ -453,7 +446,6 @@ import org.allaymc.server.item.impl.ItemObsidianStackImpl;
 import org.allaymc.server.item.impl.ItemOchreFroglightStackImpl;
 import org.allaymc.server.item.impl.ItemOminousBottleStackImpl;
 import org.allaymc.server.item.impl.ItemOminousTrialKeyStackImpl;
-import org.allaymc.server.item.impl.ItemOrangeCushionStackImpl;
 import org.allaymc.server.item.impl.ItemOxidizedCopperBulbStackImpl;
 import org.allaymc.server.item.impl.ItemOxidizedCopperChestStackImpl;
 import org.allaymc.server.item.impl.ItemOxidizedCopperGrateStackImpl;
@@ -469,7 +461,6 @@ import org.allaymc.server.item.impl.ItemPhantomMembraneStackImpl;
 import org.allaymc.server.item.impl.ItemPhotoItemStackImpl;
 import org.allaymc.server.item.impl.ItemPickaxeStackImpl;
 import org.allaymc.server.item.impl.ItemPiglinBannerPatternStackImpl;
-import org.allaymc.server.item.impl.ItemPinkCushionStackImpl;
 import org.allaymc.server.item.impl.ItemPistonStackImpl;
 import org.allaymc.server.item.impl.ItemPitcherCropStackImpl;
 import org.allaymc.server.item.impl.ItemPitcherPodStackImpl;
@@ -508,7 +499,6 @@ import org.allaymc.server.item.impl.ItemPumpkinPieStackImpl;
 import org.allaymc.server.item.impl.ItemPumpkinSeedsStackImpl;
 import org.allaymc.server.item.impl.ItemPumpkinStackImpl;
 import org.allaymc.server.item.impl.ItemPumpkinStemStackImpl;
-import org.allaymc.server.item.impl.ItemPurpleCushionStackImpl;
 import org.allaymc.server.item.impl.ItemPurpurStackImpl;
 import org.allaymc.server.item.impl.ItemQuartzBlockStackImpl;
 import org.allaymc.server.item.impl.ItemQuartzOreStackImpl;
@@ -527,7 +517,6 @@ import org.allaymc.server.item.impl.ItemRawGoldStackImpl;
 import org.allaymc.server.item.impl.ItemRawIronBlockStackImpl;
 import org.allaymc.server.item.impl.ItemRawIronStackImpl;
 import org.allaymc.server.item.impl.ItemRecoveryCompassStackImpl;
-import org.allaymc.server.item.impl.ItemRedCushionStackImpl;
 import org.allaymc.server.item.impl.ItemRedFlowerStackImpl;
 import org.allaymc.server.item.impl.ItemRedMushroomBlockStackImpl;
 import org.allaymc.server.item.impl.ItemRedMushroomStackImpl;
@@ -620,7 +609,6 @@ import org.allaymc.server.item.impl.ItemStoneStackImpl;
 import org.allaymc.server.item.impl.ItemStonebrickStackImpl;
 import org.allaymc.server.item.impl.ItemStonecutterBlockStackImpl;
 import org.allaymc.server.item.impl.ItemStonecutterStackImpl;
-import org.allaymc.server.item.impl.ItemStrawBedStackImpl;
 import org.allaymc.server.item.impl.ItemStringStackImpl;
 import org.allaymc.server.item.impl.ItemStrippedBambooBlockStackImpl;
 import org.allaymc.server.item.impl.ItemStrippedCrimsonHyphaeStackImpl;
@@ -700,7 +688,6 @@ import org.allaymc.server.item.impl.ItemWebStackImpl;
 import org.allaymc.server.item.impl.ItemWeepingVinesStackImpl;
 import org.allaymc.server.item.impl.ItemWheatSeedsStackImpl;
 import org.allaymc.server.item.impl.ItemWheatStackImpl;
-import org.allaymc.server.item.impl.ItemWhiteCushionStackImpl;
 import org.allaymc.server.item.impl.ItemWildArmorTrimSmithingTemplateStackImpl;
 import org.allaymc.server.item.impl.ItemWindChargeStackImpl;
 import org.allaymc.server.item.impl.ItemWolfArmorStackImpl;
@@ -709,7 +696,6 @@ import org.allaymc.server.item.impl.ItemWoodenPressurePlateStackImpl;
 import org.allaymc.server.item.impl.ItemWoolStackImpl;
 import org.allaymc.server.item.impl.ItemWritableBookStackImpl;
 import org.allaymc.server.item.impl.ItemWrittenBookStackImpl;
-import org.allaymc.server.item.impl.ItemYellowCushionStackImpl;
 
 public final class ItemTypeDefaultInitializer {
     public static void init() {
@@ -1465,7 +1451,7 @@ public final class ItemTypeDefaultInitializer {
         }
         if (ItemTypes.BLACK_CUSHION == null) {
             ItemTypes.BLACK_CUSHION = AllayItemType
-                            .builder(ItemBlackCushionStackImpl.class)
+                            .builder(ItemCushionStackImpl.class)
                             .vanillaItem(ItemId.BLACK_CUSHION)
                             .build();
         }
@@ -1657,7 +1643,7 @@ public final class ItemTypeDefaultInitializer {
         }
         if (ItemTypes.BLUE_CUSHION == null) {
             ItemTypes.BLUE_CUSHION = AllayItemType
-                            .builder(ItemBlueCushionStackImpl.class)
+                            .builder(ItemCushionStackImpl.class)
                             .vanillaItem(ItemId.BLUE_CUSHION)
                             .build();
         }
@@ -1969,7 +1955,7 @@ public final class ItemTypeDefaultInitializer {
         }
         if (ItemTypes.BROWN_CUSHION == null) {
             ItemTypes.BROWN_CUSHION = AllayItemType
-                            .builder(ItemBrownCushionStackImpl.class)
+                            .builder(ItemCushionStackImpl.class)
                             .vanillaItem(ItemId.BROWN_CUSHION)
                             .build();
         }
@@ -3439,7 +3425,7 @@ public final class ItemTypeDefaultInitializer {
         }
         if (ItemTypes.CYAN_CUSHION == null) {
             ItemTypes.CYAN_CUSHION = AllayItemType
-                            .builder(ItemCyanCushionStackImpl.class)
+                            .builder(ItemCushionStackImpl.class)
                             .vanillaItem(ItemId.CYAN_CUSHION)
                             .build();
         }
@@ -4101,6 +4087,12 @@ public final class ItemTypeDefaultInitializer {
             ItemTypes.DISC_FRAGMENT_5 = AllayItemType
                             .builder(ItemDiscFragment5StackImpl.class)
                             .vanillaItem(ItemId.DISC_FRAGMENT_5)
+                            .build();
+        }
+        if (ItemTypes.DISC_PRESS == null) {
+            ItemTypes.DISC_PRESS = AllayItemType
+                            .builder(ItemDiscPressStackImpl.class)
+                            .vanillaItem(ItemId.DISC_PRESS)
                             .build();
         }
         if (ItemTypes.DISPENSER == null) {
@@ -5435,6 +5427,12 @@ public final class ItemTypeDefaultInitializer {
                             .vanillaItem(ItemId.FROG_SPAWN_EGG)
                             .build();
         }
+        if (ItemTypes.FROSTBITE_SPAWN_EGG == null) {
+            ItemTypes.FROSTBITE_SPAWN_EGG = AllayItemType
+                            .builder(ItemSpawnEggStackImpl.class)
+                            .vanillaItem(ItemId.FROSTBITE_SPAWN_EGG)
+                            .build();
+        }
         if (ItemTypes.FROSTED_ICE == null) {
             ItemTypes.FROSTED_ICE = AllayItemType
                             .builder(ItemFrostedIceStackImpl.class)
@@ -5785,7 +5783,7 @@ public final class ItemTypeDefaultInitializer {
         }
         if (ItemTypes.GRAY_CUSHION == null) {
             ItemTypes.GRAY_CUSHION = AllayItemType
-                            .builder(ItemGrayCushionStackImpl.class)
+                            .builder(ItemCushionStackImpl.class)
                             .vanillaItem(ItemId.GRAY_CUSHION)
                             .build();
         }
@@ -5911,7 +5909,7 @@ public final class ItemTypeDefaultInitializer {
         }
         if (ItemTypes.GREEN_CUSHION == null) {
             ItemTypes.GREEN_CUSHION = AllayItemType
-                            .builder(ItemGreenCushionStackImpl.class)
+                            .builder(ItemCushionStackImpl.class)
                             .vanillaItem(ItemId.GREEN_CUSHION)
                             .build();
         }
@@ -6383,6 +6381,18 @@ public final class ItemTypeDefaultInitializer {
                             .vanillaItem(ItemId.ICE_BOMB)
                             .build();
         }
+        if (ItemTypes.ICE_CRYSTAL == null) {
+            ItemTypes.ICE_CRYSTAL = AllayItemType
+                            .builder(ItemIceCrystalStackImpl.class)
+                            .vanillaItem(ItemId.ICE_CRYSTAL)
+                            .build();
+        }
+        if (ItemTypes.ICICLE == null) {
+            ItemTypes.ICICLE = AllayItemType
+                            .builder(ItemIcicleStackImpl.class)
+                            .vanillaItem(ItemId.ICICLE)
+                            .build();
+        }
         if (ItemTypes.INFESTED_CHISELED_STONE_BRICKS == null) {
             ItemTypes.INFESTED_CHISELED_STONE_BRICKS = AllayItemType
                             .builder(ItemBricksStackImpl.class)
@@ -6673,7 +6683,7 @@ public final class ItemTypeDefaultInitializer {
         }
         if (ItemTypes.ITEM_STRAW_BED == null) {
             ItemTypes.ITEM_STRAW_BED = AllayItemType
-                            .builder(ItemItemStrawBedStackImpl.class)
+                            .builder(ItemItemBedStackImpl.class)
                             .vanillaItem(ItemId.ITEM_STRAW_BED)
                             .build();
         }
@@ -7117,7 +7127,7 @@ public final class ItemTypeDefaultInitializer {
         }
         if (ItemTypes.LIGHT_BLUE_CUSHION == null) {
             ItemTypes.LIGHT_BLUE_CUSHION = AllayItemType
-                            .builder(ItemLightBlueCushionStackImpl.class)
+                            .builder(ItemCushionStackImpl.class)
                             .vanillaItem(ItemId.LIGHT_BLUE_CUSHION)
                             .build();
         }
@@ -7243,7 +7253,7 @@ public final class ItemTypeDefaultInitializer {
         }
         if (ItemTypes.LIGHT_GRAY_CUSHION == null) {
             ItemTypes.LIGHT_GRAY_CUSHION = AllayItemType
-                            .builder(ItemLightGrayCushionStackImpl.class)
+                            .builder(ItemCushionStackImpl.class)
                             .vanillaItem(ItemId.LIGHT_GRAY_CUSHION)
                             .build();
         }
@@ -7387,7 +7397,7 @@ public final class ItemTypeDefaultInitializer {
         }
         if (ItemTypes.LIME_CUSHION == null) {
             ItemTypes.LIME_CUSHION = AllayItemType
-                            .builder(ItemLimeCushionStackImpl.class)
+                            .builder(ItemCushionStackImpl.class)
                             .vanillaItem(ItemId.LIME_CUSHION)
                             .build();
         }
@@ -7603,7 +7613,7 @@ public final class ItemTypeDefaultInitializer {
         }
         if (ItemTypes.MAGENTA_CUSHION == null) {
             ItemTypes.MAGENTA_CUSHION = AllayItemType
-                            .builder(ItemMagentaCushionStackImpl.class)
+                            .builder(ItemCushionStackImpl.class)
                             .vanillaItem(ItemId.MAGENTA_CUSHION)
                             .build();
         }
@@ -8605,7 +8615,7 @@ public final class ItemTypeDefaultInitializer {
         }
         if (ItemTypes.ORANGE_CUSHION == null) {
             ItemTypes.ORANGE_CUSHION = AllayItemType
-                            .builder(ItemOrangeCushionStackImpl.class)
+                            .builder(ItemCushionStackImpl.class)
                             .vanillaItem(ItemId.ORANGE_CUSHION)
                             .build();
         }
@@ -9109,7 +9119,7 @@ public final class ItemTypeDefaultInitializer {
         }
         if (ItemTypes.PINK_CUSHION == null) {
             ItemTypes.PINK_CUSHION = AllayItemType
-                            .builder(ItemPinkCushionStackImpl.class)
+                            .builder(ItemCushionStackImpl.class)
                             .vanillaItem(ItemId.PINK_CUSHION)
                             .build();
         }
@@ -9901,7 +9911,7 @@ public final class ItemTypeDefaultInitializer {
         }
         if (ItemTypes.PURPLE_CUSHION == null) {
             ItemTypes.PURPLE_CUSHION = AllayItemType
-                            .builder(ItemPurpleCushionStackImpl.class)
+                            .builder(ItemCushionStackImpl.class)
                             .vanillaItem(ItemId.PURPLE_CUSHION)
                             .build();
         }
@@ -10201,7 +10211,7 @@ public final class ItemTypeDefaultInitializer {
         }
         if (ItemTypes.RED_CUSHION == null) {
             ItemTypes.RED_CUSHION = AllayItemType
-                            .builder(ItemRedCushionStackImpl.class)
+                            .builder(ItemCushionStackImpl.class)
                             .vanillaItem(ItemId.RED_CUSHION)
                             .build();
         }
@@ -11359,7 +11369,7 @@ public final class ItemTypeDefaultInitializer {
         }
         if (ItemTypes.STRAW_BED == null) {
             ItemTypes.STRAW_BED = AllayItemType
-                            .builder(ItemStrawBedStackImpl.class)
+                            .builder(ItemBedStackImpl.class)
                             .vanillaItem(ItemId.STRAW_BED)
                             .build();
         }
@@ -12775,7 +12785,7 @@ public final class ItemTypeDefaultInitializer {
         }
         if (ItemTypes.WHITE_CUSHION == null) {
             ItemTypes.WHITE_CUSHION = AllayItemType
-                            .builder(ItemWhiteCushionStackImpl.class)
+                            .builder(ItemCushionStackImpl.class)
                             .vanillaItem(ItemId.WHITE_CUSHION)
                             .build();
         }
@@ -13051,7 +13061,7 @@ public final class ItemTypeDefaultInitializer {
         }
         if (ItemTypes.YELLOW_CUSHION == null) {
             ItemTypes.YELLOW_CUSHION = AllayItemType
-                            .builder(ItemYellowCushionStackImpl.class)
+                            .builder(ItemCushionStackImpl.class)
                             .vanillaItem(ItemId.YELLOW_CUSHION)
                             .build();
         }

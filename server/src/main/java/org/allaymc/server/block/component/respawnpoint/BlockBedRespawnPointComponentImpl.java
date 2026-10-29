@@ -1,6 +1,5 @@
 package org.allaymc.server.block.component.respawnpoint;
 
-import com.google.common.base.Preconditions;
 import org.allaymc.api.block.data.BlockFace;
 import org.allaymc.api.block.dto.Block;
 import org.allaymc.api.block.property.type.BlockPropertyTypes;
@@ -8,6 +7,7 @@ import org.allaymc.api.entity.interfaces.EntityPlayer;
 import org.allaymc.api.math.location.Location3i;
 import org.allaymc.api.math.location.Location3ic;
 import org.allaymc.api.message.TrKeys;
+import org.allaymc.server.block.component.BlockBedBaseComponentImpl;
 import org.joml.Vector3i;
 
 import java.util.Map;
@@ -53,9 +53,7 @@ public class BlockBedRespawnPointComponentImpl extends BlockRespawnPointComponen
     @Override
     public Location3ic onPlayerRespawn(EntityPlayer player, Block block) {
         var headBlock = block.getPropertyValue(BlockPropertyTypes.HEAD_PIECE_BIT) ? block : getPairBlock(block);
-        var facing = Preconditions.checkNotNull(
-                BlockFace.fromHorizontalIndex(headBlock.getPropertyValue(BlockPropertyTypes.DIRECTION_4))
-        );
+        var facing = BlockBedBaseComponentImpl.getBedFacing(headBlock.getBlockState());
 
         // The foot block is on the opposite side of the facing direction
         var footBlock = getPairBlock(headBlock);
@@ -97,7 +95,7 @@ public class BlockBedRespawnPointComponentImpl extends BlockRespawnPointComponen
 
     protected Block getPairBlock(Block block) {
         var head = block.getPropertyValue(BlockPropertyTypes.HEAD_PIECE_BIT);
-        var face = Preconditions.checkNotNull(BlockFace.fromHorizontalIndex(block.getPropertyValue(BlockPropertyTypes.DIRECTION_4)));
+        var face = BlockBedBaseComponentImpl.getBedFacing(block.getBlockState());
         return block.offsetPos(head ? face.opposite() : face);
     }
 }

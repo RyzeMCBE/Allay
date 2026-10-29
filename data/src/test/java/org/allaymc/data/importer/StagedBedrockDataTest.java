@@ -1,67 +1,52 @@
 package org.allaymc.data.importer;
 
 import org.junit.jupiter.api.Test;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Verifies that the vetted 1.26.50 staging snapshot was actually promoted to the live data paths.
- *
- * <p>The previous version compared staging against the old 1.26.30 live data. Once the migration is promoted that
- * comparison becomes invalid by definition. The historical migration assertions remain in Git history; CI now protects
- * the promoted snapshot from partial or accidental rollbacks.</p>
+ * 1.26.50 staging stays immutable, but the active vanilla registry is 1.26.60.
+ * Do not insist that the newer runtime blocks/items equal the older snapshot.
  */
 class StagedBedrockDataTest {
-
     private static final Path RESOURCES = Path.of("data/resources");
     private static final Path UNPACKED = RESOURCES.resolve("unpacked");
     private static final Path STAGING = UNPACKED.resolve("staging-1.26.50");
+    private static final Set<String> UPDATED = Set.of(
+            "resources/block_types.json", "resources/items.json", "resources/recipes.json",
+            "resources/creative_items.nbt", "resources/creative_groups.json",
+            "resources/item_components.nbt", "unpacked/block_palette.nbt",
+            "unpacked/block_states_raw.json", "unpacked/items_raw.json",
+            "unpacked/item_tags.json", "unpacked/block_tags.json");
 
     @Test
-    void promotedBedrockDataMatchesStagingSnapshot() throws IOException {
+    void historicalSnapshotAndUnchangedAssetsRemainStable() throws IOException {
+        assertTrue(Files.isRegularFile(STAGING.resolve("resources/block_types.json")));
+        assertTrue(Files.isRegularFile(STAGING.resolve("unpacked/items_raw.json")));
         var compared = new ArrayList<String>();
-
         try (var files = Files.walk(STAGING)) {
             for (var staged : files.filter(Files::isRegularFile).sorted().toList()) {
                 var relative = STAGING.relativize(staged);
-                var relativeName = relative.toString().replace('\\', '/');
-
-                // Provenance and the local BDS oracle are not runtime files.
-                if (relativeName.equals("SOURCES.md") || relativeName.equals("bds_registry_dump.json")) {
+                var name = relative.toString().replace('\\', '/');
+                if (name.equals("SOURCES.md") || name.equals("bds_registry_dump.json") || UPDATED.contains(name)) {
                     continue;
                 }
-
-                var live = livePath(relative);
-                assertTrue(Files.isRegularFile(live), "promoted file is missing: " + live);
-                assertEquals(-1L, Files.mismatch(staged, live), "staging/live mismatch: " + relativeName);
-                compared.add(relativeName);
+                var live = switch (relative.getName(0).toString()) {
+                    case "resources" -> RESOURCES.resolve(relative.subpath(1, relative.getNameCount()));
+                    case "unpacked" -> UNPACKED.resolve(relative.subpath(1, relative.getNameCount()));
+                    default -> throw new IllegalArgumentException("Unknown staging root: " + relative);
+                };
+                assertTrue(Files.isRegularFile(live), "Missing historical asset " + live);
+                assertEquals(-1L, Files.mismatch(staged, live), "Changed historical asset " + name);
+                compared.add(name);
             }
         }
-
-        assertFalse(compared.isEmpty());
-        assertTrue(compared.contains("resources/block_types.json"));
-        assertTrue(compared.contains("unpacked/block_palette.nbt"));
-        assertTrue(compared.contains("unpacked/items_raw.json"));
-    }
-
-    private static Path livePath(Path relative) {
-        if (relative.getNameCount() < 2) {
-            throw new IllegalArgumentException("Unexpected staging path: " + relative);
-        }
-
-        var root = relative.getName(0).toString();
-        var tail = relative.subpath(1, relative.getNameCount());
-        return switch (root) {
-            case "resources" -> RESOURCES.resolve(tail);
-            case "unpacked" -> UNPACKED.resolve(tail);
-            default -> throw new IllegalArgumentException("Unexpected staging root: " + root);
-        };
+        assertFalse(compared.isEmpty(), "Historical snapshot has no unchanged files");
+        assertTrue(compared.contains("resources/biome_definitions.json"));
     }
 }

@@ -9,6 +9,12 @@ import org.allaymc.api.block.type.BlockTypes;
 import org.allaymc.api.entity.Entity;
 import org.allaymc.api.item.ItemStack;
 import org.allaymc.api.item.type.ItemTypes;
+import org.allaymc.api.math.position.Position3i;
+import org.allaymc.api.world.Dimension;
+import org.allaymc.api.block.dto.PlayerInteractInfo;
+import org.allaymc.server.block.BlockConnectionProperties;
+import org.allaymc.server.block.BlockConnectionResolver;
+import org.joml.Vector3ic;
 import org.allaymc.server.block.component.BlockBaseComponentImpl;
 
 import java.util.Set;
@@ -17,7 +23,7 @@ import java.util.concurrent.ThreadLocalRandom;
 /**
  * @author IWareQ
  */
-public class BlockChorusPlantBaseComponentImpl extends BlockBaseComponentImpl {
+public class BlockChorusPlantBaseComponentImpl extends BlockBaseComponentImpl implements BlockConnectionResolver {
     public BlockChorusPlantBaseComponentImpl(BlockType<? extends BlockBehavior> blockType) {
         super(blockType);
     }
@@ -27,7 +33,41 @@ public class BlockChorusPlantBaseComponentImpl extends BlockBaseComponentImpl {
         super.onNeighborUpdate(block, neighbor, face, oldNeighborState);
         if (!canBeSupportedAt(block)) {
             block.breakBlock();
+        } else {
+            var resolved = resolveConnections(block);
+            if (!resolved.equals(block.getBlockState())) {
+                block.replaceState(resolved);
+            }
         }
+    }
+
+    @Override
+    public boolean place(Dimension dimension, BlockState blockState, Vector3ic pos, PlayerInteractInfo info) {
+        var connected = resolveConnections(new Block(blockState, new Position3i(pos, dimension)));
+        return super.place(dimension, connected, pos, info);
+    }
+
+    @Override
+    public void afterPlaced(Block block, BlockState state, PlayerInteractInfo info) {
+        super.afterPlaced(block, state, info);
+        var resolved = resolveConnections(new Block(state, block.getPosition()));
+        if (!resolved.equals(state)) {
+            var pos = block.getPosition();
+            block.getDimension().setBlockState(pos.x(), pos.y(), pos.z(), resolved,
+                    block.getLayer(), true, true, false, null);
+        }
+    }
+
+    @Override
+    public BlockState resolveConnections(Block block) {
+        var state = block.getBlockState();
+        for (var face : BlockFace.VALUES) {
+            var neighbor = block.offsetPos(face).getBlockType();
+            var connected = neighbor == BlockTypes.CHORUS_PLANT || neighbor == BlockTypes.CHORUS_FLOWER ||
+                    (face == BlockFace.DOWN && neighbor == BlockTypes.END_STONE);
+            state = state.setPropertyValue(BlockConnectionProperties.connection(face), connected);
+        }
+        return state;
     }
 
     private boolean canBeSupportedAt(Block current) {

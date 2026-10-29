@@ -124,6 +124,7 @@ import org.allaymc.server.block.impl.BlockDiamondBlockBehaviorImpl;
 import org.allaymc.server.block.impl.BlockDioriteBehaviorImpl;
 import org.allaymc.server.block.impl.BlockDirtBehaviorImpl;
 import org.allaymc.server.block.impl.BlockDirtWithRootsBehaviorImpl;
+import org.allaymc.server.block.impl.BlockDiscPressBehaviorImpl;
 import org.allaymc.server.block.impl.BlockDispenserBehaviorImpl;
 import org.allaymc.server.block.impl.BlockDoorBehaviorImpl;
 import org.allaymc.server.block.impl.BlockDoubleCopperSlabBehaviorImpl;
@@ -179,6 +180,8 @@ import org.allaymc.server.block.impl.BlockHoneyBlockBehaviorImpl;
 import org.allaymc.server.block.impl.BlockHoneycombBlockBehaviorImpl;
 import org.allaymc.server.block.impl.BlockHopperBehaviorImpl;
 import org.allaymc.server.block.impl.BlockIceBehaviorImpl;
+import org.allaymc.server.block.impl.BlockIceCrystalBehaviorImpl;
+import org.allaymc.server.block.impl.BlockIcicleBehaviorImpl;
 import org.allaymc.server.block.impl.BlockInfestedBlockBehaviorImpl;
 import org.allaymc.server.block.impl.BlockInfoUpdate2BehaviorImpl;
 import org.allaymc.server.block.impl.BlockInfoUpdateBehaviorImpl;
@@ -325,7 +328,6 @@ import org.allaymc.server.block.impl.BlockStickyPistonBehaviorImpl;
 import org.allaymc.server.block.impl.BlockStoneBehaviorImpl;
 import org.allaymc.server.block.impl.BlockStonecutterBehaviorImpl;
 import org.allaymc.server.block.impl.BlockStonecutterBlockBehaviorImpl;
-import org.allaymc.server.block.impl.BlockStrawBedBehaviorImpl;
 import org.allaymc.server.block.impl.BlockStructureBlockBehaviorImpl;
 import org.allaymc.server.block.impl.BlockStructureVoidBehaviorImpl;
 import org.allaymc.server.block.impl.BlockSulfurBehaviorImpl;
@@ -1848,6 +1850,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.CHORUS_PLANT = AllayBlockType
                             .builder(BlockChorusPlantBehaviorImpl.class)
                             .vanillaBlock(BlockId.CHORUS_PLANT)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CONNECTION_DOWN, BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_UP, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.CINNABAR == null) {
@@ -3065,6 +3068,13 @@ public final class BlockTypeDefaultInitializer {
                             .vanillaBlock(BlockId.DIRT_WITH_ROOTS)
                             .build();
         }
+        if (BlockTypes.DISC_PRESS == null) {
+            BlockTypes.DISC_PRESS = AllayBlockType
+                            .builder(BlockDiscPressBehaviorImpl.class)
+                            .vanillaBlock(BlockId.DISC_PRESS)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_CARDINAL_DIRECTION)
+                            .build();
+        }
         if (BlockTypes.DISPENSER == null) {
             BlockTypes.DISPENSER = AllayBlockType
                             .builder(BlockDispenserBehaviorImpl.class)
@@ -4062,7 +4072,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.FIRE = AllayBlockType
                             .builder(BlockFireBehaviorImpl.class)
                             .vanillaBlock(BlockId.FIRE)
-                            .setProperties(BlockPropertyTypes.AGE_16)
+                            .setProperties(BlockPropertyTypes.AGE_16, BlockPropertyTypes.MINECRAFT_CONNECTION_EAST, BlockPropertyTypes.MINECRAFT_CONNECTION_NORTH, BlockPropertyTypes.MINECRAFT_CONNECTION_SOUTH, BlockPropertyTypes.MINECRAFT_CONNECTION_UP, BlockPropertyTypes.MINECRAFT_CONNECTION_WEST)
                             .build();
         }
         if (BlockTypes.FIRE_CORAL == null) {
@@ -4812,6 +4822,20 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.ICE = AllayBlockType
                             .builder(BlockIceBehaviorImpl.class)
                             .vanillaBlock(BlockId.ICE)
+                            .build();
+        }
+        if (BlockTypes.ICE_CRYSTAL == null) {
+            BlockTypes.ICE_CRYSTAL = AllayBlockType
+                            .builder(BlockIceCrystalBehaviorImpl.class)
+                            .vanillaBlock(BlockId.ICE_CRYSTAL)
+                            .setProperties(BlockPropertyTypes.MINECRAFT_BLOCK_FACE)
+                            .build();
+        }
+        if (BlockTypes.ICICLE == null) {
+            BlockTypes.ICICLE = AllayBlockType
+                            .builder(BlockIcicleBehaviorImpl.class)
+                            .vanillaBlock(BlockId.ICICLE)
+                            .setProperties(BlockPropertyTypes.ATTACHED_BIT, BlockPropertyTypes.DRIPSTONE_THICKNESS, BlockPropertyTypes.HANGING)
                             .build();
         }
         if (BlockTypes.INFESTED_CHISELED_STONE_BRICKS == null) {
@@ -7903,7 +7927,7 @@ public final class BlockTypeDefaultInitializer {
             BlockTypes.REDSTONE_WIRE = AllayBlockType
                             .builder(BlockRedstoneWireBehaviorImpl.class)
                             .vanillaBlock(BlockId.REDSTONE_WIRE)
-                            .setProperties(BlockPropertyTypes.REDSTONE_SIGNAL)
+                            .setProperties(BlockPropertyTypes.REDSTONE_EAST, BlockPropertyTypes.REDSTONE_NORTH, BlockPropertyTypes.REDSTONE_SIGNAL, BlockPropertyTypes.REDSTONE_SOUTH, BlockPropertyTypes.REDSTONE_WEST)
                             .build();
         }
         if (BlockTypes.REEDS == null) {
@@ -8575,7 +8599,7 @@ public final class BlockTypeDefaultInitializer {
         }
         if (BlockTypes.STRAW_BED == null) {
             BlockTypes.STRAW_BED = AllayBlockType
-                            .builder(BlockStrawBedBehaviorImpl.class)
+                            .builder(BlockBedBehaviorImpl.class)
                             .vanillaBlock(BlockId.STRAW_BED)
                             .setProperties(BlockPropertyTypes.HEAD_PIECE_BIT, BlockPropertyTypes.MINECRAFT_CARDINAL_DIRECTION, BlockPropertyTypes.OCCUPIED_BIT)
                             .build();

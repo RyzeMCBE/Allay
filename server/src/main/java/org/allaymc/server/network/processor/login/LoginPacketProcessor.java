@@ -9,6 +9,7 @@ import org.allaymc.api.player.Skin;
 import org.allaymc.api.server.Server;
 import org.allaymc.server.AllayServer;
 import org.allaymc.server.network.processor.ingame.ILoginPacketProcessor;
+import org.cloudburstmc.netty.util.nethernet.TransportIdentityBinding;
 import org.allaymc.server.network.protocol.ClientVariant;
 import org.allaymc.server.player.AllayLoginData;
 import org.allaymc.server.player.AllayPlayer;
@@ -42,6 +43,26 @@ public class LoginPacketProcessor extends ILoginPacketProcessor<LoginPacket> {
             log.warn("Failed to configure the v2168 codec for client {}", player.getSocketAddress());
             player.disconnect();
             return;
+        }
+
+        // NetherNet uses DTLS rather than the Bedrock AES handshake. Before
+        // trusting a signed login chain, tie it to the identity proven during
+        // the WebRTC signaling handshake to prevent replayed login chains.
+        if (allayPlayer.getSourceInterface().isTransportEncrypted()) {
+            try {
+                var channel = allayPlayer.getSession().getPeer().getChannel();
+                var mismatch = TransportIdentityBinding.mismatch(channel,
+                        EncryptionUtils.parseKey(loginData.getIdentityPublicKey()));
+                if (mismatch != null) {
+                    log.warn("Rejected unbound NetherNet login from {}: {}", player.getSocketAddress(), mismatch);
+                    player.disconnect(TrKeys.MC_DISCONNECTIONSCREEN_NOTAUTHENTICATED);
+                    return;
+                }
+            } catch (Exception exception) {
+                log.warn("Failed to verify NetherNet transport identity from {}", player.getSocketAddress(), exception);
+                player.disconnect(TrKeys.MC_DISCONNECTIONSCREEN_NOTAUTHENTICATED);
+                return;
+            }
         }
 
         allayPlayer.setLoginData(loginData);
@@ -86,7 +107,10 @@ public class LoginPacketProcessor extends ILoginPacketProcessor<LoginPacket> {
             }
         }
 
-        if (!AllayServer.getSettings().networkSettings().enableNetworkEncryption()) {
+        // DTLS is already active for NetherNet; its clients have no RakNet
+        // AES handshake to answer, so complete login after identity validation.
+        if (allayPlayer.getSourceInterface().isTransportEncrypted()
+                || !AllayServer.getSettings().networkSettings().enableNetworkEncryption()) {
             allayPlayer.completeLogin();
             return;
         }

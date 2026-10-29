@@ -29,6 +29,12 @@ dependencies {
     api(libs.disruptor)
     api(libs.netty.epoll)
     api(libs.netty.kqueue)
+    // Preserve the Protocol submodule's older RakNet API: BedrockPeer still
+    // links RakDisconnectReason, removed from Cloudburst RakNet 2.x.
+    api(libs.nethernet.transport) { exclude(group = "io.netty") }
+    // Only the Linux glibc x86_64 native WebRTC transport is bundled.
+    runtimeOnly("dev.opencollab:libdatachannel-java:${libs.versions.libdatachannel.get()}:linux-glibc-x86_64")
+    api("io.netty:netty-codec-http:${libs.versions.netty.get()}")
     runtimeOnly("io.netty:netty-transport-native-epoll:${libs.versions.netty.get()}:linux-x86_64")
     runtimeOnly("io.netty:netty-transport-native-epoll:${libs.versions.netty.get()}:linux-aarch_64")
     api(libs.fastreflect)
@@ -145,7 +151,7 @@ tasks {
 }
 
 fun getShadedJarName(): String {
-    return "allay-server-${version}-${getShortGitHash()}-shaded.jar"
+    return "Engine-${version}-${getShortGitHash()}-shaded.jar"
 }
 
 fun getShortGitHash(): String {

@@ -1,0 +1,26 @@
+# Keep generated output, server worlds and secrets out of Docker build context.
+# .git and the two submodules remain available to Gradle's gitProperties
+# plugin and local includeBuild dependency substitution.
+**/build/
+**/.gradle/
+.run/
+.test/
+.jacoco/
+dist/
+logs/
+worlds/
+players/
+plugins/
+extensions/
+command_data/
+resource_packs/
+server-settings.yml
+world-settings.yml
+*.pem
+*.key
+*.p12
+*.pfx
+.env
+.env.*
+*.log
+*.zip

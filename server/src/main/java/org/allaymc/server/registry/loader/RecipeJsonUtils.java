@@ -14,6 +14,8 @@ import org.allaymc.api.utils.identifier.Identifier;
 import org.cloudburstmc.nbt.NbtMap;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
 
@@ -29,7 +31,9 @@ public final class RecipeJsonUtils {
         Objects.requireNonNull(itemType, "Unknown item type: " + itemId);
         var count = jsonObject.get("count").getAsInt();
         var meta = jsonObject.has("data") ? jsonObject.get("data").getAsInt() : 0;
-        var nbtMap = jsonObject.has("nbt") ? AllayNBTUtils.base64ToNbt(jsonObject.get("nbt").getAsString()) : NbtMap.EMPTY;
+        var nbtMap = jsonObject.has("nbt")
+                ? parseRecipeOutputNbt(jsonObject.get("nbt").getAsString())
+                : NbtMap.EMPTY;
         return itemType.createItemStack(
                 ItemStackInitInfo
                         .builder()
@@ -38,6 +42,39 @@ public final class RecipeJsonUtils {
                         .extraTag(nbtMap)
                         .build()
         );
+    }
+
+    /**
+     * Decode the real Bedrock recipe item-stack extra data from the BDS export.
+     * The exporter base64-encodes the network item NBT field, rather than a
+     * standalone big-endian NBT document. Nonempty payloads begin with the
+     * little-endian short 0xffff and format byte 1, followed by little-endian NBT.
+     * Most vanilla outputs have a fixed-width, all-zero placeholder instead.
+     */
+    static NbtMap parseRecipeOutputNbt(String encoded) {
+        byte[] bytes = Base64.getDecoder().decode(encoded);
+        boolean empty = true;
+        for (byte value : bytes) {
+            if (value != 0) {
+                empty = false;
+                break;
+            }
+        }
+        if (empty) return NbtMap.EMPTY;
+
+        if (bytes.length >= 4 && (bytes[0] & 0xff) == 0xff
+                && (bytes[1] & 0xff) == 0xff && bytes[2] == 1) {
+            // Skip the three-byte network NBT header. The remaining bytes
+            // start with the NBT compound tag and its little-endian name.
+            return Objects.requireNonNull(
+                    AllayNBTUtils.bytesToNbtLE(Arrays.copyOfRange(bytes, 3, bytes.length)),
+                    "Network recipe NBT compound is null"
+            );
+        }
+
+        // Retain compatibility with older standalone big-endian NBT exports.
+        return Objects.requireNonNull(AllayNBTUtils.base64ToNbt(encoded),
+                "Recipe NBT compound is null");
     }
 
     public static List<ItemStack> parseOutputs(JsonObject obj) {

@@ -21,6 +21,9 @@ class RawPacketCodecRegistrationTest {
     private static final Pattern PACKET_CONSTRUCTION = Pattern.compile(
             "\\bnew\\s+([A-Za-z][A-Za-z0-9_]*Packet)\\s*\\("
     );
+    private static final Pattern DATAGRAM_IMPORT = Pattern.compile(
+            "(?m)^import (?:io\\.netty\\.channel\\.socket|java\\.net)\\.DatagramPacket;"
+    );
     private static final Set<RawPacketUse> RAW_PACKET_ALLOWLIST = Set.of(
             new RawPacketUse(
                     "org/allaymc/server/network/processor/login/RequestNetworkSettingsPacketProcessor.java",
@@ -86,6 +89,16 @@ class RawPacketCodecRegistrationTest {
     }
 
     @Test
+    void transportDatagramsAreExcludedWithoutIgnoringBedrockPackets() {
+        for (String transport : List.of("io.netty.channel.socket", "java.net")) {
+            String source = "import " + transport + ".DatagramPacket;\n"
+                    + "class Example { Object a = new DatagramPacket(data, address);\n"
+                    + "Object b = new PlayStatusPacket(); }";
+            assertEquals(Set.of("PlayStatusPacket"), findPacketConstructions(source));
+        }
+    }
+
+    @Test
     void confirmSkinRegistrationIsNetEaseOnly() {
         for (var protocol : registry.getProtocols()) {
             var registered = protocol.getCodec().getPacketDefinition(ConfirmSkinPacket.class) != null;
@@ -134,10 +147,16 @@ class RawPacketCodecRegistrationTest {
     }
 
     private static Set<String> findPacketConstructions(Path sourceFile) throws IOException {
+        return findPacketConstructions(Files.readString(sourceFile));
+    }
+
+    private static Set<String> findPacketConstructions(String source) {
         var packetNames = new HashSet<String>();
-        var matcher = PACKET_CONSTRUCTION.matcher(Files.readString(sourceFile));
+        boolean transportDatagram = DATAGRAM_IMPORT.matcher(source).find();
+        var matcher = PACKET_CONSTRUCTION.matcher(source);
         while (matcher.find()) {
-            packetNames.add(matcher.group(1));
+            String name = matcher.group(1);
+            if (!transportDatagram || !name.equals("DatagramPacket")) packetNames.add(name);
         }
         return packetNames;
     }

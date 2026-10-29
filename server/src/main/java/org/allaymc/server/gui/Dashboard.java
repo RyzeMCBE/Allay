@@ -13,6 +13,7 @@ import org.allaymc.api.registry.Registries;
 import org.allaymc.api.server.Server;
 import org.allaymc.api.utils.AllayStringUtils;
 import org.allaymc.server.command.AllayCommandSuggester;
+import org.allaymc.server.EngineIdentity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Layout;
 import org.apache.logging.log4j.core.LogEvent;
@@ -32,7 +33,6 @@ import java.awt.event.*;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.Serializable;
-import java.net.URL;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -87,7 +87,7 @@ public final class Dashboard {
         $$$setupUI$$$();
         wrapSystemOutputStreams();
         attachLogAppender();
-        JFrame frame = new JFrame(I18n.get().tr(TrKeys.ALLAY_GUI_NAME));
+        JFrame frame = new JFrame(EngineIdentity.NAME);
         frame.setContentPane(rootPane);
         frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         frame.addWindowListener(new WindowAdapter() {
@@ -98,11 +98,8 @@ public final class Dashboard {
         });
         frame.setSize(700, 700);
         frame.setLocationRelativeTo(null);
-        // Set icon
-        URL image = Dashboard.class.getClassLoader().getResource("icon.png");
-        if (image != null) {
-            frame.setIconImage(new ImageIcon(image).getImage());
-        }
+        // Do not display the upstream Allay trademark artwork under the Engine identity.
+        // A distinct Engine logo can be installed here when available.
         applyI18nTexts();
         // Show the frame
         frame.setVisible(true);

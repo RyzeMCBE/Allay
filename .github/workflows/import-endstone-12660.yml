@@ -1,0 +1,128 @@
+name: Import official BDS 1.26.60 into Allay
+
+on:
+  push:
+    branches: [feat/minecraft-1.26.60]
+    paths:
+      - '.github/workflows/import-endstone-12660.yml'
+      - 'scripts/ci/import_official_bds_12660.py'
+      - 'codegen/src/main/java/org/allaymc/codegen/BlockIdEnumGen.java'
+      - 'server/src/main/java/org/allaymc/server/block/type/BlockTypeInitializer.java'
+      - 'server/src/main/java/org/allaymc/server/block/component/BlockBedBaseComponentImpl.java'
+      - 'server/src/main/java/org/allaymc/server/block/component/respawnpoint/BlockBedRespawnPointComponentImpl.java'
+      - 'server/src/main/java/org/allaymc/server/registry/loader/RecipeJsonUtils.java'
+      - 'server/src/test/java/org/allaymc/server/registry/loader/RecipeNbtDecodeTest.java'
+      - 'server/src/test/java/org/allaymc/server/network/protocol/BlockNetworkIdMappingTest.java'
+      - 'server/src/test/java/org/allaymc/server/network/protocol/ProtocolRegistryTest.java'
+      - 'server/src/test/java/org/allaymc/server/player/CapturedPlayerPacketReplayTest.java'
+      - 'gradle/libs.versions.toml'
+      - 'server/build.gradle.kts'
+      - 'server/src/main/java/org/allaymc/server/ServerSettings.java'
+      - 'server/src/main/java/org/allaymc/server/network/AllayNetworkInterface.java'
+      - 'server/src/main/java/org/allaymc/server/network/AllayNetworkManager.java'
+      - 'server/src/main/java/org/allaymc/server/AllayServer.java'
+      - 'server/src/main/java/org/allaymc/server/network/processor/login/LoginPacketProcessor.java'
+      - 'server/src/main/java/org/allaymc/server/network/nethernet/NetherNetFrameCodec.java'
+      - 'server/src/main/java/org/allaymc/server/network/nethernet/NetherNetPacketEncoder.java'
+      - 'server/src/main/java/org/allaymc/server/network/nethernet/AllayNetherNetPeer.java'
+      - 'server/src/main/java/org/allaymc/server/network/AllayNetherNetInterface.java'
+      - 'server/src/test/java/org/allaymc/server/network/nethernet/NetherNetFrameCodecTest.java'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: allay-import-bds12660
+  cancel-in-progress: false
+
+jobs:
+  import:
+    name: Verify BDS, regenerate Allay, test and publish source
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - name: Checkout Allay and pinned Protocol/StateUpdater
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Verify dependency pointers
+        run: bash .github/scripts/check-linked-dependencies.sh
+
+      - name: Download official BDS 1.26.60 export from Endstone Actions
+        uses: actions/download-artifact@v7
+        with:
+          repository: RyzeMCBE/endstone
+          run-id: 40758269886
+          artifact-ids: '12848845705'
+          github-token: ${{ github.token }}
+          path: .ci/endstone-export
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Verify hashes and import BDS registry
+        run: python3 scripts/ci/import_official_bds_12660.py
+
+      - name: Generate physics, item metadata and block property types
+        run: |
+          chmod +x gradlew
+          ./gradlew :data:runMain -PmainClass=org.allaymc.data.BlockStateDataProcessor --no-daemon
+          ./gradlew :data:runMain -PmainClass=org.allaymc.data.ItemDataProcessor --no-daemon
+          ./gradlew :data:runMain -PmainClass=org.allaymc.data.BlockPropertyTypeDataFileGen --no-daemon
+
+      - name: Generate source identifiers
+        run: |
+          ./gradlew :codegen:runMain -PmainClass=org.allaymc.codegen.BlockIdEnumGen --no-daemon
+          ./gradlew :codegen:runMain -PmainClass=org.allaymc.codegen.ItemIdEnumGen --no-daemon
+
+      - name: Regenerate block and item Java classes
+        run: |
+          ./gradlew :codegen:runMain -PmainClass=org.allaymc.codegen.BlockPropertyTypeGen --no-daemon
+          ./gradlew :codegen:runMain -PmainClass=org.allaymc.codegen.BlockClassGen --no-daemon
+          ./gradlew :codegen:runMain -PmainClass=org.allaymc.codegen.ItemClassGen --no-daemon
+
+      - name: Full Gradle build and tests
+        run: ./gradlew build --no-daemon
+
+      - name: Commit validated data to existing PR 42 branch
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A data/resources/
+          git add -A api/src/main/java/org/allaymc/api/block/ api/src/main/java/org/allaymc/api/item/
+          git add -A server/src/main/java/org/allaymc/server/block/ server/src/main/java/org/allaymc/server/item/
+          if ! git diff --cached --quiet; then
+            git commit -m "data: integrate verified BDS 1.26.60 registries"
+            git push origin HEAD:feat/minecraft-1.26.60
+          fi
+
+      - name: Upload Linux server JAR
+        if: success()
+        uses: actions/upload-artifact@v7
+        with:
+          name: allay-official-12660-linux-${{ github.run_id }}
+          path: server/build/libs/*.jar
+          if-no-files-found: error
+
+      - name: Upload diagnostic test reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: allay-official-12660-diagnostics-${{ github.run_id }}
+          path: |
+            data/build/test-results/test/
+            server/build/test-results/test/
+            .ci/endstone-export/manifest.json
+          if-no-files-found: ignore

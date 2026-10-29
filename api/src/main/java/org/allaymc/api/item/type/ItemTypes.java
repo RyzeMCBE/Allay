@@ -46,13 +46,11 @@ import org.allaymc.api.item.interfaces.ItemBellStack;
 import org.allaymc.api.item.interfaces.ItemBigDripleafStack;
 import org.allaymc.api.item.interfaces.ItemBigFlowerStack;
 import org.allaymc.api.item.interfaces.ItemBirchPressurePlateStack;
-import org.allaymc.api.item.interfaces.ItemBlackCushionStack;
 import org.allaymc.api.item.interfaces.ItemBlackstoneStack;
 import org.allaymc.api.item.interfaces.ItemBladePotterySherdStack;
 import org.allaymc.api.item.interfaces.ItemBlazePowderStack;
 import org.allaymc.api.item.interfaces.ItemBlazeRodStack;
 import org.allaymc.api.item.interfaces.ItemBleachStack;
-import org.allaymc.api.item.interfaces.ItemBlueCushionStack;
 import org.allaymc.api.item.interfaces.ItemBlueIceStack;
 import org.allaymc.api.item.interfaces.ItemBoardStack;
 import org.allaymc.api.item.interfaces.ItemBoatStack;
@@ -74,7 +72,6 @@ import org.allaymc.api.item.interfaces.ItemBrewingStandStack;
 import org.allaymc.api.item.interfaces.ItemBrickBlockStack;
 import org.allaymc.api.item.interfaces.ItemBrickStack;
 import org.allaymc.api.item.interfaces.ItemBricksStack;
-import org.allaymc.api.item.interfaces.ItemBrownCushionStack;
 import org.allaymc.api.item.interfaces.ItemBrownMushroomBlockStack;
 import org.allaymc.api.item.interfaces.ItemBrownMushroomStack;
 import org.allaymc.api.item.interfaces.ItemBrushStack;
@@ -182,7 +179,7 @@ import org.allaymc.api.item.interfaces.ItemCrimsonRootsStack;
 import org.allaymc.api.item.interfaces.ItemCrimsonStemStack;
 import org.allaymc.api.item.interfaces.ItemCrossbowStack;
 import org.allaymc.api.item.interfaces.ItemCryingObsidianStack;
-import org.allaymc.api.item.interfaces.ItemCyanCushionStack;
+import org.allaymc.api.item.interfaces.ItemCushionStack;
 import org.allaymc.api.item.interfaces.ItemDangerPotterySherdStack;
 import org.allaymc.api.item.interfaces.ItemDarkOakPressurePlateStack;
 import org.allaymc.api.item.interfaces.ItemDarkPrismarineStack;
@@ -210,6 +207,7 @@ import org.allaymc.api.item.interfaces.ItemDioriteStack;
 import org.allaymc.api.item.interfaces.ItemDirtStack;
 import org.allaymc.api.item.interfaces.ItemDirtWithRootsStack;
 import org.allaymc.api.item.interfaces.ItemDiscFragment5Stack;
+import org.allaymc.api.item.interfaces.ItemDiscPressStack;
 import org.allaymc.api.item.interfaces.ItemDispenserStack;
 import org.allaymc.api.item.interfaces.ItemDoorStack;
 import org.allaymc.api.item.interfaces.ItemDoublePlantStack;
@@ -303,8 +301,6 @@ import org.allaymc.api.item.interfaces.ItemGraniteStack;
 import org.allaymc.api.item.interfaces.ItemGrassBlockStack;
 import org.allaymc.api.item.interfaces.ItemGrassPathStack;
 import org.allaymc.api.item.interfaces.ItemGravelStack;
-import org.allaymc.api.item.interfaces.ItemGrayCushionStack;
-import org.allaymc.api.item.interfaces.ItemGreenCushionStack;
 import org.allaymc.api.item.interfaces.ItemGrindstoneStack;
 import org.allaymc.api.item.interfaces.ItemGunpowderStack;
 import org.allaymc.api.item.interfaces.ItemGusterBannerPatternStack;
@@ -331,7 +327,9 @@ import org.allaymc.api.item.interfaces.ItemHorseArmorStack;
 import org.allaymc.api.item.interfaces.ItemHostArmorTrimSmithingTemplateStack;
 import org.allaymc.api.item.interfaces.ItemHowlPotterySherdStack;
 import org.allaymc.api.item.interfaces.ItemIceBombStack;
+import org.allaymc.api.item.interfaces.ItemIceCrystalStack;
 import org.allaymc.api.item.interfaces.ItemIceStack;
+import org.allaymc.api.item.interfaces.ItemIcicleStack;
 import org.allaymc.api.item.interfaces.ItemInfestedCobblestoneStack;
 import org.allaymc.api.item.interfaces.ItemInfestedDeepslateStack;
 import org.allaymc.api.item.interfaces.ItemInfestedStoneStack;
@@ -359,7 +357,6 @@ import org.allaymc.api.item.interfaces.ItemItemKelpStack;
 import org.allaymc.api.item.interfaces.ItemItemNetherSproutsStack;
 import org.allaymc.api.item.interfaces.ItemItemNetherWartStack;
 import org.allaymc.api.item.interfaces.ItemItemReedsStack;
-import org.allaymc.api.item.interfaces.ItemItemStrawBedStack;
 import org.allaymc.api.item.interfaces.ItemItemWheatStack;
 import org.allaymc.api.item.interfaces.ItemJigsawStack;
 import org.allaymc.api.item.interfaces.ItemJukeboxStack;
@@ -385,11 +382,8 @@ import org.allaymc.api.item.interfaces.ItemLecternStack;
 import org.allaymc.api.item.interfaces.ItemLeggingsStack;
 import org.allaymc.api.item.interfaces.ItemLeverStack;
 import org.allaymc.api.item.interfaces.ItemLightBlockStack;
-import org.allaymc.api.item.interfaces.ItemLightBlueCushionStack;
-import org.allaymc.api.item.interfaces.ItemLightGrayCushionStack;
 import org.allaymc.api.item.interfaces.ItemLightWeightedPressurePlateStack;
 import org.allaymc.api.item.interfaces.ItemLightningRodStack;
-import org.allaymc.api.item.interfaces.ItemLimeCushionStack;
 import org.allaymc.api.item.interfaces.ItemLingeringPotionStack;
 import org.allaymc.api.item.interfaces.ItemLiquidStack;
 import org.allaymc.api.item.interfaces.ItemLitDeepslateRedstoneOreStack;
@@ -400,7 +394,6 @@ import org.allaymc.api.item.interfaces.ItemLodestoneStack;
 import org.allaymc.api.item.interfaces.ItemLogStack;
 import org.allaymc.api.item.interfaces.ItemLoomStack;
 import org.allaymc.api.item.interfaces.ItemMaceStack;
-import org.allaymc.api.item.interfaces.ItemMagentaCushionStack;
 import org.allaymc.api.item.interfaces.ItemMagmaCreamStack;
 import org.allaymc.api.item.interfaces.ItemMagmaStack;
 import org.allaymc.api.item.interfaces.ItemMangrovePressurePlateStack;
@@ -452,7 +445,6 @@ import org.allaymc.api.item.interfaces.ItemObsidianStack;
 import org.allaymc.api.item.interfaces.ItemOchreFroglightStack;
 import org.allaymc.api.item.interfaces.ItemOminousBottleStack;
 import org.allaymc.api.item.interfaces.ItemOminousTrialKeyStack;
-import org.allaymc.api.item.interfaces.ItemOrangeCushionStack;
 import org.allaymc.api.item.interfaces.ItemOxidizedCopperBulbStack;
 import org.allaymc.api.item.interfaces.ItemOxidizedCopperChestStack;
 import org.allaymc.api.item.interfaces.ItemOxidizedCopperGrateStack;
@@ -468,7 +460,6 @@ import org.allaymc.api.item.interfaces.ItemPhantomMembraneStack;
 import org.allaymc.api.item.interfaces.ItemPhotoItemStack;
 import org.allaymc.api.item.interfaces.ItemPickaxeStack;
 import org.allaymc.api.item.interfaces.ItemPiglinBannerPatternStack;
-import org.allaymc.api.item.interfaces.ItemPinkCushionStack;
 import org.allaymc.api.item.interfaces.ItemPistonStack;
 import org.allaymc.api.item.interfaces.ItemPitcherCropStack;
 import org.allaymc.api.item.interfaces.ItemPitcherPodStack;
@@ -507,7 +498,6 @@ import org.allaymc.api.item.interfaces.ItemPumpkinPieStack;
 import org.allaymc.api.item.interfaces.ItemPumpkinSeedsStack;
 import org.allaymc.api.item.interfaces.ItemPumpkinStack;
 import org.allaymc.api.item.interfaces.ItemPumpkinStemStack;
-import org.allaymc.api.item.interfaces.ItemPurpleCushionStack;
 import org.allaymc.api.item.interfaces.ItemPurpurStack;
 import org.allaymc.api.item.interfaces.ItemQuartzBlockStack;
 import org.allaymc.api.item.interfaces.ItemQuartzOreStack;
@@ -526,7 +516,6 @@ import org.allaymc.api.item.interfaces.ItemRawGoldStack;
 import org.allaymc.api.item.interfaces.ItemRawIronBlockStack;
 import org.allaymc.api.item.interfaces.ItemRawIronStack;
 import org.allaymc.api.item.interfaces.ItemRecoveryCompassStack;
-import org.allaymc.api.item.interfaces.ItemRedCushionStack;
 import org.allaymc.api.item.interfaces.ItemRedFlowerStack;
 import org.allaymc.api.item.interfaces.ItemRedMushroomBlockStack;
 import org.allaymc.api.item.interfaces.ItemRedMushroomStack;
@@ -619,7 +608,6 @@ import org.allaymc.api.item.interfaces.ItemStoneStack;
 import org.allaymc.api.item.interfaces.ItemStonebrickStack;
 import org.allaymc.api.item.interfaces.ItemStonecutterBlockStack;
 import org.allaymc.api.item.interfaces.ItemStonecutterStack;
-import org.allaymc.api.item.interfaces.ItemStrawBedStack;
 import org.allaymc.api.item.interfaces.ItemStringStack;
 import org.allaymc.api.item.interfaces.ItemStrippedBambooBlockStack;
 import org.allaymc.api.item.interfaces.ItemStrippedCrimsonHyphaeStack;
@@ -699,7 +687,6 @@ import org.allaymc.api.item.interfaces.ItemWebStack;
 import org.allaymc.api.item.interfaces.ItemWeepingVinesStack;
 import org.allaymc.api.item.interfaces.ItemWheatSeedsStack;
 import org.allaymc.api.item.interfaces.ItemWheatStack;
-import org.allaymc.api.item.interfaces.ItemWhiteCushionStack;
 import org.allaymc.api.item.interfaces.ItemWildArmorTrimSmithingTemplateStack;
 import org.allaymc.api.item.interfaces.ItemWindChargeStack;
 import org.allaymc.api.item.interfaces.ItemWolfArmorStack;
@@ -708,7 +695,6 @@ import org.allaymc.api.item.interfaces.ItemWoodenPressurePlateStack;
 import org.allaymc.api.item.interfaces.ItemWoolStack;
 import org.allaymc.api.item.interfaces.ItemWritableBookStack;
 import org.allaymc.api.item.interfaces.ItemWrittenBookStack;
-import org.allaymc.api.item.interfaces.ItemYellowCushionStack;
 
 @MinecraftVersionSensitive
 public final class ItemTypes {
@@ -962,7 +948,7 @@ public final class ItemTypes {
 
     public static ItemType<ItemStairsStack> BLACK_CONCRETE_STAIRS;
 
-    public static ItemType<ItemBlackCushionStack> BLACK_CUSHION;
+    public static ItemType<ItemCushionStack> BLACK_CUSHION;
 
     public static ItemType<ItemDyeStack> BLACK_DYE;
 
@@ -1026,7 +1012,7 @@ public final class ItemTypes {
 
     public static ItemType<ItemStairsStack> BLUE_CONCRETE_STAIRS;
 
-    public static ItemType<ItemBlueCushionStack> BLUE_CUSHION;
+    public static ItemType<ItemCushionStack> BLUE_CUSHION;
 
     public static ItemType<ItemDyeStack> BLUE_DYE;
 
@@ -1130,7 +1116,7 @@ public final class ItemTypes {
 
     public static ItemType<ItemStairsStack> BROWN_CONCRETE_STAIRS;
 
-    public static ItemType<ItemBrownCushionStack> BROWN_CUSHION;
+    public static ItemType<ItemCushionStack> BROWN_CUSHION;
 
     public static ItemType<ItemDyeStack> BROWN_DYE;
 
@@ -1620,7 +1606,7 @@ public final class ItemTypes {
 
     public static ItemType<ItemStairsStack> CYAN_CONCRETE_STAIRS;
 
-    public static ItemType<ItemCyanCushionStack> CYAN_CUSHION;
+    public static ItemType<ItemCushionStack> CYAN_CUSHION;
 
     public static ItemType<ItemDyeStack> CYAN_DYE;
 
@@ -1841,6 +1827,8 @@ public final class ItemTypes {
     public static ItemType<ItemDirtWithRootsStack> DIRT_WITH_ROOTS;
 
     public static ItemType<ItemDiscFragment5Stack> DISC_FRAGMENT_5;
+
+    public static ItemType<ItemDiscPressStack> DISC_PRESS;
 
     public static ItemType<ItemDispenserStack> DISPENSER;
 
@@ -2286,6 +2274,8 @@ public final class ItemTypes {
 
     public static ItemType<ItemSpawnEggStack> FROG_SPAWN_EGG;
 
+    public static ItemType<ItemSpawnEggStack> FROSTBITE_SPAWN_EGG;
+
     public static ItemType<ItemFrostedIceStack> FROSTED_ICE;
 
     public static ItemType<ItemFurnaceStack> FURNACE;
@@ -2402,7 +2392,7 @@ public final class ItemTypes {
 
     public static ItemType<ItemStairsStack> GRAY_CONCRETE_STAIRS;
 
-    public static ItemType<ItemGrayCushionStack> GRAY_CUSHION;
+    public static ItemType<ItemCushionStack> GRAY_CUSHION;
 
     public static ItemType<ItemDyeStack> GRAY_DYE;
 
@@ -2444,7 +2434,7 @@ public final class ItemTypes {
 
     public static ItemType<ItemStairsStack> GREEN_CONCRETE_STAIRS;
 
-    public static ItemType<ItemGreenCushionStack> GREEN_CUSHION;
+    public static ItemType<ItemCushionStack> GREEN_CUSHION;
 
     public static ItemType<ItemDyeStack> GREEN_DYE;
 
@@ -2602,6 +2592,10 @@ public final class ItemTypes {
 
     public static ItemType<ItemIceBombStack> ICE_BOMB;
 
+    public static ItemType<ItemIceCrystalStack> ICE_CRYSTAL;
+
+    public static ItemType<ItemIcicleStack> ICICLE;
+
     public static ItemType<ItemBricksStack> INFESTED_CHISELED_STONE_BRICKS;
 
     public static ItemType<ItemInfestedCobblestoneStack> INFESTED_COBBLESTONE;
@@ -2698,7 +2692,7 @@ public final class ItemTypes {
 
     public static ItemType<ItemCampfireStack> ITEM_SOUL_CAMPFIRE;
 
-    public static ItemType<ItemItemStrawBedStack> ITEM_STRAW_BED;
+    public static ItemType<ItemItemBedStack> ITEM_STRAW_BED;
 
     public static ItemType<ItemItemWheatStack> ITEM_WHEAT;
 
@@ -2846,7 +2840,7 @@ public final class ItemTypes {
 
     public static ItemType<ItemStairsStack> LIGHT_BLUE_CONCRETE_STAIRS;
 
-    public static ItemType<ItemLightBlueCushionStack> LIGHT_BLUE_CUSHION;
+    public static ItemType<ItemCushionStack> LIGHT_BLUE_CUSHION;
 
     public static ItemType<ItemDyeStack> LIGHT_BLUE_DYE;
 
@@ -2888,7 +2882,7 @@ public final class ItemTypes {
 
     public static ItemType<ItemStairsStack> LIGHT_GRAY_CONCRETE_STAIRS;
 
-    public static ItemType<ItemLightGrayCushionStack> LIGHT_GRAY_CUSHION;
+    public static ItemType<ItemCushionStack> LIGHT_GRAY_CUSHION;
 
     public static ItemType<ItemDyeStack> LIGHT_GRAY_DYE;
 
@@ -2936,7 +2930,7 @@ public final class ItemTypes {
 
     public static ItemType<ItemStairsStack> LIME_CONCRETE_STAIRS;
 
-    public static ItemType<ItemLimeCushionStack> LIME_CUSHION;
+    public static ItemType<ItemCushionStack> LIME_CUSHION;
 
     public static ItemType<ItemDyeStack> LIME_DYE;
 
@@ -3008,7 +3002,7 @@ public final class ItemTypes {
 
     public static ItemType<ItemStairsStack> MAGENTA_CONCRETE_STAIRS;
 
-    public static ItemType<ItemMagentaCushionStack> MAGENTA_CUSHION;
+    public static ItemType<ItemCushionStack> MAGENTA_CUSHION;
 
     public static ItemType<ItemDyeStack> MAGENTA_DYE;
 
@@ -3342,7 +3336,7 @@ public final class ItemTypes {
 
     public static ItemType<ItemStairsStack> ORANGE_CONCRETE_STAIRS;
 
-    public static ItemType<ItemOrangeCushionStack> ORANGE_CUSHION;
+    public static ItemType<ItemCushionStack> ORANGE_CUSHION;
 
     public static ItemType<ItemDyeStack> ORANGE_DYE;
 
@@ -3510,7 +3504,7 @@ public final class ItemTypes {
 
     public static ItemType<ItemStairsStack> PINK_CONCRETE_STAIRS;
 
-    public static ItemType<ItemPinkCushionStack> PINK_CUSHION;
+    public static ItemType<ItemCushionStack> PINK_CUSHION;
 
     public static ItemType<ItemDyeStack> PINK_DYE;
 
@@ -3774,7 +3768,7 @@ public final class ItemTypes {
 
     public static ItemType<ItemStairsStack> PURPLE_CONCRETE_STAIRS;
 
-    public static ItemType<ItemPurpleCushionStack> PURPLE_CUSHION;
+    public static ItemType<ItemCushionStack> PURPLE_CUSHION;
 
     public static ItemType<ItemDyeStack> PURPLE_DYE;
 
@@ -3874,7 +3868,7 @@ public final class ItemTypes {
 
     public static ItemType<ItemStairsStack> RED_CONCRETE_STAIRS;
 
-    public static ItemType<ItemRedCushionStack> RED_CUSHION;
+    public static ItemType<ItemCushionStack> RED_CUSHION;
 
     public static ItemType<ItemDyeStack> RED_DYE;
 
@@ -4260,7 +4254,7 @@ public final class ItemTypes {
 
     public static ItemType<ItemStonecutterBlockStack> STONECUTTER_BLOCK;
 
-    public static ItemType<ItemStrawBedStack> STRAW_BED;
+    public static ItemType<ItemBedStack> STRAW_BED;
 
     public static ItemType<ItemSpawnEggStack> STRAY_SPAWN_EGG;
 
@@ -4732,7 +4726,7 @@ public final class ItemTypes {
 
     public static ItemType<ItemStairsStack> WHITE_CONCRETE_STAIRS;
 
-    public static ItemType<ItemWhiteCushionStack> WHITE_CUSHION;
+    public static ItemType<ItemCushionStack> WHITE_CUSHION;
 
     public static ItemType<ItemDyeStack> WHITE_DYE;
 
@@ -4824,7 +4818,7 @@ public final class ItemTypes {
 
     public static ItemType<ItemStairsStack> YELLOW_CONCRETE_STAIRS;
 
-    public static ItemType<ItemYellowCushionStack> YELLOW_CUSHION;
+    public static ItemType<ItemCushionStack> YELLOW_CUSHION;
 
     public static ItemType<ItemDyeStack> YELLOW_DYE;
 

@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.allaymc.api.block.dto.Block;
+import org.allaymc.api.block.data.BlockFace;
 import org.allaymc.api.block.interfaces.BlockLiquidBehavior;
 import org.allaymc.api.block.type.BlockState;
 import org.allaymc.api.block.type.BlockTypes;
@@ -26,6 +27,8 @@ import org.allaymc.api.world.gamerule.GameRule;
 import org.allaymc.api.world.poi.PoiType;
 import org.allaymc.api.world.storage.WorldStorage;
 import org.allaymc.server.AllayServer;
+import org.allaymc.server.block.BlockConnectionResolver;
+import org.allaymc.server.block.impl.BlockBehaviorImpl;
 import org.allaymc.server.blockentity.component.BlockEntityBaseComponentImpl;
 import org.allaymc.server.blockentity.impl.BlockEntityImpl;
 import org.allaymc.server.world.light.AllayLightEngine;
@@ -69,6 +72,7 @@ public class AllayUnsafeChunk implements UnsafeChunk {
     protected BlockChangeCallback blockChangeCallback;
     @Getter
     protected volatile boolean loaded;
+    protected volatile boolean connectionRefreshRequired;
     protected int autoSaveTimer = 0;
     protected int updateLCG = ThreadLocalRandom.current().nextInt();
 
@@ -131,9 +135,46 @@ public class AllayUnsafeChunk implements UnsafeChunk {
     }
 
     public void tick(long currentTick, Dimension dimension) {
+        if (connectionRefreshRequired) {
+            connectionRefreshRequired = false;
+            refreshBlockConnections(dimension);
+        }
         blockEntities.values().forEach(blockEntity -> ((BlockEntityBaseComponentImpl) ((BlockEntityImpl) blockEntity).getBaseComponent()).tick(currentTick));
         tickScheduledUpdates(currentTick, dimension);
         tickRandomUpdates(dimension);
+    }
+
+    /** Rebuilds visual connection properties after a chunk or its neighbors load. */
+    protected void refreshBlockConnections(Dimension dimension) {
+        for (var section : sections) {
+            if (section.blockLayers()[0].allEntriesMatch(state -> connectionResolver(state) == null)) {
+                continue;
+            }
+            for (int localX = 0; localX < 16; localX++) {
+                for (int localZ = 0; localZ < 16; localZ++) {
+                    for (int localY = 0; localY < 16; localY++) {
+                        var state = section.getBlockState(localX, localY, localZ, 0);
+                        var resolver = connectionResolver(state);
+                        if (resolver == null) continue;
+                        int y = (section.sectionY() << 4) + localY;
+                        var block = new Block(state,
+                                new Position3i((x << 4) + localX, y, (z << 4) + localZ, dimension));
+                        var refreshed = resolver.resolveConnections(block);
+                        if (!refreshed.equals(state)) {
+                            setBlockState(localX, y, localZ, refreshed, 0, true);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private static BlockConnectionResolver connectionResolver(BlockState state) {
+        if (state.getBehavior() instanceof BlockBehaviorImpl behavior &&
+                behavior.getBaseComponent() instanceof BlockConnectionResolver resolver) {
+            return resolver;
+        }
+        return null;
     }
 
     public void checkAutoSave(WorldStorage worldStorage) {
@@ -227,6 +268,13 @@ public class AllayUnsafeChunk implements UnsafeChunk {
         ((AllayEntityManager) dimension.getEntityManager()).onChunkLoad(this.x, this.z);
 
         loaded = true;
+        connectionRefreshRequired = true;
+        for (var face : BlockFace.getHorizontalBlockFaces()) {
+            var neighbor = dimension.getChunkManager().getChunk(x + face.getOffset().x(), z + face.getOffset().z());
+            if (neighbor != null) {
+                ((AllayUnsafeChunk) neighbor.toUnsafeChunk()).connectionRefreshRequired = true;
+            }
+        }
     }
 
     public void onChunkUnload(Dimension dimension) {

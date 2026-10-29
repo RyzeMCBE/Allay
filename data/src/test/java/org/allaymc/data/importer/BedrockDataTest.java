@@ -32,7 +32,7 @@ class BedrockDataTest {
     private static final Path RESOURCES = Path.of("data/resources");
     private static final Path UNPACKED = RESOURCES.resolve("unpacked");
     /** Veri sürümünün resmî paleti; veri güncellenince bu yol da güncellenir. */
-    private static final Path OFFICIAL_PALETTE = RESOURCES.resolve("protocol_palettes/1_26_50.nbt");
+    private static final Path OFFICIAL_PALETTE = RESOURCES.resolve("protocol_palettes/1_26_60.nbt");
     private static final Path DATA_DRIVEN_BLOCKS = RESOURCES.resolve("protocol_palettes/1_26_50_data_driven_blocks.nbt");
     private static final Path BDS_DUMP = UNPACKED.resolve("bds_registry_dump.json");
     private static final int UNKNOWN_HASH = -2;
@@ -49,7 +49,10 @@ class BedrockDataTest {
         var physics = new HashSet<Integer>();
         readJson(UNPACKED.resolve("block_states_raw.json")).getAsJsonArray()
                 .forEach(state -> physics.add((int) state.getAsJsonObject().get("blockStateHash").getAsLong()));
-        assertEquals(official, physics);
+        assertTrue(official.equals(physics), () ->
+                "Palette vs raw-state hashes: official=" + official.size() + ", raw=" + physics.size() +
+                ", missing=" + official.stream().filter(hash -> !physics.contains(hash)).limit(15).toList() +
+                ", extra=" + physics.stream().filter(hash -> !official.contains(hash)).limit(15).toList());
     }
 
     @Test
@@ -61,7 +64,10 @@ class BedrockDataTest {
             paletteTypes.add(state.getString("name"));
         }
         var blockTypes = readJson(RESOURCES.resolve("block_types.json")).getAsJsonObject();
-        assertEquals(paletteTypes, blockTypes.keySet());
+        assertTrue(paletteTypes.equals(blockTypes.keySet()), () ->
+                "Palette names=" + paletteTypes.size() + ", block types=" + blockTypes.size() +
+                ", missing=" + paletteTypes.stream().filter(name -> !blockTypes.has(name)).limit(15).toList() +
+                ", extra=" + blockTypes.keySet().stream().filter(name -> !paletteTypes.contains(name)).limit(15).toList());
 
         var dump = requireBdsDump().getAsJsonObject("blocks");
         for (var name : paletteTypes) {
@@ -194,7 +200,7 @@ class BedrockDataTest {
     private static JsonObject requireBdsDump() throws IOException {
         Assumptions.assumeTrue(
                 Files.isRegularFile(BDS_DUMP),
-                "BDS 1.26.50 oracle dump is not versioned; place bds_registry_dump.json in data/resources/unpacked to run oracle checks"
+                "BDS oracle dump is not versioned; place bds_registry_dump.json in data/resources/unpacked to run oracle checks"
         );
         return readJson(BDS_DUMP).getAsJsonObject();
     }

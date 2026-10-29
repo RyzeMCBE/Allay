@@ -160,7 +160,9 @@ class CapturedPlayerPacketReplayTest {
             assertEquals(packet.getClass(), decoded.getClass());
             if (decoded instanceof PlayerSkinPacket skin) {
                 assertEquals(SOURCE_ID, skin.getUuid());
-                assertCapturedSkin(sourceData, skin.getSkin());
+                // Since 2225, the standalone skin body omits PlayFabId.
+                // PlayerList still carries it as a separate outer entry field.
+                assertCapturedSkin(sourceData, skin.getSkin(), protocol.getProtocolVersion() < 2225);
             }
             if (decoded instanceof PlayerListPacket list) {
                 assertEquals(2, list.getEntries().size());
@@ -390,6 +392,10 @@ class CapturedPlayerPacketReplayTest {
     }
 
     private static void assertCapturedSkin(JsonObject capture, SerializedSkin actual) {
+        assertCapturedSkin(capture, actual, true);
+    }
+
+    private static void assertCapturedSkin(JsonObject capture, SerializedSkin actual, boolean embedsPlayFabId) {
         assertEquals(capture.get("SkinId").getAsString(), actual.getSkinId());
         assertEquals(capture.get("SkinImageWidth").getAsInt(), actual.getSkinData().getWidth());
         assertEquals(capture.get("SkinImageHeight").getAsInt(), actual.getSkinData().getHeight());
@@ -408,7 +414,7 @@ class CapturedPlayerPacketReplayTest {
                 break;
             }
         }
-        assertEquals(playFabId, actual.getPlayFabId());
+        assertEquals(embedsPlayFabId ? playFabId : "", actual.getPlayFabId());
         for (int i = 0; i < actual.getAnimations().size(); i++) {
             assertArrayEquals(Base64.getDecoder().decode(capture.getAsJsonArray("AnimatedImageData")
                     .get(i).getAsJsonObject().get("Image").getAsString()),

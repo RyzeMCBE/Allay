@@ -122,6 +122,7 @@ import org.allaymc.api.block.interfaces.BlockDiamondBlockBehavior;
 import org.allaymc.api.block.interfaces.BlockDioriteBehavior;
 import org.allaymc.api.block.interfaces.BlockDirtBehavior;
 import org.allaymc.api.block.interfaces.BlockDirtWithRootsBehavior;
+import org.allaymc.api.block.interfaces.BlockDiscPressBehavior;
 import org.allaymc.api.block.interfaces.BlockDispenserBehavior;
 import org.allaymc.api.block.interfaces.BlockDoorBehavior;
 import org.allaymc.api.block.interfaces.BlockDoubleCopperSlabBehavior;
@@ -177,6 +178,8 @@ import org.allaymc.api.block.interfaces.BlockHoneyBlockBehavior;
 import org.allaymc.api.block.interfaces.BlockHoneycombBlockBehavior;
 import org.allaymc.api.block.interfaces.BlockHopperBehavior;
 import org.allaymc.api.block.interfaces.BlockIceBehavior;
+import org.allaymc.api.block.interfaces.BlockIceCrystalBehavior;
+import org.allaymc.api.block.interfaces.BlockIcicleBehavior;
 import org.allaymc.api.block.interfaces.BlockInfestedBlockBehavior;
 import org.allaymc.api.block.interfaces.BlockInfoUpdate2Behavior;
 import org.allaymc.api.block.interfaces.BlockInfoUpdateBehavior;
@@ -323,7 +326,6 @@ import org.allaymc.api.block.interfaces.BlockStickyPistonBehavior;
 import org.allaymc.api.block.interfaces.BlockStoneBehavior;
 import org.allaymc.api.block.interfaces.BlockStonecutterBehavior;
 import org.allaymc.api.block.interfaces.BlockStonecutterBlockBehavior;
-import org.allaymc.api.block.interfaces.BlockStrawBedBehavior;
 import org.allaymc.api.block.interfaces.BlockStructureBlockBehavior;
 import org.allaymc.api.block.interfaces.BlockStructureVoidBehavior;
 import org.allaymc.api.block.interfaces.BlockSulfurBehavior;
@@ -1419,6 +1421,14 @@ public final class BlockTypes {
      */
     public static BlockType<BlockChorusFlowerBehavior> CHORUS_FLOWER;
 
+    /**
+     * {@link BlockPropertyTypes#MINECRAFT_CONNECTION_DOWN}
+     * {@link BlockPropertyTypes#MINECRAFT_CONNECTION_EAST}
+     * {@link BlockPropertyTypes#MINECRAFT_CONNECTION_NORTH}
+     * {@link BlockPropertyTypes#MINECRAFT_CONNECTION_SOUTH}
+     * {@link BlockPropertyTypes#MINECRAFT_CONNECTION_UP}
+     * {@link BlockPropertyTypes#MINECRAFT_CONNECTION_WEST}
+     */
     public static BlockType<BlockChorusPlantBehavior> CHORUS_PLANT;
 
     public static BlockType<BlockCinnabarBehavior> CINNABAR;
@@ -2244,6 +2254,11 @@ public final class BlockTypes {
     public static BlockType<BlockDirtWithRootsBehavior> DIRT_WITH_ROOTS;
 
     /**
+     * {@link BlockPropertyTypes#MINECRAFT_CARDINAL_DIRECTION}
+     */
+    public static BlockType<BlockDiscPressBehavior> DISC_PRESS;
+
+    /**
      * {@link BlockPropertyTypes#FACING_DIRECTION}
      * {@link BlockPropertyTypes#TRIGGERED_BIT}
      */
@@ -2672,6 +2687,11 @@ public final class BlockTypes {
 
     /**
      * {@link BlockPropertyTypes#AGE_16}
+     * {@link BlockPropertyTypes#MINECRAFT_CONNECTION_EAST}
+     * {@link BlockPropertyTypes#MINECRAFT_CONNECTION_NORTH}
+     * {@link BlockPropertyTypes#MINECRAFT_CONNECTION_SOUTH}
+     * {@link BlockPropertyTypes#MINECRAFT_CONNECTION_UP}
+     * {@link BlockPropertyTypes#MINECRAFT_CONNECTION_WEST}
      */
     public static BlockType<BlockFireBehavior> FIRE;
 
@@ -3165,6 +3185,18 @@ public final class BlockTypes {
     public static BlockType<BlockCoralWallFanBehavior> HORN_CORAL_WALL_FAN;
 
     public static BlockType<BlockIceBehavior> ICE;
+
+    /**
+     * {@link BlockPropertyTypes#MINECRAFT_BLOCK_FACE}
+     */
+    public static BlockType<BlockIceCrystalBehavior> ICE_CRYSTAL;
+
+    /**
+     * {@link BlockPropertyTypes#ATTACHED_BIT}
+     * {@link BlockPropertyTypes#DRIPSTONE_THICKNESS}
+     * {@link BlockPropertyTypes#HANGING}
+     */
+    public static BlockType<BlockIcicleBehavior> ICICLE;
 
     public static BlockType<BlockInfestedBlockBehavior> INFESTED_CHISELED_STONE_BRICKS;
 
@@ -5301,7 +5333,11 @@ public final class BlockTypes {
     public static BlockType<BlockTorchBehavior> REDSTONE_TORCH;
 
     /**
+     * {@link BlockPropertyTypes#REDSTONE_EAST}
+     * {@link BlockPropertyTypes#REDSTONE_NORTH}
      * {@link BlockPropertyTypes#REDSTONE_SIGNAL}
+     * {@link BlockPropertyTypes#REDSTONE_SOUTH}
+     * {@link BlockPropertyTypes#REDSTONE_WEST}
      */
     public static BlockType<BlockRedstoneWireBehavior> REDSTONE_WIRE;
 
@@ -5781,7 +5817,7 @@ public final class BlockTypes {
      * {@link BlockPropertyTypes#MINECRAFT_CARDINAL_DIRECTION}
      * {@link BlockPropertyTypes#OCCUPIED_BIT}
      */
-    public static BlockType<BlockStrawBedBehavior> STRAW_BED;
+    public static BlockType<BlockBedBehavior> STRAW_BED;
 
     /**
      * {@link BlockPropertyTypes#PILLAR_AXIS}

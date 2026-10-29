@@ -90,7 +90,7 @@ public class BlockIdEnumGen {
     }
 
     private static void addEnums(TypeSpec.Builder codeBuilder) {
-        var sortedIdentifier = BLOCK_PALETTE_NBT.stream().map(block -> block.getString("name")).sorted(String::compareTo).map(Identifier::new).toList();
+        var sortedIdentifier = BLOCK_PALETTE_NBT.stream().map(block -> block.getString("name")).distinct().sorted(String::compareTo).map(Identifier::new).toList();
         for (var identifier : sortedIdentifier) {
             codeBuilder.addEnumConstant(
                     identifier.path().toUpperCase(Locale.ROOT),

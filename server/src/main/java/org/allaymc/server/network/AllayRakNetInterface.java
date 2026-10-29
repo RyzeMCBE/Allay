@@ -22,6 +22,7 @@ import org.allaymc.api.server.Server;
 import org.allaymc.server.AllayServer;
 import org.allaymc.server.ServerSettings;
 import org.allaymc.server.eventbus.event.network.NettyPipelineInitEvent;
+import org.allaymc.server.network.nethernet.NetherNetUdpMultiplexer;
 import org.cloudburstmc.netty.channel.raknet.RakChannelFactory;
 import org.cloudburstmc.netty.channel.raknet.RakServerChannel;
 import org.cloudburstmc.netty.channel.raknet.config.RakChannelOption;
@@ -59,9 +60,15 @@ public class AllayRakNetInterface extends AllayNetworkInterface {
     protected InetSocketAddress addressv6;
 
     protected BedrockPong pong;
+    private final NetherNetUdpMultiplexer sharedUdp;
 
     public AllayRakNetInterface(Server server) {
+        this(server, null);
+    }
+
+    public AllayRakNetInterface(Server server, NetherNetUdpMultiplexer sharedUdp) {
         this.server = server;
+        this.sharedUdp = sharedUdp;
         this.channels = new HashSet<>();
         this.serverId = ThreadLocalRandom.current().nextLong();
     }
@@ -104,7 +111,9 @@ public class AllayRakNetInterface extends AllayNetworkInterface {
         }
 
         var bootstrap = new ServerBootstrap()
-                .channelFactory(RakChannelFactory.server(datagramChannelClass))
+                .channelFactory(RakChannelFactory.server(datagramChannelClass, datagram -> {
+                    if (sharedUdp != null) sharedUdp.attach(datagram, datagramChannelClass);
+                }))
                 .option(RakChannelOption.RAK_ADVERTISEMENT, pong.toByteBuf())
                 // I think we don't need other modes
                 .option(RakChannelOption.RAK_SERVER_COOKIE_MODE, RakServerCookieMode.ACTIVE)

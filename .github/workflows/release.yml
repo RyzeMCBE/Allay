@@ -1,4 +1,4 @@
-name: Allay · Beta y versión oficial
+name: Engine · Beta y versión oficial
 
 on:
   push:
@@ -21,7 +21,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: allay-release-${{ github.ref }}
+  group: engine-release-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -108,32 +108,32 @@ jobs:
         run: |
           set -euo pipefail
           mapfile -t jars < <(find server/build/libs -maxdepth 1 -type f \
-            -name 'allay-server-*-shaded.jar' | sort)
+            -name 'Engine-*-shaded.jar' | sort)
           if (( ${#jars[@]} != 1 )); then
             echo "::error::Se esperaba exactamente un JAR ejecutable."
             exit 1
           fi
 
           jar="${jars[0]}"
-          prefix="allay-server-${RELEASE_VERSION}-"
+          prefix="Engine-${RELEASE_VERSION}-"
           if [[ "${jar##*/}" != "$prefix"*"-shaded.jar" ]]; then
             echo "::error::El JAR no contiene la versión $RELEASE_VERSION: ${jar##*/}"
             exit 1
           fi
 
           mkdir -p dist
-          cp "$jar" "dist/Allay-${RELEASE_VERSION}.jar"
+          cp "$jar" "dist/Engine-${RELEASE_VERSION}.jar"
           (
             cd dist
-            sha256sum "Allay-${RELEASE_VERSION}.jar" > "Allay-${RELEASE_VERSION}.jar.sha256"
-            sha256sum -c "Allay-${RELEASE_VERSION}.jar.sha256"
+            sha256sum "Engine-${RELEASE_VERSION}.jar" > "Engine-${RELEASE_VERSION}.jar.sha256"
+            sha256sum -c "Engine-${RELEASE_VERSION}.jar.sha256"
           )
 
       - name: Conservar informes de pruebas
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: allay-tests-${{ env.RELEASE_SOURCE_SHA }}
+          name: engine-tests-${{ env.RELEASE_SOURCE_SHA }}
           path: |
             server/build/test-results/test/**
             server/build/reports/tests/test/**
@@ -142,10 +142,10 @@ jobs:
       - name: Adjuntar JAR al workflow
         uses: actions/upload-artifact@v7
         with:
-          name: allay-${{ env.RELEASE_VERSION }}-${{ env.RELEASE_SOURCE_SHA }}
+          name: engine-${{ env.RELEASE_VERSION }}-${{ env.RELEASE_SOURCE_SHA }}
           path: |
-            dist/Allay-*.jar
-            dist/Allay-*.sha256
+            dist/Engine-*.jar
+            dist/Engine-*.sha256
           if-no-files-found: error
           retention-days: 90
 
@@ -157,7 +157,7 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-          assets=("Allay-${RELEASE_VERSION}.jar" "Allay-${RELEASE_VERSION}.jar.sha256")
+          assets=("Engine-${RELEASE_VERSION}.jar" "Engine-${RELEASE_VERSION}.jar.sha256")
 
           if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
             echo "El release $RELEASE_TAG ya existe. Se conservarán su descripción y los archivos publicados."
@@ -179,7 +179,7 @@ jobs:
           fi
 
           args=(--verify-tag --target "$RELEASE_SOURCE_SHA" \
-            --title "RyzeMCBE Allay $RELEASE_VERSION")
+            --title "Engine $RELEASE_VERSION")
           notes_file="docs/releases/${RELEASE_TAG}.md"
           if [[ -f "$notes_file" ]]; then
             args+=(--notes-file "$notes_file")

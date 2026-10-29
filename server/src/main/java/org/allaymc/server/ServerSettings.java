@@ -43,11 +43,11 @@ public class ServerSettings extends OkaeriConfig {
     @Accessors(fluent = true)
     public static class GenericSettings extends OkaeriConfig {
 
-        private String motd = "An allay-powered server";
+        private String motd = EngineIdentity.DEFAULT_MOTD;
 
         @CustomKey("sub-motd")
         @Comment("Usually only visible on the LAN interface")
-        private String subMotd = "https://github.com/AllayMC/Allay";
+        private String subMotd = EngineIdentity.DEFAULT_SUB_MOTD;
 
         @CustomKey("max-player-count")
         private int maxPlayerCount = 20;
@@ -107,6 +107,30 @@ public class ServerSettings extends OkaeriConfig {
 
         @Comment("The IPv6 port of this server. Works only when enablev6 is true")
         private int portv6 = 19133;
+
+        @Comment("Enable the NetherNet WebRTC listener for Minecraft Bedrock 1.26.50+; keep RakNet for legacy players")
+        @CustomKey("nethernet-enabled")
+        private boolean nethernetEnabled = true;
+
+        @Comment("NetherNet HTTP signaling TCP port. Zero means use the normal IPv4 Bedrock port")
+        @CustomKey("nethernet-signaling-port")
+        private int nethernetSignalingPort = 0;
+
+        @Comment("Share the normal IPv4 UDP port between NetherNet and RakNet; no extra public UDP port is needed")
+        @CustomKey("nethernet-shared-port")
+        private boolean nethernetSharedPort = true;
+
+        @Comment("Dedicated UDP WebRTC/ICE port when nethernet-shared-port is false")
+        @CustomKey("nethernet-ice-port")
+        private int nethernetIcePort = 19134;
+
+        @Comment("Persistent NetherNet server identity. Keep this PEM file across restarts")
+        @CustomKey("nethernet-identity-file")
+        private String nethernetIdentityFile = "nethernet-identity.pem";
+
+        @Comment("Optional public host:port override for NAT/tunnels; empty uses the join Host and main port automatically")
+        @CustomKey("nethernet-advertise-addresses")
+        private List<String> nethernetAdvertiseAddresses = List.of();
 
         @CustomKey("xbox-auth")
         private boolean xboxAuth = true;

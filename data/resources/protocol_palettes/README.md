@@ -19,6 +19,7 @@ Kaynak: [CloudburstMC/Data](https://github.com/CloudburstMC/Data) (Apache-2.0), 
 | `1_26_30.nbt` | 1001 | `6ce0e699` | `9d9cedc0fbe40cfca9f09e1063d6e8c2bdb5a922` |
 | `1_26_40.nbt` | 2168, 2169 | `247e816d` | `9be2b645a50cbb2c83eb157d402f199b31030b7e` |
 | `1_26_50.nbt` | 2192, 2193 | `7046791a` | `d5f0d3ac1615514decdb72240fa8af94f36f17f2` |
+| `1_26_60.nbt` | 2225 | `293c8480` | `ad9e886233bcfc535bd8d31143da039ec99b8bd4` |
 
 Yeni bir sürüm eklenirken dosya CloudburstMC/Data'nın o sürüm commit'inden alınır, bu tablo güncellenir ve
 `BlockNetworkIdMappingTest`'teki beklenen palet tablosuna protokol eklenir.
