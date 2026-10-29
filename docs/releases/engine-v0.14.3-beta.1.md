@@ -29,6 +29,6 @@ Se completaron las pruebas automáticas de compilación y una prueba de un plugi
 
 Consulta [distribución y primera instalación](../engine-beta-distribution.md) y [desarrollo de plugins](../engine-beta-developers.md).
 
-**Soporte y reporte de pruebas:** [Issue #43](https://github.com/RyzeMCBE/Allay/issues/43) para conexión y juego 1.26.60, y [PR #45](https://github.com/RyzeMCBE/Allay/pull/45) para la integración de Engine.
+**Soporte y reporte de pruebas:** [Issue #43](https://github.com/RyzeMCBE/Engine/issues/43) para conexión y juego 1.26.60, y [PR #45](https://github.com/RyzeMCBE/Engine/pull/45) para la integración de Engine.
 
 Engine y este fork no están afiliados a Mojang Studios ni Microsoft. Se mantienen los créditos originales a AllayMC, CloudburstMC y los autores de las dependencias.
