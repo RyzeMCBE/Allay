@@ -56,6 +56,12 @@ publishing {
         }
     }
     repositories {
+        // Produce a complete, versioned Maven repository inside the downloadable
+        // Developer SDK. This does not require GitHub Packages credentials.
+        maven {
+            name = "EngineSdkBundle"
+            url = uri(rootProject.file("build/engine-sdk-maven"))
+        }
         maven {
             name = "RyzeMCBE"
             url = uri("https://maven.pkg.github.com/RyzeMCBE/Engine")

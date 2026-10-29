@@ -1,0 +1,59 @@
+name: Engine Developer SDK
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'api/**'
+      - 'docs/developer-distribution.md'
+      - '.github/scripts/package-engine-sdk.sh'
+      - '.github/workflows/developer-sdk.yml'
+  pull_request:
+    paths:
+      - 'api/**'
+      - 'docs/developer-distribution.md'
+      - '.github/scripts/package-engine-sdk.sh'
+      - '.github/workflows/developer-sdk.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sdk:
+    name: Build and verify downloadable Engine API
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Check out Engine and its pinned dependencies
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Verify Protocol and StateUpdater
+        run: bash .github/scripts/check-linked-dependencies.sh
+      - name: Set up Java 21
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+      - name: Compile API and publish to bundled Maven repository
+        run: |
+          chmod +x ./gradlew
+          ./gradlew :api:build :api:javadoc \
+            :api:publishRyzeApiPublicationToEngineSdkBundleRepository \
+            -Pryzemcbe.apiVersion=0.30.0-SNAPSHOT --no-daemon
+      - name: Verify Java API, Maven metadata, sources and Javadoc
+        run: |
+          bash -n .github/scripts/package-engine-sdk.sh
+          bash .github/scripts/package-engine-sdk.sh 0.30.0-SNAPSHOT
+      - name: Upload SDK archive and SHA-256
+        uses: actions/upload-artifact@v7
+        with:
+          name: engine-developer-sdk-${{ github.sha }}
+          path: |
+            dist/Engine-Developer-SDK-*.zip
+            dist/Engine-Developer-SDK-*.zip.sha256
+          retention-days: 90
+          if-no-files-found: error
