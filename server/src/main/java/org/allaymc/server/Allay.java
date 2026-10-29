@@ -176,13 +176,15 @@ public final class Allay {
         api.bind(NBTIO.class, AllayNBTIO::new);
         api.bind(FakeContainerFactory.class, AllayFakeContainerFactory::new);
 
-        api.implement(EngineIdentity.NAME, GitProperties.isDevBuild());
+        // Keep the legacy core identifier for plugins that detect Allay by name.
+        // Engine branding is displayed separately from this compatibility value.
+        api.implement("allay", GitProperties.isDevBuild());
 
         var versionStr = ProtocolInfo.getLowestCodec().getMinecraftVersion() + " - " + ProtocolInfo.getLatestCodec().getMinecraftVersion();
         var protocolStr = ProtocolInfo.getLowestCodec().getProtocolVersion() + " - " + ProtocolInfo.getLatestCodec().getProtocolVersion();
         log.info(I18n.get().tr(
                 TrKeys.ALLAY_COMMAND_VERSION_OUTPUT,
-                AllayAPI.getInstance().getCoreName(), GitProperties.getBuildVersion(),
+                EngineIdentity.NAME, GitProperties.getBuildVersion(),
                 GitProperties.getBuildApiVersion(), versionStr, protocolStr
         ));
         if (AllayAPI.getInstance().isDevBuild()) {
