@@ -41,6 +41,49 @@ java {
 
 publishing {
     publications {
+
+        // Separate, immutable public publication for Maven Central.
+        // Keep the existing ryzeApi publication and GitHub Packages unchanged.
+        create<MavenPublication>("centralApi") {
+            groupId = "io.github.ryzemcbe"
+            artifactId = "engine-api"
+            version = providers.gradleProperty("engine.centralVersion")
+                .orElse(rootProject.property("api.version").toString())
+                .get()
+            from(components["java"])
+            pom {
+                name.set("Engine API (Allay-compatible)")
+                description.set("Public Java API for Engine Minecraft Bedrock server, preserving Allay 0.30.0 plugin compatibility.")
+                url.set("https://github.com/RyzeMCBE/Engine")
+                licenses {
+                    license {
+                        name.set("GNU Lesser General Public License, Version 3.0")
+                        url.set("https://www.gnu.org/licenses/lgpl-3.0.html")
+                        distribution.set("repo")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("RyzeMCBE")
+                        name.set("RyzeMCBE Development Studio")
+                        organization.set("RyzeMCBE")
+                        organizationUrl.set("https://github.com/RyzeMCBE")
+                    }
+                    developer {
+                        id.set("AllayMC")
+                        name.set("AllayMC Team")
+                        organization.set("AllayMC")
+                        organizationUrl.set("https://github.com/AllayMC")
+                    }
+                }
+                scm {
+                    connection.set("scm:git:https://github.com/RyzeMCBE/Engine.git")
+                    developerConnection.set("scm:git:ssh://git@github.com/RyzeMCBE/Engine.git")
+                    url.set("https://github.com/RyzeMCBE/Engine")
+                    tag.set("HEAD")
+                }
+            }
+        }
         create<MavenPublication>("ryzeApi") {
             groupId = "org.ryzemcbe.allay"
             artifactId = "api"
@@ -56,6 +99,12 @@ publishing {
         }
     }
     repositories {
+        // Staging repository used to build and verify an offline Maven Central
+        // upload bundle before sending it to the Central Publishing Portal.
+        maven {
+            name = "CentralBundle"
+            url = uri(rootProject.file("build/central-api-maven"))
+        }
         // Produce a complete, versioned Maven repository inside the downloadable
         // Developer SDK. This does not require GitHub Packages credentials.
         maven {

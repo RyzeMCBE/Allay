@@ -11,7 +11,7 @@
 [![Java 21](https://img.shields.io/badge/Java-21-f97316)](https://github.com/RyzeMCBE/Engine)
 [![Licencia LGPL-3.0](https://img.shields.io/badge/Licencia-LGPL--3.0-blue)](LICENSE)
 
-[**Código**](https://github.com/RyzeMCBE/Engine) · [**Betas**](https://github.com/RyzeMCBE/Engine/releases) · [**Guía para servidores**](docs/engine-beta-distribution.md) · [**SDK para developers**](docs/developer-distribution.md) · [**SDK Beta 1**](docs/engine-beta-developers.md) · [**Compatibilidad**](docs/engine-compatibility.md)
+[**Código**](https://github.com/RyzeMCBE/Engine) · [**Betas**](https://github.com/RyzeMCBE/Engine/releases) · [**Guía para servidores**](docs/engine-beta-distribution.md) · [**SDK para developers**](docs/developer-distribution.md) · [**Maven Central (preparación)**](docs/maven-central.md) · [**SDK Beta 1**](docs/engine-beta-developers.md) · [**Compatibilidad**](docs/engine-compatibility.md)
 
 </div>
 
