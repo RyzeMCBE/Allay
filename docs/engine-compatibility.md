@@ -10,7 +10,7 @@ Engine is a RyzeMCBE distribution of [AllayMC/Allay](https://github.com/AllayMC/
 - Preserve legacy Gradle/Maven coordinates, `protocol-local` and `stateupdater-local` composite builds.
 - Keep `server-settings.yml`, world and player data paths; existing MOTDs remain user-configured.
 - Retain the Java entrypoint `org.allaymc.server.Allay` so existing integrations work.
-- Product name reported by `/version` becomes `Engine` via `AllayAPI.getCoreName()`.
+- Product name reported by `/version` is `Engine`, while `AllayAPI.getCoreName()` intentionally remains `allay` for legacy plugin detection.
 
 Existing `plugin.json` files still work:
 ```json
