@@ -1,4 +1,4 @@
-name: Allay Build
+name: Engine Build
 
 on:
   push:
@@ -31,11 +31,35 @@ jobs:
         run: |
           chmod +x ./gradlew
           ./gradlew build --no-daemon
+      - name: Verificar un plugin binario de Allay sin recompilarlo para Engine
+        if: github.event_name == 'pull_request'
+        run: bash .github/scripts/smoke-legacy-plugin.sh
+
+      - name: Validar y empaquetar beta Linux y SDK sin publicar
+        if: github.event_name == 'pull_request' && github.base_ref == 'feat/minecraft-1.26.60'
+        shell: bash
+        run: |
+          bash -n .github/scripts/package-engine-beta.sh
+          ./gradlew :server:shadowJar :api:generatePomFileForRyzeApiPublication \
+            -Pserver.version=0.14.3-beta.1 \
+            -Pryzemcbe.apiVersion=0.30.0-engine-beta.1 \
+            -Pallay.is-dev-build=true --no-daemon
+          bash .github/scripts/package-engine-beta.sh engine-v0.14.3-beta.1
+
+      - name: Adjuntar paquete beta candidato para revisión
+        if: github.event_name == 'pull_request' && github.base_ref == 'feat/minecraft-1.26.60'
+        uses: actions/upload-artifact@v7
+        with:
+          name: engine-beta-preview-${{ github.sha }}
+          path: dist/*
+          retention-days: 90
+          if-no-files-found: error
+
       - name: Guardar resultados de pruebas para diagnóstico
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: allay-test-reports-${{ github.sha }}
+          name: engine-test-reports-${{ github.sha }}
           path: |
             server/build/test-results/test/**
             server/build/reports/tests/test/**
@@ -45,6 +69,6 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v7
         with:
-          name: allay-server-${{ github.sha }}
+          name: engine-server-${{ github.sha }}
           path: server/build/libs/*.jar
           if-no-files-found: error
