@@ -44,6 +44,13 @@ jobs:
           ./gradlew :api:build :api:javadoc \
             :api:publishRyzeApiPublicationToEngineSdkBundleRepository \
             -Pryzemcbe.apiVersion=0.30.0-SNAPSHOT --no-daemon
+      - name: Diagnose SDK Maven publication layout
+        shell: bash
+        run: |
+          echo "Published candidate files:"
+          find build api/build -type f \
+            \( -name 'api-*.jar' -o -name 'api-*.pom' -o -name 'maven-metadata.xml' \) \
+            | sort | head -80
       - name: Verify Java API, Maven metadata, sources and Javadoc
         run: |
           bash -n .github/scripts/package-engine-sdk.sh
