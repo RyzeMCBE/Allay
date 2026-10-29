@@ -79,8 +79,8 @@ subprojects {
                 url.set("https://github.com/RyzeMCBE/Allay")
 
                 scm {
-                    connection.set("scm:git:git://github.com/AllayMC/Allay.git")
-                    developerConnection.set("scm:git:ssh://github.com/AllayMC/Allay.git")
+                    connection.set("scm:git:git://github.com/RyzeMCBE/Allay.git")
+                    developerConnection.set("scm:git:ssh://github.com/RyzeMCBE/Allay.git")
                     url.set("https://github.com/RyzeMCBE/Allay")
                 }
 
