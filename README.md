@@ -11,7 +11,7 @@
 [![Java 21](https://img.shields.io/badge/Java-21-f97316)](https://github.com/RyzeMCBE/Allay)
 [![Licencia LGPL-3.0](https://img.shields.io/badge/Licencia-LGPL--3.0-blue)](LICENSE)
 
-[**Código**](https://github.com/RyzeMCBE/Allay) · [**Compilaciones**](https://github.com/RyzeMCBE/Allay/actions) · [**Compatibilidad**](docs/engine-compatibility.md) · [**Incidencias**](https://github.com/RyzeMCBE/Allay/issues)
+[**Código**](https://github.com/RyzeMCBE/Allay) · [**Betas**](https://github.com/RyzeMCBE/Allay/releases) · [**Guía para servidores**](docs/engine-beta-distribution.md) · [**SDK para plugins**](docs/engine-beta-developers.md) · [**Compatibilidad**](docs/engine-compatibility.md)
 
 </div>
 
@@ -24,13 +24,13 @@
 Engine deriva de [AllayMC/Allay](https://github.com/AllayMC/Allay) y conserva sus atribuciones y obligaciones LGPL-3.0. Protocol y StateUpdater mantienen inicialmente sus coordenadas originales. Consulta la [guía de compatibilidad](docs/engine-compatibility.md).
 
 > [!IMPORTANT]
-> **Estado: desarrollo activo y validación.** El código integrado en `main` superó compilación y pruebas automatizadas. Eso **no garantiza que todos los mundos personalizados y clientes hayan sido probados dentro de Minecraft**. Verifica el [workflow de compilación](https://github.com/RyzeMCBE/Allay/actions/workflows/gradle.yml) de la revisión que vayas a utilizar.
+> **Estado de esta rama: desarrollo activo y beta experimental.** La compilación de Engine 1.26.60 y las pruebas automáticas de compatibilidad se han superado en CI. Eso **no garantiza que todos los mundos personalizados, plugins y clientes hayan sido probados dentro de Minecraft**. Verifica el [workflow de compilación](https://github.com/RyzeMCBE/Allay/actions/workflows/gradle.yml) de la revisión que vayas a utilizar.
 
 ## 🚀 Características y áreas de trabajo
 
 | Área | Descripción |
 | --- | --- |
-| 🌐 **Multiversión** | Protocolos Bedrock internacionales específicos desde 1.21.90 (818) hasta 1.26.52 (2193) y variantes NetEase. |
+| 🌐 **Multiversión** | Protocolos Bedrock internacionales registrados desde 1.21.90 (818) hasta 1.26.60 (2225), y variantes NetEase. |
 | ⚡ **Rendimiento** | Herramientas y diseño orientados a un servidor eficiente sobre la JVM. |
 | 🧩 **Plugins** | API para extensiones en Java y otros lenguajes compatibles con la JVM. |
 | 🌍 **Mundos y dimensiones** | Overworld, Nether y End, LevelDB `SHARED`/`SEPARATE`, rutas configurables, conversiones y mapas personalizados. |
