@@ -1,0 +1,153 @@
+name: Engine API · Maven Central (manual, signed)
+
+on:
+  pull_request:
+    paths:
+      - 'api/**'
+      - 'docs/maven-central.md'
+      - '.github/scripts/package-central-api.py'
+      - '.github/workflows/publish-central-api.yml'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Versión de la API, por ejemplo 0.30.0'
+        required: true
+        default: '0.30.0'
+        type: string
+      publish:
+        description: 'Enviar bundle firmado a Sonatype para revisión MANUAL (requiere tag api-vX.Y.Z y secrets)'
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: central-api-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  central-api:
+    name: Compile and validate Engine API for Maven Central
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      CENTRAL_VERSION: ${{ inputs.version || '0.30.0' }}
+
+    steps:
+      - name: Fetch source, Protocol and StateUpdater
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.publish && format('refs/tags/api-v{0}', inputs.version) || github.ref }}
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Check publication version and pinned dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$CENTRAL_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
+            echo "::error::Use X.Y.Z for a Maven Central release."
+            exit 1
+          }
+          configured="$(sed -n 's/^api.version=//p' gradle.properties)"
+          [[ "$CENTRAL_VERSION" == "$configured" ]] || {
+            echo "::error::Release version must equal api.version=$configured"
+            exit 1
+          }
+          bash .github/scripts/check-linked-dependencies.sh
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.publish }}" == "true" ]]; then
+            git fetch origin main --tags
+            tag="api-v$CENTRAL_VERSION"
+            tagged_sha="$(git rev-parse "refs/tags/$tag^{commit}")"
+            current_sha="$(git rev-parse HEAD)"
+            [[ "$tagged_sha" == "$current_sha" ]] || {
+              echo "::error::Checkout must match the version tag exactly"
+              exit 1
+            }
+            git merge-base --is-ancestor "$current_sha" origin/main || {
+              echo "::error::Maven Central release must come from a commit integrated in main"
+              exit 1
+            }
+          fi
+
+      - name: Configure Java 21
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Configure Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Build API and assemble local Central repository
+        shell: bash
+        run: |
+          chmod +x ./gradlew
+          ./gradlew :api:build :api:publishCentralApiPublicationToCentralBundleRepository \
+            -Pengine.centralVersion="$CENTRAL_VERSION" --no-daemon
+
+      - name: Validate Central POM, JAR, sources and Javadoc without credentials
+        run: python3 .github/scripts/package-central-api.py --version "$CENTRAL_VERSION"
+
+      - name: Upload unsigned candidate for review (not publishable)
+        if: ${{ github.event_name == 'pull_request' || !inputs.publish }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: engine-api-central-dry-run-${{ github.sha }}
+          path: |
+            dist/*-unsigned.zip
+            dist/*-unsigned.zip.sha256
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Prepare signed Central bundle using Actions secrets
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish }}
+        env:
+          CENTRAL_GPG_PRIVATE_KEY: ${{ secrets.ENGINE_CENTRAL_GPG_PRIVATE_KEY }}
+          CENTRAL_GPG_PASSPHRASE: ${{ secrets.ENGINE_CENTRAL_GPG_PASSPHRASE }}
+        run: python3 .github/scripts/package-central-api.py --version "$CENTRAL_VERSION" --sign
+
+      - name: Upload signed bundle to Sonatype (manual review only)
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish }}
+        shell: bash
+        env:
+          CENTRAL_TOKEN_USERNAME: ${{ secrets.ENGINE_CENTRAL_TOKEN_USERNAME }}
+          CENTRAL_TOKEN_PASSWORD: ${{ secrets.ENGINE_CENTRAL_TOKEN_PASSWORD }}
+        run: |
+          set -euo pipefail
+          [[ -n "$CENTRAL_TOKEN_USERNAME" && -n "$CENTRAL_TOKEN_PASSWORD" ]] || {
+            echo "::error::Configure Engine Central user token in GitHub Actions secrets"
+            exit 1
+          }
+          bundle="dist/Engine-API-$CENTRAL_VERSION-MavenCentral.zip"
+          [[ -s "$bundle" ]] || exit 1
+          authorization="$(printf '%s:%s' "$CENTRAL_TOKEN_USERNAME" "$CENTRAL_TOKEN_PASSWORD" | base64 -w0)"
+          deployment_id="$(curl --fail-with-body --silent --show-error --request POST \
+            --header "Authorization: Bearer $authorization" \
+            --form "bundle=@$bundle;type=application/octet-stream" \
+            "https://central.sonatype.com/api/v1/publisher/upload?publishingType=USER_MANAGED&name=Engine-API-$CENTRAL_VERSION")"
+          [[ "$deployment_id" =~ ^[0-9a-fA-F-]{36}$ ]] || {
+            echo "::error::Unexpected Sonatype deployment ID"
+            exit 1
+          }
+          echo "::notice::Sonatype deployment $deployment_id submitted for manual approval"
+          {
+            echo "### Engine API $CENTRAL_VERSION"
+            echo "Signed bundle submitted to the Central Portal."
+            echo "Deployment ID: \`$deployment_id\`"
+            echo "Review validation, then click Publish in https://central.sonatype.com/publishing"
+            echo "No automatic release was requested."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Preserve signed upload bundle for release audit
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: engine-api-central-signed-${{ github.sha }}
+          path: |
+            dist/Engine-API-*-MavenCentral.zip
+            dist/Engine-API-*-MavenCentral.zip.sha256
+          retention-days: 90
+          if-no-files-found: error
