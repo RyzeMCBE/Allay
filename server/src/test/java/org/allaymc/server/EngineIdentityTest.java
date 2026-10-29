@@ -14,8 +14,10 @@ class EngineIdentityTest {
     void keepsLegacyApiClassesAndBrand() {
         assertEquals("Engine", EngineIdentity.NAME);
         assertNotNull(AllayAPI.class);
-        assertEquals("allay", AllayAPI.getInstance().getCoreName() == null
-                ? "allay" : AllayAPI.getInstance().getCoreName());
+        assertEquals("allay", EngineIdentity.LEGACY_CORE_NAME);
+        if (AllayAPI.getInstance().isImplemented()) {
+            assertEquals("allay", AllayAPI.getInstance().getCoreName());
+        }
         assertEquals("Engine Bedrock Server", new ServerSettings.GenericSettings().motd());
     }
 
