@@ -178,7 +178,7 @@ public final class Allay {
 
         // Keep the legacy core identifier for plugins that detect Allay by name.
         // Engine branding is displayed separately from this compatibility value.
-        api.implement("allay", GitProperties.isDevBuild());
+        api.implement(EngineIdentity.LEGACY_CORE_NAME, GitProperties.isDevBuild());
 
         var versionStr = ProtocolInfo.getLowestCodec().getMinecraftVersion() + " - " + ProtocolInfo.getLatestCodec().getMinecraftVersion();
         var protocolStr = ProtocolInfo.getLowestCodec().getProtocolVersion() + " - " + ProtocolInfo.getLatestCodec().getProtocolVersion();
