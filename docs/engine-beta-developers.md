@@ -2,6 +2,8 @@
 
 El kit de desarrollo corresponde a Engine con Minecraft Bedrock 1.26.60. Su **API de compatibilidad es Allay 0.30.0**. No se renombraron las clases públicas `org.allaymc.api.*`, los paquetes `org.cloudburstmc.protocol.*` ni los descriptores de plugins.
 
+**Documentación de la distribución SDK independiente y de la API Maven actual:** [Engine Developer SDK](developer-distribution.md). El paquete Beta 1 descrito aquí sigue siendo el archivo histórico de esa publicación.
+
 ## Contenido del ZIP para desarrolladores
 
 - `libs/api-0.30.0.jar` (o el JAR de API con el nombre de la versión construida).
