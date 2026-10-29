@@ -52,7 +52,7 @@ El punto de entrada Java debe implementar o extender la interfaz/clase de plugin
 Desde una copia del repositorio de Engine con los submódulos inicializados:
 
 ```bash
-git clone --recurse-submodules https://github.com/RyzeMCBE/Allay.git Engine
+git clone --recurse-submodules https://github.com/RyzeMCBE/Engine.git Engine
 cd Engine
 git checkout engine-v0.14.3-beta.1
 git submodule update --init --recursive
@@ -66,4 +66,4 @@ Después de publicarlo en Maven Local puedes declararlo como dependencia `compil
 
 El pipeline del PR de Engine prueba un plugin binario compilado con Allay y lo ejecuta sin recompilación. No se garantiza que plugins que hagan reflexión sobre clases internas, usen APIs inestables o asuman versiones específicas del protocolo funcionen sin modificaciones.
 
-Código fuente, atribuciones y notas: [Engine en GitHub](https://github.com/RyzeMCBE/Allay) · [Política de compatibilidad](engine-compatibility.md).
+Código fuente, atribuciones y notas: [Engine en GitHub](https://github.com/RyzeMCBE/Engine) · [Política de compatibilidad](engine-compatibility.md).
