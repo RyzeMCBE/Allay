@@ -8,7 +8,7 @@ Engine **0.14.3-beta.1**, compatible con Minecraft Bedrock **1.26.60** (protocol
 
 ## Primera instalación
 
-1. Descarga **`Engine-0.14.3-beta.1-server-linux-x86_64.zip`** en la [página de releases de Engine](https://github.com/RyzeMCBE/Allay/releases).
+1. Descarga **`Engine-0.14.3-beta.1-server-linux-x86_64.zip`** en la [página de releases de Engine](https://github.com/RyzeMCBE/Engine/releases).
 2. Extrae el ZIP; este incluye el servidor, la guía, notas y licencias principales.
 3. Crea una carpeta de datos nueva, diferente de tu servidor principal.
 4. Desde esa carpeta, inicia el servidor con Java 21:
@@ -41,7 +41,7 @@ Comprueba el checksum del archivo descargado con `SHA256SUMS.txt`:
 sha256sum -c SHA256SUMS.txt
 ```
 
-La descarga y el archivo SHA-256 deben estar juntos para verificarlos. Reporta versión del cliente, modo de conexión, comportamiento reproducible y logs **sin tokens, claves privadas ni datos sensibles** a [RyzeMCBE/Allay — incidencias](https://github.com/RyzeMCBE/Allay/issues).
+La descarga y el archivo SHA-256 deben estar juntos para verificarlos. Reporta versión del cliente, modo de conexión, comportamiento reproducible y logs **sin tokens, claves privadas ni datos sensibles** a [RyzeMCBE/Allay — incidencias](https://github.com/RyzeMCBE/Engine/issues).
 
 ## Licencias y distribución
 
