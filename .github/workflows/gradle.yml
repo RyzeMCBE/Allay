@@ -1,4 +1,4 @@
-name: Allay Build
+name: Engine Build
 
 on:
   push:
@@ -31,11 +31,15 @@ jobs:
         run: |
           chmod +x ./gradlew
           ./gradlew build --no-daemon
+      - name: Verificar un plugin binario de Allay sin recompilarlo para Engine
+        if: github.event_name == 'pull_request'
+        run: bash .github/scripts/smoke-legacy-plugin.sh
+
       - name: Guardar resultados de pruebas para diagnóstico
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: allay-test-reports-${{ github.sha }}
+          name: engine-test-reports-${{ github.sha }}
           path: |
             server/build/test-results/test/**
             server/build/reports/tests/test/**
@@ -45,6 +49,6 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v7
         with:
-          name: allay-server-${{ github.sha }}
+          name: engine-server-${{ github.sha }}
           path: server/build/libs/*.jar
           if-no-files-found: error

@@ -1,6 +1,6 @@
 package org.allaymc.server.command.defaults;
 
-import org.allaymc.api.AllayAPI;
+import org.allaymc.server.EngineIdentity;
 import org.allaymc.api.command.Command;
 import org.allaymc.api.command.tree.CommandTree;
 import org.allaymc.api.message.I18n;
@@ -27,10 +27,10 @@ public class VersionCommand extends Command {
             var protocolStr = ProtocolInfo.getLowestCodec().getProtocolVersion() + " - " + ProtocolInfo.getLatestCodec().getProtocolVersion();
             context.addOutput(
                     TrKeys.ALLAY_COMMAND_VERSION_OUTPUT,
-                    AllayAPI.getInstance().getCoreName(), GitProperties.getBuildVersion(),
+                    EngineIdentity.NAME, GitProperties.getBuildVersion(),
                     GitProperties.getBuildApiVersion(), versionStr, protocolStr
             );
-            if (AllayAPI.getInstance().isDevBuild()) {
+            if (GitProperties.isDevBuild()) {
                 context.addOutput(I18n.get().tr(TrKeys.ALLAY_SERVER_IS_DEV_VERSION));
             }
             return context.success();

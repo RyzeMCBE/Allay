@@ -151,7 +151,7 @@ tasks {
 }
 
 fun getShadedJarName(): String {
-    return "allay-server-${version}-${getShortGitHash()}-shaded.jar"
+    return "Engine-${version}-${getShortGitHash()}-shaded.jar"
 }
 
 fun getShortGitHash(): String {
