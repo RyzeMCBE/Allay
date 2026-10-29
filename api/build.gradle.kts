@@ -51,14 +51,14 @@ publishing {
             pom {
                 name.set("Engine (Allay-compatible) API")
                 description.set("API compatible con plugins Allay, mantenida para Engine por RyzeMCBE.")
-                url.set("https://github.com/RyzeMCBE/Allay")
+                url.set("https://github.com/RyzeMCBE/Engine")
             }
         }
     }
     repositories {
         maven {
             name = "RyzeMCBE"
-            url = uri("https://maven.pkg.github.com/RyzeMCBE/Allay")
+            url = uri("https://maven.pkg.github.com/RyzeMCBE/Engine")
             credentials {
                 username = providers.gradleProperty("gpr.user")
                     .orElse(providers.environmentVariable("GITHUB_ACTOR"))
