@@ -10,7 +10,7 @@ RUN chmod +x gradlew && ./gradlew :server:shadowJar --no-daemon
 
 FROM eclipse-temurin:21-jre-jammy
 LABEL org.opencontainers.image.title="Engine" \
-      org.opencontainers.image.source="https://github.com/RyzeMCBE/Allay"
+      org.opencontainers.image.source="https://github.com/RyzeMCBE/Engine"
 RUN useradd --system --create-home --home-dir /home/engine --shell /usr/sbin/nologin engine \
     && mkdir -p /opt/engine /data && chown engine:engine /data
 COPY --from=build /src/server/build/libs/Engine-*-shaded.jar /opt/engine/Engine.jar
