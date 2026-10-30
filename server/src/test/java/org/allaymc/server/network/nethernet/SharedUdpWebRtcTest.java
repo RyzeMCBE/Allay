@@ -53,8 +53,8 @@ class SharedUdpWebRtcTest {
 
     @ParameterizedTest
     @ValueSource(booleans = {false, true})
-    @Timeout(45)
-    void twoRealWebRtcPeersAndLegacyRaknetShareOnePublicSocket(boolean epoll) throws Exception {
+    @Timeout(75)
+    void sixConcurrentRealWebRtcPeersAndLegacyRaknetShareOnePublicSocket(boolean epoll) throws Exception {
         Assumptions.assumeTrue(!epoll || Epoll.isAvailable());
         Class<? extends DatagramChannel> datagramClass = epoll ? EpollDatagramChannel.class : NioDatagramChannel.class;
         var group = new MultiThreadIoEventLoopGroup(1, epoll ? EpollIoHandler.newFactory() : NioIoHandler.newFactory());
@@ -77,9 +77,11 @@ class SharedUdpWebRtcTest {
 
             var clients = new ArrayList<DataChannel>();
             var servers = new ArrayList<DataChannel>();
+            var openedChannels = new ArrayList<CompletableFuture<Void>>();
+            var acceptedChannels = new ArrayList<CompletableFuture<DataChannel>>();
             var receivedByServer = new ArrayList<LinkedBlockingQueue<String>>();
             var receivedByClient = new ArrayList<LinkedBlockingQueue<String>>();
-            for (int i = 0; i < 2; i++) {
+            for (int i = 0; i < 6; i++) {
                 var server = PeerConnection.createPeer(CONFIG.withEnableIceUdpMux(true).withIceUdpMuxDirect(true)
                         .withPortRangeBegin(backend.getPort()).withPortRangeEnd(backend.getPort()));
                 var client = PeerConnection.createPeer(CONFIG);
@@ -109,10 +111,15 @@ class SharedUdpWebRtcTest {
                 String publicAnswer = SharedPortNetherNetSignaling.publicDescription(answer, List.of(publicAddress));
                 assertFalse(publicAnswer.contains(" " + backend.getPort() + " typ "));
                 client.setRemoteDescription(publicAnswer, SessionDescriptionType.ANSWER);
-                opened.get(10, TimeUnit.SECONDS);
+                // Start all six ICE handshakes before awaiting any of them.
+                // This exercises overlapping signaling/relays with one public UDP port.
+                openedChannels.add(opened);
+                acceptedChannels.add(accepted);
                 clients.add(outbound);
-                servers.add(accepted.get(5, TimeUnit.SECONDS));
             }
+
+            for (var opened : openedChannels) opened.get(20, TimeUnit.SECONDS);
+            for (var accepted : acceptedChannels) servers.add(accepted.get(10, TimeUnit.SECONDS));
 
             for (int i = 0; i < clients.size(); i++) clients.get(i).sendMessage(binary("client-" + i));
             for (int i = 0; i < clients.size(); i++) {
