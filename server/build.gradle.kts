@@ -19,6 +19,14 @@ application {
 val centralRelease = providers.gradleProperty("centralRelease")
     .map(String::toBoolean).getOrElse(false)
 
+// The standard Java JAR can be published with sources and Javadoc;
+// the executable shaded JAR remains a separate runtime artifact.
+tasks.withType<Javadoc>().configureEach {
+    enabled = centralRelease
+    isFailOnError = false
+    (options as StandardJavadocDocletOptions).addStringOption("Xdoclint:none", "-quiet")
+}
+
 dependencies {
     if (centralRelease) api("io.github.ryzemcbe:engine-api:0.30.0")
     else api(project(":api"))
