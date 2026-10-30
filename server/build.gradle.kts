@@ -14,13 +14,33 @@ application {
     mainClass.set("org.allaymc.server.Allay")
 }
 
+// Publish the ordinary Java component, not shadowJar.
+// Central mode is opt-in and only after matching Protocol/StateUpdater releases exist.
+val centralRelease = providers.gradleProperty("centralRelease")
+    .map(String::toBoolean).getOrElse(false)
+
+// The standard Java JAR can be published with sources and Javadoc;
+// the executable shaded JAR remains a separate runtime artifact.
+tasks.withType<Javadoc>().configureEach {
+    enabled = centralRelease
+    isFailOnError = false
+    (options as StandardJavadocDocletOptions).addStringOption("Xdoclint:none", "-quiet")
+}
+
 dependencies {
-    api(project(":api"))
+    if (centralRelease) api("io.github.ryzemcbe:engine-api:0.30.0")
+    else api(project(":api"))
     api(libs.bundles.logging)
     api(libs.bundles.leveldb)
     api(libs.bundles.rng)
     api(libs.bundles.fastutil)
-    api(libs.bundles.stateupdater)
+    if (centralRelease) {
+        api("io.github.ryzemcbe:common:0.1.1")
+        api("io.github.ryzemcbe:item-updater:1.26.50-R1")
+        api("io.github.ryzemcbe:block-updater:1.26.60-R1")
+    } else {
+        api(libs.bundles.stateupdater)
+    }
     api(libs.semver4j)
     api(libs.commonslang3)
     api(libs.commonsio)
@@ -44,10 +64,18 @@ dependencies {
     api(libs.sentry)
     api(libs.jctools)
     api(libs.caffeine)
-    api(libs.protocol) {
-        exclude(group = "org.cloudburstmc", module = "nbt") // Use allaymc's nbt library
-        exclude(group = "org.cloudburstmc.fastutil.commons")
-        exclude(group = "org.cloudburstmc.fastutil.maps")
+    if (centralRelease) {
+        api("io.github.ryzemcbe:bedrock-connection:1.26.60-R1") {
+            exclude(group = "org.cloudburstmc", module = "nbt")
+            exclude(group = "org.cloudburstmc.fastutil.commons")
+            exclude(group = "org.cloudburstmc.fastutil.maps")
+        }
+    } else {
+        api(libs.protocol) {
+            exclude(group = "org.cloudburstmc", module = "nbt") // Use allaymc's nbt library
+            exclude(group = "org.cloudburstmc.fastutil.commons")
+            exclude(group = "org.cloudburstmc.fastutil.maps")
+        }
     }
     api(libs.okaeri.configs.yaml.snakeyaml) {
         exclude(group = "org.yaml", module = "snakeyaml") // Use the latest version
