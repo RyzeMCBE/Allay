@@ -54,7 +54,7 @@ jobs:
         run: bash .github/scripts/check-linked-dependencies.sh
 
       - name: Download official BDS 1.26.60 export from Endstone Actions
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           repository: RyzeMCBE/endstone
           run-id: 40758269886
