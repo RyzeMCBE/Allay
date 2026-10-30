@@ -347,13 +347,17 @@ public final class NetherNetUdpMultiplexer implements AutoCloseable {
                         if (probe != null) write.addListener(result -> {
                             if (!result.isSuccess()) {
                                 probe.relayDrops.increment();
-                                log.warn("NetherNet diagnostic #{}: relay write to private native socket failed", probe.id);
+                                if (probe.failureReported.compareAndSet(false, true)) {
+                                    log.warn("NetherNet diagnostic #{}: relay write to private native socket failed", probe.id);
+                                }
                             }
                         });
                     } else {
                         if (probe != null) {
                             probe.relayDrops.increment();
-                            log.warn("NetherNet diagnostic #{}: relay binding failed or authorization expired", probe.id);
+                            if (probe.failureReported.compareAndSet(false, true)) {
+                                log.warn("NetherNet diagnostic #{}: relay binding failed or authorization expired", probe.id);
+                            }
                         }
                         data.release();
                         close();
@@ -377,6 +381,7 @@ public final class NetherNetUdpMultiplexer implements AutoCloseable {
         private final LongAdder dtls = new LongAdder();
         private final LongAdder nativeReplies = new LongAdder();
         private final LongAdder relayDrops = new LongAdder();
+        private final AtomicBoolean failureReported = new AtomicBoolean();
 
         private Probe(long id) {
             this.id = id;
