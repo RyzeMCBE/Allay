@@ -90,13 +90,22 @@ public final class SharedPortNetherNetSignaling implements NetherNetServerSignal
         // DNS belongs to a bounded worker pool. The native callback and Netty loops remain free.
         join.endpoints.thenAccept(endpoints -> {
             String announced = SdpUtil.withAddedEndpoints(publicDescription(sdp, hostEndpoints), endpoints);
+            long probeId;
             synchronized (this) {
                 if (joins.get(join.connectionId) != join) return;
                 join.ufrag = ufrag;
-                multiplexer.authorize(ufrag);
+                probeId = multiplexer.authorize(ufrag);
+            }
+            if (probeId > 0) {
+                // Only candidate counts are logged; ICE usernames/passwords, signed SDP and
+                // authenticated player information are intentionally excluded.
+                long candidates = announced.lines().filter(line -> line.startsWith("a=candidate:")).count();
+                log.info("NetherNet diagnostic #{}: signed SDP answer ready; candidates={} "
+                        + "sharedUdpPort={}", probeId, candidates, publicAddress.getPort());
             }
             logEndpoints(announced);
             delegate.sendDescription(targetNetworkId, announced);
+            if (probeId > 0) log.info("NetherNet diagnostic #{}: HTTP signaling answer dispatched", probeId);
         }).exceptionally(failure -> {
             log.warn("Could not complete the NetherNet SDP answer", failure);
             removeSignalHandler(join.connectionId);
