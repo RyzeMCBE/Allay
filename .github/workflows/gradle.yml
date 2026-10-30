@@ -31,6 +31,13 @@ jobs:
         run: |
           chmod +x ./gradlew
           ./gradlew build --no-daemon
+      - name: Auditar POM del Engine Server para Maven Central (sin publicar)
+        shell: bash
+        run: |
+          ./gradlew :server:generatePomFileForMavenPublication \
+            -PcentralRelease=true --no-daemon
+          python3 .github/scripts/verify-central-server-pom.py
+
       - name: Verificar un plugin binario de Allay sin recompilarlo para Engine
         if: github.event_name == 'pull_request'
         run: bash .github/scripts/smoke-legacy-plugin.sh
