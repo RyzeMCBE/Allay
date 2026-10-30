@@ -12,7 +12,10 @@ tasks.jar {
 subprojects {
     apply(plugin = "java-library")
 
-    group = "org.allaymc.allay"
+    // Central releases are explicitly opted into and never change normal builds.
+    val centralRelease = providers.gradleProperty("centralRelease")
+        .map(String::toBoolean).getOrElse(false)
+    group = if (centralRelease && project.name == "server") "io.github.ryzemcbe" else "org.allaymc.allay"
 
     tasks {
         withType<JavaCompile>().configureEach {
@@ -55,8 +58,12 @@ subprojects {
     if (project.name in listOf("api", "server")) {
         if (project.name == "server") apply(plugin = "com.vanniktech.maven.publish")
 
-        project.version = rootProject.property(project.name + ".version").toString() +
+        project.version = if (centralRelease && project.name == "server") {
+            providers.gradleProperty("engineServerReleaseVersion").orElse("0.14.3-beta.1").get()
+        } else {
+            rootProject.property(project.name + ".version").toString() +
                 if (rootProject.property("allay.is-dev-build").toString().toBoolean()) "-dev" else ""
+        }
 
         java {
             withSourcesJar()
@@ -68,7 +75,7 @@ subprojects {
 
             coordinates(
                 project.group.toString(),
-                project.name,
+                if (centralRelease) "engine-server" else project.name,
                 project.version.toString().replace("-dev", "-SNAPSHOT")
             )
 
