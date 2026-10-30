@@ -13,6 +13,22 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class NetherNetUdpMultiplexerTest {
     @Test
+    void optionalDiagnosticsCreateStableNonSensitiveProbeNumbers() {
+        var disabled = new NetherNetUdpMultiplexer();
+        assertEquals(-1, disabled.authorize("private-ice-ufrag"));
+        disabled.revoke("private-ice-ufrag");
+
+        var enabled = new NetherNetUdpMultiplexer(true);
+        long first = enabled.authorize("private-ice-ufrag");
+        assertTrue(first > 0);
+        assertEquals(first, enabled.authorize("private-ice-ufrag"));
+        enabled.revoke("private-ice-ufrag");
+        long second = enabled.authorize("different-private-ufrag");
+        assertTrue(second > first);
+        enabled.revoke("different-private-ufrag");
+    }
+
+    @Test
     void distinguishesStunAndDtlsFromRaknetEvenWithReaderOffsets() {
         var stun = Unpooled.buffer().writeInt(123).writeShort(1).writeShort(0)
                 .writeInt(0x2112a442).writeZero(12).readerIndex(4);

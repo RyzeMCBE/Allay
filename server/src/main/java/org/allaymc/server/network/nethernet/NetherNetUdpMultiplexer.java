@@ -1,5 +1,6 @@
 package org.allaymc.server.network.nethernet;
 
+import lombok.extern.slf4j.Slf4j;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
@@ -25,17 +26,35 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.LongAdder;
 
 /**
  * Demultiplexes RakNet and authenticated ICE/DTLS on the existing Bedrock UDP socket.
  * WebRTC reaches the native transport through local PROXY v2 relays, preserving each
  * client's original address. Only the public Bedrock port is advertised to clients.
  */
+@Slf4j
 public final class NetherNetUdpMultiplexer implements AutoCloseable {
     private static final InetAddress LOOPBACK = new InetSocketAddress("127.0.0.1", 0).getAddress();
     private static final int MAX_RELAYS = 1024;
     private static final long IDLE_NANOS = TimeUnit.MINUTES.toNanos(2);
     private static final byte[] PROXY_SIGNATURE = {13, 10, 13, 10, 0, 13, 10, 81, 85, 73, 84, 10};
+
+    private final boolean diagnosticsEnabled;
+    private final AtomicLong nextProbeId = new AtomicLong();
+    private final Map<String, Probe> probes = new ConcurrentHashMap<>();
+    private final LongAdder rejectedUnknownUfrag = new LongAdder();
+    private final LongAdder rejectedUnmatched = new LongAdder();
+
+    public NetherNetUdpMultiplexer() {
+        this(false);
+    }
+
+    public NetherNetUdpMultiplexer(boolean diagnosticsEnabled) {
+        this.diagnosticsEnabled = diagnosticsEnabled;
+    }
 
     private final Set<String> authorizedUfrags = ConcurrentHashMap.newKeySet();
     private final Set<FrontHandler> fronts = ConcurrentHashMap.newKeySet();
@@ -81,13 +100,24 @@ public final class NetherNetUdpMultiplexer implements AutoCloseable {
     }
 
     /** Allows a signaled peer's ICE username fragment until its channel closes. */
-    public void authorize(String ufrag) {
+    public long authorize(String ufrag) {
         authorizedUfrags.add(ufrag);
+        if (!diagnosticsEnabled) return -1;
+        var probe = probes.computeIfAbsent(ufrag, ignored -> new Probe(nextProbeId.incrementAndGet()));
+        log.info("NetherNet diagnostic #{}: ICE username authorized for shared UDP", probe.id);
+        return probe.id;
     }
 
     /** Releases every candidate path belonging to a closed peer. */
     public void revoke(String ufrag) {
         authorizedUfrags.remove(ufrag);
+        var probe = probes.remove(ufrag);
+        if (probe != null) {
+            log.info("NetherNet diagnostic #{}: relay authorization ended; age={}ms inboundSTUN={} inboundDTLS={} "
+                            + "nativeReplies={} relayDrops={}", probe.id,
+                    TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - probe.startedAt),
+                    probe.stun.sum(), probe.dtls.sum(), probe.nativeReplies.sum(), probe.relayDrops.sum());
+        }
         for (var front : fronts) front.removeUfrag(ufrag);
     }
 
@@ -95,6 +125,7 @@ public final class NetherNetUdpMultiplexer implements AutoCloseable {
     public synchronized void close() {
         backendAddress = null;
         authorizedUfrags.clear();
+        probes.clear();
         for (var front : fronts) front.clearAsync();
         if (nativeListener != null) {
             nativeListener.close();
@@ -173,6 +204,14 @@ public final class NetherNetUdpMultiplexer implements AutoCloseable {
                     relay.close();
                     return true;
                 });
+                if (diagnosticsEnabled) {
+                    long unknown = rejectedUnknownUfrag.sumThenReset();
+                    long unmatched = rejectedUnmatched.sumThenReset();
+                    if (unknown != 0 || unmatched != 0) {
+                        log.info("NetherNet diagnostic: discarded UDP datagrams in 30s: unknownUfrag={} "
+                                + "missingRelayOrBackend={} (aggregated, no client data)", unknown, unmatched);
+                    }
+                }
             }, 30, 30, TimeUnit.SECONDS);
             ctx.fireChannelActive();
         }
@@ -186,21 +225,40 @@ public final class NetherNetUdpMultiplexer implements AutoCloseable {
             }
             try {
                 var backend = backendAddress;
-                if (backend == null) return;
+                if (backend == null) {
+                    if (diagnosticsEnabled) rejectedUnmatched.increment();
+                    return;
+                }
                 var relay = relays.get(packet.sender());
                 String ufrag = requestedUfrag(packet.content());
-                if (ufrag != null && !authorizedUfrags.contains(ufrag)) return;
+                if (ufrag != null && !authorizedUfrags.contains(ufrag)) {
+                    if (diagnosticsEnabled) rejectedUnknownUfrag.increment();
+                    return;
+                }
                 if (relay != null && ufrag != null && !ufrag.equals(relay.ufrag)) {
                     relay.close();
                     relays.remove(packet.sender());
                     relay = null;
                 }
                 if (relay == null) {
-                    if (ufrag == null || !authorizedUfrags.contains(ufrag) || relays.size() >= MAX_RELAYS) return;
+                    if (ufrag == null || !authorizedUfrags.contains(ufrag) || relays.size() >= MAX_RELAYS) {
+                        if (diagnosticsEnabled) rejectedUnmatched.increment();
+                        return;
+                    }
                     relay = new Relay(packet.sender(), ufrag, backend);
                     relays.put(packet.sender(), relay);
+                    if (relay.probe != null) log.info("NetherNet diagnostic #{}: first authorized UDP relay created", relay.probe.id);
                 }
                 if (!authorizedUfrags.contains(relay.ufrag)) return;
+                if (relay.probe != null) {
+                    if (isStun(packet.content()) && relay.probe.stun.sum() == 0) {
+                        log.info("NetherNet diagnostic #{}: first STUN packet arrived on shared public UDP socket", relay.probe.id);
+                    } else if (isDtls(packet.content()) && relay.probe.dtls.sum() == 0) {
+                        log.info("NetherNet diagnostic #{}: first DTLS packet arrived on shared public UDP socket", relay.probe.id);
+                    }
+                    if (isStun(packet.content())) relay.probe.stun.increment();
+                    if (isDtls(packet.content())) relay.probe.dtls.increment();
+                }
                 relay.send(proxyPacket(ctx.alloc(), packet.sender(), packet.recipient(), packet.content()));
             } finally {
                 ReferenceCountUtil.release(packet);
@@ -240,6 +298,7 @@ public final class NetherNetUdpMultiplexer implements AutoCloseable {
         private final class Relay {
             private final InetSocketAddress remote;
             private final String ufrag;
+            private final Probe probe;
             private final ChannelFuture binding;
             private long lastActivity = System.nanoTime();
             private int pending;
@@ -248,12 +307,17 @@ public final class NetherNetUdpMultiplexer implements AutoCloseable {
             private Relay(InetSocketAddress remote, String ufrag, InetSocketAddress backend) {
                 this.remote = remote;
                 this.ufrag = ufrag;
+                this.probe = diagnosticsEnabled ? probes.get(ufrag) : null;
                 binding = new Bootstrap().group(context.channel().eventLoop()).channel(channelClass)
                         .handler(new SimpleChannelInboundHandler<DatagramPacket>() {
                             @Override
                             protected void channelRead0(ChannelHandlerContext ctx, DatagramPacket packet) {
                                 lastActivity = System.nanoTime();
                                 if (!closed && authorizedUfrags.contains(ufrag)) {
+                                    if (probe != null && probe.nativeReplies.sum() == 0) {
+                                        log.info("NetherNet diagnostic #{}: first native ICE/DTLS reply forwarded to client", probe.id);
+                                    }
+                                    if (probe != null) probe.nativeReplies.increment();
                                     // Write below RakNet's handlers: the native packet is already framed and encrypted.
                                     context.writeAndFlush(new DatagramPacket(packet.content().retain(), remote));
                                 }
@@ -271,6 +335,7 @@ public final class NetherNetUdpMultiplexer implements AutoCloseable {
             private void send(ByteBuf data) {
                 lastActivity = System.nanoTime();
                 if (closed || pending >= 32) {
+                    if (probe != null) probe.relayDrops.increment();
                     data.release();
                     return;
                 }
@@ -278,8 +343,22 @@ public final class NetherNetUdpMultiplexer implements AutoCloseable {
                 binding.addListener(future -> {
                     pending--;
                     if (future.isSuccess() && !closed && authorizedUfrags.contains(ufrag)) {
-                        binding.channel().writeAndFlush(data);
+                        var write = binding.channel().writeAndFlush(data);
+                        if (probe != null) write.addListener(result -> {
+                            if (!result.isSuccess()) {
+                                probe.relayDrops.increment();
+                                if (probe.failureReported.compareAndSet(false, true)) {
+                                    log.warn("NetherNet diagnostic #{}: relay write to private native socket failed", probe.id);
+                                }
+                            }
+                        });
                     } else {
+                        if (probe != null) {
+                            probe.relayDrops.increment();
+                            if (probe.failureReported.compareAndSet(false, true)) {
+                                log.warn("NetherNet diagnostic #{}: relay binding failed or authorization expired", probe.id);
+                            }
+                        }
                         data.release();
                         close();
                         relays.remove(remote, this);
@@ -291,6 +370,21 @@ public final class NetherNetUdpMultiplexer implements AutoCloseable {
                 closed = true;
                 binding.channel().close();
             }
+        }
+    }
+
+    /** Counts metadata only; never retain or log SDP, ICE credentials, payloads or client addresses. */
+    private static final class Probe {
+        private final long id;
+        private final long startedAt = System.nanoTime();
+        private final LongAdder stun = new LongAdder();
+        private final LongAdder dtls = new LongAdder();
+        private final LongAdder nativeReplies = new LongAdder();
+        private final LongAdder relayDrops = new LongAdder();
+        private final AtomicBoolean failureReported = new AtomicBoolean();
+
+        private Probe(long id) {
+            this.id = id;
         }
     }
 }

@@ -100,7 +100,7 @@ public final class AllayServer implements Server {
         this.state = new AtomicReference<>(ServerState.STARTING);
         var networkSettings = SETTINGS.networkSettings();
         var sharedUdp = networkSettings.nethernetEnabled() && networkSettings.nethernetSharedPort()
-                ? new NetherNetUdpMultiplexer() : null;
+                ? new NetherNetUdpMultiplexer(networkSettings.nethernetConnectionDiagnostics()) : null;
         var rakNetInterface = new AllayRakNetInterface(this, sharedUdp);
         var networkManager = SETTINGS.networkSettings().nethernetEnabled()
                 ? new AllayNetworkManager(rakNetInterface, new AllayNetherNetInterface(this, sharedUdp))

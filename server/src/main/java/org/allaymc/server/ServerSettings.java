@@ -132,6 +132,11 @@ public class ServerSettings extends OkaeriConfig {
         @CustomKey("nethernet-advertise-addresses")
         private List<String> nethernetAdvertiseAddresses = List.of();
 
+        @Comment("Opt-in, low-volume NetherNet ICE/relay diagnostics. Never logs STUN credentials, SDP or tokens")
+        @Comment("Restart Engine after changing this setting; use briefly while troubleshooting connection failures")
+        @CustomKey("nethernet-connection-diagnostics")
+        private boolean nethernetConnectionDiagnostics = false;
+
         @CustomKey("xbox-auth")
         private boolean xboxAuth = true;
 
